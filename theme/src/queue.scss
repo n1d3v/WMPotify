@@ -1,0 +1,128 @@
+#Desktop_PanelContainer_Id > div {
+    > div:first-child { /* panel header (tabs) */
+        div[data-testid="PanelHeader_CloseButton"] button {
+            width: 16px;
+            height: 16px;
+            border-radius: 0;
+            background: url('resources/sidebar/sbclose.png') no-repeat;
+            transform: none !important;
+    
+            svg {
+                display: none;
+            }
+        }
+    }
+
+    > div:nth-child(2) { /* panel content */
+        > div:nth-child(2) {
+            overflow-x: hidden !important;
+
+            > div:has(#queue-panel),
+            > div:has(#history-panel) {
+                padding-left: 8px;
+                padding-right: 0;
+                > div {
+                    padding-right: 0;
+                }
+            }
+        }
+    }
+
+    #queue-panel,
+    #history-panel {
+        > div:first-child > div:first-child {
+            gap: 0;
+        }
+
+        .x-entityImage-imageContainer {
+            display: none; /* Hide the album art */
+        }
+
+        div[data-flip-id*="section-header-"] {
+            display: none; /* Hide the 'Now playing' / 'Next from' title */
+        }
+
+        .Column-lg {
+            flex-direction: row;
+
+            span {
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+        }
+
+        li {
+            height: var(--queue-item-height);
+
+            &:hover div[data-encore-id="listRow"]::after {
+                border-radius: 0;
+                height: var(--queue-item-height);
+                background-color: #d7dbe1;
+            }
+
+            &:not(:hover) div[data-encore-id="listRow"]::after {
+                display: none;
+            }
+
+            > div {
+                display: inline;
+                padding: 0;
+            }
+
+            div[role="button"],
+            .HeaderArea {
+                height: var(--queue-item-height);
+                margin-top: -1px;
+                margin-left: 1px;
+
+                .encore-internal-color-text-bright-accent[data-encore-id="listRowTitle"] {
+                    color: #2871e9;
+
+                    &::before {
+                        content: '⏵';
+                        position: absolute;
+                        top: 1px;
+                        left: -11px;
+                        font-size: 12px;
+                    }
+                }
+
+                p[data-encore-id="listRowSubtitle"] {
+                    color: #77797d !important;
+                    margin-left: 10px;
+                    position: relative;
+
+                    &::before {
+                        content: '-';
+                        position: absolute;
+                        top: 0;
+                        left: -9px;
+                        font-size: 12px;
+                    }
+                }
+            }
+
+            p span {
+                font-size: 12px !important;
+            }
+
+            svg {
+                display: none !important;
+            }
+        }
+    }
+}
+
+.LayoutResizer__resize-bar.LayoutResizer__inline-start {
+    opacity: 1 !important;
+    width: 3px;
+    inset-inline-start: -3px;
+    border-left: solid 1px #eef3fa;
+    background-color: #a9b7c9;
+    border-right: solid 1px #f2f7fc;
+    cursor: ew-resize;
+
+    &::after {
+        display: none;
+    }
+}

@@ -1,0 +1,163 @@
+.Root__globalNav {
+    height: 36px;
+    background: url('resources/topbar/bgstrip.png') repeat-x;
+    border-image: url('resources/topbar/bg.png') 2 / 2px 1px 2px 1px;
+    justify-content: center;
+}
+
+.main-globalNav-historyButtons {
+    height: 35px;
+    margin-top: -1px;
+    margin-left: -1px;
+    background: url('resources/topbar/nav_disabled.png') no-repeat;
+    gap: 0 !important;
+    padding-inline: 0 !important;
+
+    > button {
+        background: none;
+        border: none;
+        padding: 0;
+        margin: 0;
+        width: 30px;
+        min-height: 0;
+        max-height: 35px;
+        opacity: 1 !important;
+        transform: none !important;
+        cursor: default !important;
+
+        > span {
+            display: none;
+        }
+
+        &:first-child {
+            background: url('resources/topbar/nav.png') 0 0 / 200% 100%;
+
+            &:hover {
+                background: url('resources/topbar/nav_hover.png') 0 0 / 200% 100%;
+            }
+
+            &:active {
+                background: url('resources/topbar/nav_pressed.png') 0 0 / 200% 100%;
+            }
+
+            &:disabled {
+                background: url('resources/topbar/nav_disabled.png') 0 0 / 200% 100%;
+            }
+        }
+
+        &:nth-child(2) {
+            width: 29px;
+            background: url('resources/topbar/nav.png') -100% 0 / 200% 100%;
+
+            &:hover {
+                background: url('resources/topbar/nav_hover.png') -100% 0 / 200% 100%;
+            }
+
+            &:active {
+                background: url('resources/topbar/nav_pressed.png') -100% 0 / 200% 100%;
+            }
+
+            &:disabled {
+                background: url('resources/topbar/nav_disabled.png') -100% 0 / 200% 100%;
+            }
+        }
+    }
+
+    > :not(button) {
+        display: flex;
+        align-items: center;
+    }
+}
+
+.main-globalNav-searchContainer,
+.custom-navlinks-scrollable_container,
+.main-topBar-topbarContentRight > .main-actionButtons {
+    display: none;
+}
+
+.wmpotify-tabs-container {
+    display: flex;
+    position: absolute;
+
+    > button {
+        min-width: 99px;
+        height: 36px;
+        min-height: 0;
+        background: none !important;
+        border: 6px solid transparent;
+        border-image: 6 3 2 3 fill stretch;
+        border-image-width: 6px 3px 2px 3px;
+        border-radius: 0 !important;
+        color: white !important;
+        font-weight: normal !important;
+        display: block !important;
+        transform: none !important;
+
+        svg {
+            display: none;
+        }
+
+        .wmpotify-tab-label {
+            position: absolute;
+            top: 2px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+        }
+
+        .main-topBar-buddyFeed {
+            height: 36px !important;
+        }
+
+        &:hover {
+            border-image-source: url('resources/topbar/tab_hover.png');
+        }
+
+        &:active {
+            border-image-source: url('resources/topbar/tab_pressed.png');
+        }
+
+        &.main-globalNav-navLinkActive,
+        &:has(svg.Svg-img-icon-small-textBase) {
+            border-image-source: url('resources/topbar/tab_active.png');
+
+            &:hover {
+                border-image-source: url('resources/topbar/tab_active_hover.png');
+            }
+
+            &:active {
+                border-image-source: url('resources/topbar/tab_active_pressed.png');
+            }
+        }
+    }
+}
+
+.main-topBar-topbarContentRight > button:last-child {
+    min-width: 64px;
+    width: auto;
+    height: 36px;
+    min-height: 0;
+    background: none !important;
+    border: 10px solid transparent;
+    border-image: url('resources/topbar/user.png') 10 3 10 3 fill stretch;
+    border-image-width: 10px 3px 10px 3px;
+    border-radius: 0 !important;
+    color: white !important;
+    font-weight: normal !important;
+    display: block !important;
+    transform: none !important;
+    font-size: 11px;
+    line-height: 1;
+
+    > span:not(.wmpotify-user-label) {
+        display: none;
+    }
+
+    &:hover {
+        border-image-source: url('resources/topbar/user_hover.png');
+    }
+
+    &:active {
+        border-image-source: url('resources/topbar/user_pressed.png');
+    }
+}

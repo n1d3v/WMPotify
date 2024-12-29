@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Image to Gradient</title>
+    <meta charset="utf-8">
+</head>
+<body>
+    <h1>1xN Image Strip to CSS Gradient Converter</h1>
+    <canvas id="canv" hidden></canvas>
+    <input type="file" id="file" accept="image/*"><br>
+    <textarea id="output" rows="10" cols="50"></textarea>
+    <script>
+        const canv = document.getElementById('canv');
+        const ctx = canv.getContext('2d');
+        const file = document.getElementById('file');
+        const output = document.getElementById('output');
+
+        file.addEventListener('change', function() {
+            const img = new Image();
+            img.onload = function() {
+                canv.width = img.width;
+                canv.height = img.height;
+                ctx.drawImage(img, 0, 0);
+                const data = ctx.getImageData(0, 0, 1, img.height).data;
+                const colors = [];
+                for (let i = 0; i < data.length; i += 4) {
+                    const r = data[i];
+                    const g = data[i + 1];
+                    const b = data[i + 2];
+                    const a = data[i + 3];
+                    if (a > 0) {
+                        colors.push(`rgb(${r}, ${g}, ${b}) ${i / 4}px`);
+                    }
+                }
+                const gradient = colors.join(',\n');
+                output.value = `linear-gradient(to bottom,\n${gradient}\n);`;
+            };
+            img.src = URL.createObjectURL(file.files[0]);
+        });
+    </script>
+</html>

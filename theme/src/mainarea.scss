@@ -1,0 +1,60 @@
+.Root__top-container {
+    background: transparent;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: calc(100% - var(--player-bar-height));
+        background-color: #EEF3FA;
+    }
+}
+
+body[data-hide-libx] {
+    #Desktop_LeftSidebar_Id {
+        display: none;
+    }
+
+    .Root__main-view {
+        margin-left: calc(var(--panel-gap) * -2);
+        width: calc(100% + var(--panel-gap) * 3 - 3px);
+    }
+}
+
+.Root__main-view {
+    border-radius: 0 !important;
+}
+
+.main-home-homeHeader {
+    background: transparent !important;
+}
+
+.main-topBar-container {
+    width: auto;
+}
+
+.Root__right-sidebar {
+    margin-right: calc(var(--panel-gap) * -1);
+    aside {
+        background: transparent !important;
+        border-radius: 0 !important;
+
+        &::before {
+            background: transparent !important;
+        }
+
+        div div:has(.os-size-observer) div div:has([data-testid='NPV_Panel_OpenDiv']) {
+            background: transparent !important;
+        }
+    }
+
+    .BeautifulLyricsBackground-Container {
+        opacity: 0;
+    }
+
+    aside.NowPlayingView * {
+        color: black !important;
+    }
+}

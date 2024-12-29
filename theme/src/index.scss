@@ -1,0 +1,21 @@
+/*! WMPotify for Spicetify by Ingan121 */
+@import "variables.scss";
+@import "menu.scss";
+@import "scrollbar.scss";
+@import "topbar.scss";
+@import "mainarea.scss";
+@import "queue.scss";
+@import "playerbar.scss";
+
+html > body::after { display: none !important; }
+.Root__globalNav { padding-inline: 8px !important; }
+.Titlebar { display: none !important; } /* Hide the titlebar completely */
+
+* {
+    font-family: var(--ui-font);
+    -webkit-app-region: no-drag !important;
+}
+
+body {
+    overflow: hidden;
+}

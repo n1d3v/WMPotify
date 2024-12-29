@@ -1,0 +1,104 @@
+
+:root {
+    --font: 9pt "Segoe UI", "SegoeUI", "Noto Sans", sans-serif;
+    --surface: #f0f0f0;
+
+    --active-border: #B4B4B4;
+    --active-title: #99B4D1;
+    --app-workspace: #ABABAB;
+    --background: #000000;
+    --button-alternate-face: #000000;
+    --button-dk-shadow: #696969;
+    --button-face: #F0F0F0;
+    --button-hilight: #FFFFFF;
+    --button-light: #E3E3E3;
+    --button-shadow: #A0A0A0;
+    --button-text: #000000;
+    --gradient-active-title: #B9D1EA;
+    --gradient-inactive-title: #D7E4F2;
+    --gray-text: #6D6D6D;
+    --hilight: #3399FF;
+    --hilight-text: #FFFFFF;
+    --hot-tracking-color: #0066CC;
+    --inactive-border: #F4F7FC;
+    --inactive-title: #BFCDDB;
+    --inactive-title-text: #434E54;
+    --info-text: #000000;
+    --info-window: #FFFFE1;
+    --menu: #F0F0F0;
+    --menu-bar: #F0F0F0;
+    --menu-hilight: #3399FF;
+    --menu-text: #000000;
+    --scrollbar: #C8C8C8;
+    --title-text: #000000;
+    --window: #FFFFFF;
+    --window-frame: #000000;
+    --window-text: #646464;
+    --default-colorization-color: #4580c4;
+    --scrollbar-size: 17px;
+    --menu-height: 19px;
+    --ui-font: "Segoe UI", "SegoeUI", "Noto Sans", sans-serif;
+    --caption-font: 9pt/1.2 var(--ui-font);
+    --menu-font: 9pt/0.9 var(--ui-font);
+    --message-font: 9pt var(--ui-font);
+    --status-font: 9pt var(--ui-font);
+
+    --underline: var(--menu-text);
+    --underline-hilight: var(--hilight-text);
+    --underline-disabled: var(--button-shadow);
+    
+    --button-highlight: #fff;
+    --button-face: #f2f2f2;
+    --button-face-hover: #eaf6fd;
+    --button-face-active: #c4e5f6;
+    --button-face-disabled: #f4f4f4;
+    --button-shade-light: #ebebeb;
+    --button-shade-light-default: #c3dcea;
+    --button-shade-light-hovered: #bee6fd;
+    --button-shade-light-active: #98d1ef;
+    --button-shade-dark: #cfcfcf;
+    --button-shadow: inset 0 0 0 1px #fffc;
+    --button-shadow-active: inset 1px 1px 0 #0003, inset -1px 1px 0 #0001;
+    --button-border: 1px solid;
+    --button-border-color: #8e8f8f;
+    --button-border-color-default: #5586a3;
+    --button-border-color-hovered: #3c7fb1;
+    --button-border-color-active: #6d91ab;
+    --button-border-color-disabled: #aeb2b5;
+    --button-text-color-disabled: #838383;
+    --button-gradient: linear-gradient(
+        to bottom,
+        var(--button-face) 45%,
+        var(--button-shade-light) 45%,
+        var(--button-shade-dark)
+    );
+    --button-gradient-hovered: linear-gradient(
+        to bottom,
+        var(--button-face-hover) 45%,
+        var(--button-shade-light-hovered) 45%,
+        #a7d9f5
+    );
+    --button-gradient-active: linear-gradient(
+        to bottom,
+        #e5f4fc,
+        var(--button-face-active) 30% 50%,
+        var(--button-shade-light-active) 50%,
+        #68b3db
+    );
+    
+    --element-spacing: 8px;
+    --grouped-element-spacing: 6px;
+    
+    --border-radius: 3px;
+    --border-width: 1px;
+
+    --spice-player: var(--surface);
+    --spice-tab-active: var(--hilight);
+
+    --player-bar-height: 60px;
+    --queue-item-height: 19px;
+}
+
+.encore-dark-theme {
+    --background-highlight: var(--hilight);
+}

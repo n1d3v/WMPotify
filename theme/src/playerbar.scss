@@ -1,0 +1,402 @@
+.Root__now-playing-bar {
+    margin: calc(var(--panel-gap) * -1);
+}
+
+.main-nowPlayingBar-nowPlayingBar {
+    height: var(--player-bar-height);
+
+    svg {
+        color: white !important;
+    }
+}
+
+.main-nowPlayingWidget-nowPlaying {
+    margin-top: 13px;
+    margin-left: -2px;
+}
+
+
+button[data-testid="cover-art-button"] {
+    background: transparent;
+    border-radius: 0;
+    width: 34px;
+    height: 34px;
+}
+
+.main-nowPlayingWidget-coverArt .cover-art {
+    max-width: 33px;
+    max-height: 33px;
+    box-shadow: 1px 1px rgba(0, 0, 0, 0.2) !important;
+}
+
+.main-coverSlotCollapsed-navAltContainer {
+    border-radius: 0;
+}
+
+.wmpotify-track-info {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: 6px;
+    font-size: 12px;
+    margin-top: -3px;
+    margin-left: -6px;
+    text-shadow: 0 0 10px white, 0 0 10px white, 0 0 10px white, 0 0 10px white,
+        0 0 10px white,0 0 10px white, 0 0 10px white, 0 0 10px white;
+}
+
+.main-nowPlayingWidget-trackInfo {
+    margin-right: 0;
+
+    > :not(.wmpotify-track-info) {
+        display: none;
+    }
+}
+
+.player-controls__buttons {
+    width: 404px;
+    height: 49px;
+    background: url('resources/playerbar/bg_large.png') no-repeat;
+    background-size: 100% 100%;
+    margin-top: 10px;
+    margin-bottom: 0;
+    gap: 0;
+
+    button {
+        cursor: default !important;
+        min-height: 0;
+
+        span {
+            opacity: 0 !important;
+        }
+
+        &[data-testid='control-button-skip-back'] {
+            width: 52px;
+            height: 25px;
+            margin-right: -1px;
+            border-radius: 0;
+            background: url('resources/playerbar/prev.png') no-repeat;
+            align-self: center;
+            transform: none !important;
+
+            &:disabled {
+                background-image: url('resources/playerbar/prev_disabled.png') !important;
+            }
+
+            &:hover {
+                background-image: url('resources/playerbar/prev_hover.png');
+            }
+
+            &:active {
+                background-image: url('resources/playerbar/prev_pressed.png');
+            }
+        }
+
+        &[data-testid='control-button-playpause'] {
+            width: 42px;
+            height: 43px;
+            border-radius: 0;
+            align-self: center;
+            background: url('resources/playerbar/play.png') no-repeat;
+            transform: none !important;
+
+            &:disabled {
+                background-image: url('resources/playerbar/play_disabled.png') !important;
+            }
+
+            &:hover {
+                background-image: url('resources/playerbar/play_hover.png');
+            }
+
+            &:active {
+                background-image: url('resources/playerbar/play_pressed.png');
+            }
+
+            &.playing {
+                background-image: url('resources/playerbar/pause.png');
+            }
+
+            &.playing:disabled {
+                background-image: url('resources/playerbar/pause_disabled.png') !important;
+            }
+
+            &.playing:hover {
+                background-image: url('resources/playerbar/pause_hover.png');
+            }
+
+            &.playing:active {
+                background-image: url('resources/playerbar/pause_pressed.png');
+            }
+        }
+
+        &[data-testid='control-button-skip-forward'] {
+            width: 52px;
+            height: 25px;
+            margin-left: -1px;
+            border-radius: 0;
+            align-self: center;
+            background: url('resources/playerbar/next.png') no-repeat;
+            transform: none !important;
+
+            &:disabled {
+                background-image: url('resources/playerbar/next_disabled.png') !important;
+            }
+
+            &:hover {
+                background-image: url('resources/playerbar/next_hover.png');
+            }
+
+            &:active {
+                background-image: url('resources/playerbar/next_pressed.png');
+            }
+        }
+    }
+}
+
+.player-controls__left {
+    position: relative;
+
+    .wmpotify-time-text {
+        position: absolute;
+        top: 12px;
+        left: -40px;
+        padding: 6px;
+        font-size: 12px;
+        margin-top: -3px;
+        text-shadow: 0 0 10px white, 0 0 10px white, 0 0 10px white, 0 0 10px white,
+            0 0 10px white,0 0 10px white, 0 0 10px white, 0 0 10px white;
+    }
+
+    /* Shuffle button, wrapped in a div only if it's enabled */
+    > div:nth-child(2) button,
+    > button:nth-child(2) {
+        width: 25px;
+        height: 25px;
+        border-radius: 0;
+        align-self: center;
+        background: url('resources/playerbar/shuffle.png') no-repeat;
+        transform: none !important;
+        margin-right: -2px;
+
+        &.Button-buttonTertiary-textBrightAccent-small-small-iconOnly-useBrowserDefaultFocusStyle {
+            background-image: url('resources/playerbar/shuffle_active.png');
+        }
+
+        &::after {
+            display: none;
+        }
+
+        &[aria-disabled='true']::before {
+            display: none !important;
+        }
+    }
+
+    button[data-testid='control-button-repeat'] {
+        width: 25px;
+        height: 25px;
+        border-radius: 0 !important;
+        align-self: center;
+        background: url('resources/playerbar/repeat.png') no-repeat;
+        transform: none !important;
+        margin-right: 12px;
+
+        &::before {
+            display: none;
+        }
+
+        &:not([aria-checked='false']) {
+            background-image: url('resources/playerbar/repeat_active.png');
+        }
+    }
+
+    .wmpotify-stop-button {
+        display: inline-flex;
+        width: 25px;
+        height: 25px;
+        border: none;
+        border-radius: 0;
+        align-self: center;
+        background: url('resources/playerbar/stop.png') no-repeat 0 -1px;
+        transform: none !important;
+        margin-right: 1px;
+
+        &:disabled {
+            background-image: url('resources/playerbar/stop_disabled.png');
+        }
+    }
+}
+
+.player-controls__right {
+    gap: 0;
+
+    .volume-bar {
+        position: relative;
+        left: 12px;
+        margin-right: 0;
+    }
+    
+    .volume-bar__icon-button {
+        width: 25px;
+        height: 25px;
+        border-radius: 0;
+        align-self: center;
+        background: url('resources/playerbar/vol_mid.png') no-repeat;
+        transform: none !important;
+
+        svg {
+            display: none;
+        }
+    }
+
+    .volume-bar__slider-container {
+        width: 67px;
+        margin-left: -1px;
+
+        .x-progressBar-progressBarBg {
+            border-color: transparent;
+            outline-color: transparent;
+        }
+
+        .progress-bar__slider {
+            background: url('resources/playerbar/volhandle.png') no-repeat;
+            width: 12px;
+            height: 13px;
+            image-rendering: pixelated;
+            visibility: visible !important;
+
+            &:hover {
+                background-image: url('resources/playerbar/volhandle_hover.png');
+            }
+
+            &:active {
+                background-image: url('resources/playerbar/volhandle_pressed.png');
+            }
+        }
+    }
+}
+
+.player-controls__left > div:nth-child(2) button:hover::before,
+.player-controls__left > button:nth-child(2):hover::before,
+.player-controls__buttons button[data-testid='control-button-repeat']:hover::after,
+.wmpotify-stop-button:hover::before,
+.volume-bar__icon-button:hover::before {
+    content: '';
+    position: absolute;
+    width: 25px;
+    height: 25px;
+    background: url('resources/playerbar/btn_hover.png') no-repeat;
+    z-index: -1;
+}
+
+.player-controls__left > div:nth-child(2) button:active::before,
+.player-controls__left > button:nth-child(2):active::before,
+.player-controls__buttons button[data-testid='control-button-repeat']:active::after,
+.wmpotify-stop-button:active::before,
+.volume-bar__icon-button:active::before {
+    background-image: url('resources/playerbar/btn_pressed.png');
+}
+
+.main-nowPlayingBar-right {
+    margin-top: 10px;
+
+    button[data-testid='pip-toggle-button'] {
+        width: 21px;
+        height: 21px;
+        margin-right: 8px;
+        border-radius: 0;
+        background: url('resources/playerbar/miniplayer.png') no-repeat center;
+        transform: none !important;
+
+        svg {
+            display: none;
+        }
+
+        &:hover {
+            background-image: url('resources/playerbar/miniplayer_hover.png');
+        }
+
+        &:active {
+            background-image: url('resources/playerbar/miniplayer_pressed.png');
+        }
+
+        &:disabled {
+            background-image: url('resources/playerbar/miniplayer_disabled.png') !important;
+        }
+    }
+
+    button[data-testid='fullscreen-mode-button'],
+    #BeautifulLyricsFullscreenButton {
+        width: 21px;
+        height: 21px;
+        border-radius: 0;
+        background: url('resources/playerbar/fullscreen.png') no-repeat center;
+        scale: 1 !important;
+        transform: none !important;
+
+        svg {
+            display: none;
+        }
+
+        &:hover {
+            background-image: url('resources/playerbar/fullscreen_hover.png');
+        }
+
+        &:active {
+            background-image: url('resources/playerbar/fullscreen_pressed.png');
+        }
+
+        &:disabled {
+            background-image: url('resources/playerbar/fullscreen_disabled.png') !important;
+        }
+    }
+}
+
+.playback-bar {
+    position: absolute;
+    bottom: 46px;
+    width: calc(100% - 28px);
+    margin-left: 17px;
+
+    .encore-text {
+        display: none;
+    }
+}
+
+.x-progressBar-progressBarBg {
+    background: transparent;
+    border: rgba(92, 92, 92, 0.5) 1px solid;
+    outline: rgba(255, 255, 255, 0.5) 1px solid;
+
+    .x-progressBar-fillColor {
+        background: linear-gradient(to bottom, #84c5ff 1px, #0f41cd 1.5px, #6e96ff 2.5px);
+
+        &::after {
+            content: '';
+            position: absolute;
+            background-image: url('resources/playerbar/pbfillend.png');
+            width: 15px;
+            height: 3px;
+            right: 0;
+        }
+    }
+
+    .progress-bar__slider {
+        border-radius: 0;
+        background: url('resources/playerbar/seekhandle.png') no-repeat;
+        width: 16px;
+        height: 9px;
+        image-rendering: pixelated;
+
+        &:hover {
+            background-image: url('resources/playerbar/seekhandle_hover.png');
+        }
+
+        &:active {
+            background-image: url('resources/playerbar/seekhandle_pressed.png');
+        }
+    }
+}
+
+.main-connectBar-connectBar {
+    display: none;
+}
