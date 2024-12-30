@@ -246,6 +246,22 @@ button[data-testid="cover-art-button"] {
         svg {
             display: none;
         }
+
+        &[data-vol='muted'] {
+            background-image: url('resources/playerbar/vol_muted.png');
+        }
+
+        &[data-vol='low'] {
+            background-image: url('resources/playerbar/vol_low.png');
+        }
+
+        &[data-vol='mid'] {
+            background-image: url('resources/playerbar/vol_mid.png');
+        }
+
+        &[data-vol='high'] {
+            background-image: url('resources/playerbar/vol_high.png');
+        }
     }
 
     .volume-bar__slider-container {
@@ -282,6 +298,7 @@ button[data-testid="cover-art-button"] {
 .volume-bar__icon-button:hover::before {
     content: '';
     position: absolute;
+    left: 0;
     width: 25px;
     height: 25px;
     background: url('resources/playerbar/btn_hover.png') no-repeat;

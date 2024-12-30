@@ -8,8 +8,16 @@
         left: 0;
         right: 0;
         height: calc(100% - var(--player-bar-height));
-        background-color: #EEF3FA;
+        background-color: var(--wmp11-window);
     }
+}
+
+.Root__main-view {
+    width: calc(100% + var(--panel-gap));
+}
+
+#main:has(.Root__right-sidebar aside) .Root__main-view {
+    width: calc(100% + var(--panel-gap) - 3px);
 }
 
 body[data-hide-libx] {
@@ -19,6 +27,10 @@ body[data-hide-libx] {
 
     .Root__main-view {
         margin-left: calc(var(--panel-gap) * -2);
+        width: calc(100% + var(--panel-gap) * 3);
+    }
+
+    #main:has(.Root__right-sidebar aside) .Root__main-view {
         width: calc(100% + var(--panel-gap) * 3 - 3px);
     }
 }
@@ -47,6 +59,21 @@ body[data-hide-libx] {
 
         div div:has(.os-size-observer) div div:has([data-testid='NPV_Panel_OpenDiv']) {
             background: transparent !important;
+        }
+
+        div[data-testid="PanelHeader_CloseButton"] button {
+            width: 16px;
+            height: 16px;
+            position: absolute;
+            top: 6px;
+            right: 12px;
+            border-radius: 0;
+            background: url('resources/sidebar/sbclose.png') no-repeat;
+            transform: none !important;
+    
+            svg {
+                display: none;
+            }
         }
     }
 

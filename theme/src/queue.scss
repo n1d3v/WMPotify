@@ -1,26 +1,90 @@
-#Desktop_PanelContainer_Id > div {
+/* <aside aria-label="Queue" class="ffFwfKcPDbmAPLXzxzKq" id="Desktop_PanelContainer_Id" tabindex="-1"> */
+#Desktop_PanelContainer_Id > div:has(#queue-panel) {
     > div:first-child { /* panel header (tabs) */
-        div[data-testid="PanelHeader_CloseButton"] button {
-            width: 16px;
-            height: 16px;
-            border-radius: 0;
-            background: url('resources/sidebar/sbclose.png') no-repeat;
-            transform: none !important;
-    
-            svg {
-                display: none;
+        box-shadow: none; /* Hide the shadow when the queue panel is scrolled down */
+
+        /* I just hid the tabs and put now playing view here just like WMP11 */
+        > div:first-child {
+            height: 136px;
+        }
+
+        #wmpotify-queue-npv {
+            #wmpotify-queue-album-art {
+                width: 97px;
+                height: 97px;
+                box-shadow: 5px 5px 4px -4px rgba(0, 0, 0, 0.75);
+                position: absolute;
+                top: 9px;
+                left: 50%;
+                transform: translateX(-50%);
             }
+
+            #wmpotify-queue-song-title {
+                font-size: 12px;
+                color: var(--wmp11-text-hilight);
+                position: absolute;
+                top: 110px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 100%;
+                text-align: center;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+        }
+
+        div[role="tablist"] {
+            display: none;
         }
     }
 
+    /* <div data-overlayscrollbars-initialize="true" class="cZCuJDjrGA2QMXja_Sua" data-overlayscrollbars="host"> */
     > div:nth-child(2) { /* panel content */
-        > div:nth-child(2) {
+        border-top: solid 1px var(--wmp11-separator-shadow);
+        flex-direction: column !important;
+
+        #wmpotify-queue-toolbar {
+            border-top: solid 1px var(--wmp11-separator-light);
+            height: 30px;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+
+            #wmpotify-queue-playlist-button {
+                margin-top: 2px;
+                margin-left: 2px;
+                padding-left: 7px;
+                padding-right: 1px;
+
+                .expandMark {
+                    margin-top: -2px;
+                    margin-left: 4px;
+                }
+            }
+
+            #wmpotify-queue-clear-button {
+                margin-top: 2px;
+                margin-right: 2px;
+                width: 27px;
+                background: url('resources/sidebar/clear.png') no-repeat 5px 3px;
+
+                &:active {
+                    background-position: 6px 4px;
+                }
+
+                &:disabled {
+                    background-image: url('resources/sidebar/clear_disabled.png');
+                }
+            }
+        }
+
+        /* <div class="" data-overlayscrollbars-viewport="scrollbarHidden overflowXScroll overflowYScroll" tabindex="-1" style="margin-right: 0px; margin-bottom: 0px; margin-left: 0px; top: 0px; right: auto; left: 0px; width: calc(100% + 0px); padding: 0px;"> */
+        > div:nth-child(3) {
             overflow-x: hidden !important;
 
-            > div:has(#queue-panel),
-            > div:has(#history-panel) {
-                padding-left: 8px;
-                padding-right: 0;
+            > div {
+                padding: 0 0 0 8px;
                 > div {
                     padding-right: 0;
                 }
@@ -44,6 +108,10 @@
 
         .Column-lg {
             flex-direction: row;
+
+            p:first-child {
+                overflow: hidden;
+            }
 
             span {
                 text-overflow: ellipsis;
@@ -76,7 +144,7 @@
                 margin-left: 1px;
 
                 .encore-internal-color-text-bright-accent[data-encore-id="listRowTitle"] {
-                    color: #2871e9;
+                    color: var(--wmp11-text-hilight);
 
                     &::before {
                         content: '⏵';
@@ -89,14 +157,14 @@
 
                 p[data-encore-id="listRowSubtitle"] {
                     color: #77797d !important;
-                    margin-left: 10px;
+                    margin-left: 7px;
                     position: relative;
 
                     &::before {
                         content: '-';
                         position: absolute;
                         top: 0;
-                        left: -9px;
+                        left: -0.5em;
                         font-size: 12px;
                     }
                 }
@@ -117,9 +185,9 @@
     opacity: 1 !important;
     width: 3px;
     inset-inline-start: -3px;
-    border-left: solid 1px #eef3fa;
-    background-color: #a9b7c9;
-    border-right: solid 1px #f2f7fc;
+    border-left: solid 1px var(--wmp11-window);
+    background-color: var(--wmp11-separator-shadow);
+    border-right: solid 1px var(--wmp11-separator-light);
     cursor: ew-resize;
 
     &::after {

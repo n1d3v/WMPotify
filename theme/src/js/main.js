@@ -1,5 +1,6 @@
 import { MadMenu, createMadMenu } from './MadMenu';
 import { noControls } from './noControls';
+import { initQueuePanel } from './queue';
 
 (function() {
     const elementsRequired = [
@@ -16,6 +17,11 @@ import { noControls } from './noControls';
         '.player-controls__right',
         '.playback-bar .encore-text',
         '.volume-bar',
+        '.volume-bar__icon-button',
+        '.volume-bar .progress-bar',
+        '.main-nowPlayingBar-left',
+        '.main-nowPlayingWidget-trackInfo',
+        '.Root__right-sidebar > div > div',
     ];
 
     const tabNameSubstitutes = {
@@ -77,6 +83,10 @@ import { noControls } from './noControls';
 
         const playerControlsRight = document.querySelector('.player-controls__right');
         const volumeBar = document.querySelector('.volume-bar');
+        const volumeButton = volumeBar.querySelector('.volume-bar__icon-button');
+        const volumeBarProgress = volumeBar.querySelector('.progress-bar');
+        updateVolumeIcon();
+        new MutationObserver(updateVolumeIcon).observe(volumeBarProgress, { attributes: true, attributeFilter: ['style'] });
         playerControlsRight.appendChild(volumeBar);
 
         const timeTexts = document.querySelectorAll('.playback-bar .encore-text'); // 0: elapsed, 1: total (both in HH:MM:SS format)
@@ -110,6 +120,9 @@ import { noControls } from './noControls';
             observer.observe(playerControlsLeft, { childList: true });
         });
         observer.observe(playerControlsLeft, { childList: true });
+
+        initQueuePanel();
+        new MutationObserver(initQueuePanel).observe(document.querySelector('.Root__right-sidebar > div > div'), { childList: true });
 
         function addTab(btn) {
             tabsContainer.appendChild(btn);
@@ -160,6 +173,19 @@ import { noControls } from './noControls';
                 playPauseButton.classList.add('playing');
             } else {
                 playPauseButton.classList.remove('playing');
+            }
+        }
+
+        function updateVolumeIcon() {
+            const volume = getComputedStyle(volumeBarProgress).getPropertyValue('--progress-bar-transform').replace('%', '') / 100;
+            if (volume === 0) {
+                volumeButton.dataset.vol = 'muted';
+            } else if (volume <= 0.3) {
+                volumeButton.dataset.vol = 'low';
+            } else if (volume <= 0.6) {
+                volumeButton.dataset.vol = 'mid';
+            } else {
+                volumeButton.dataset.vol = 'high';
             }
         }
 
@@ -219,32 +245,33 @@ import { noControls } from './noControls';
         }, 100);
     });
     
-    // // test
-    // createMadMenu('test', [
-    //     {
-    //         text: '&Item 1',
-    //         click: () => console.log('Item 1 clicked')
-    //     },
-    //     {
-    //         text: 'I&tem 2',
-    //         click: () => console.log('Item 2 clicked')
-    //     },
-    //     {
-    //         text: '&Submenu',
-    //         submenu: 'testsub'
-    //     }
-    // ])
-    // createMadMenu('testsub', [
-    //     {
-    //         text: 'Sub&item 1',
-    //         click: () => console.log('Subitem 1 clicked')
-    //     },
-    //     {
-    //         text: 'Subi&tem 2',
-    //         click: () => console.log('Subitem 2 clicked')
-    //     }
-    // ], 'test');
-    // const menu = new MadMenu(document.createElement('div'), ['test'], ['testsub'], [], []);
-    // menu.openMenu('test', { x: 100, y: 100 });
-    // globalThis.menu = menu;
+    // test
+    createMadMenu('test', [
+        {
+            text: '&Item 1',
+            click: () => console.log('Item 1 clicked')
+        },
+        {
+            text: 'I&tem 2',
+            click: () => console.log('Item 2 clicked')
+        },
+        {
+            text: '&Submenu',
+            submenu: 'testsub'
+        }
+    ])
+    createMadMenu('testsub', [
+        {
+            text: 'Sub&item 1',
+            click: () => console.log('Subitem 1 clicked')
+        },
+        {
+            text: 'Subi&tem 2',
+            click: () => console.log('Subitem 2 clicked')
+        }
+    ], 'test');
+    const menu = new MadMenu(document.createElement('div'), ['test'], ['testsub'], [], []);
+    menu.openMenu('test', { x: 300, y: 100 });
+    globalThis.menu = menu;
+    window.ignoreFocusLoss = true;
 })();

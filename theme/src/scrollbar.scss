@@ -11,7 +11,7 @@
   }
 
   &-corner {
-    background: #f2f2f2 !important;
+    background: var(--button-face) !important;
   }
 
   &-track {
@@ -29,14 +29,14 @@
     border-color: var(--button-border-color) !important;
     border-radius: var(--border-radius) !important;
     box-shadow: var(--button-shadow) !important;
-    background-color: #f2f2f2 !important;
+    background-color: var(--button-face) !important;
 
     &:vertical {
       background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAKCAIAAADpZ+PpAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAAEnQAABJ0Ad5mH3gAAADrSURBVChTTc5LboJQGAXguyoCu4ERCzAGlRk7UOwGWIDh0s4M4kxb06RSq/jAB6AxJkJ4lTDrue3AnvyzP+fLId+/yfM8juP7PQmCCOf7B3e+ZD+O40RRVFW12VQUpd3r9U3T2m4OpKoqWZYNwzBZLEqfh0N7NnvfrPcEWlEUWZb9mWF4Ph6D0ylcLbfM5HkeJrhGA2hb15/QXnv+w7RYXsDatjOdvnmrHSnLEizMNE2v11sUXQBCnn98kbquBUGQJAlmq9WB2e3qg4HJdqKkaRql1HGc0WgMcDJ5dd0F24kediZJ8t/ELT69H+8py0CYSIO5AAAAAElFTkSuQmCC")
           no-repeat center,
         linear-gradient(
           to right,
-          #f2f2f2 45%,
+          var(--button-face) 45%,
           var(--button-shade-light) 45%,
           var(--button-shade-dark)
         ) !important;
@@ -47,7 +47,7 @@
           no-repeat center,
         linear-gradient(
           to bottom,
-          #f2f2f2 45%,
+          var(--button-face) 45%,
           var(--button-shade-light) 45%,
           var(--button-shade-dark)
         ) !important;
@@ -145,7 +145,7 @@
       border-color: var(--button-border-color) !important;
       border-radius: var(--border-radius) !important;
       box-shadow: var(--button-shadow) !important;
-      background-color: #f2f2f2 !important;
+      background-color: var(--button-face) !important;
 
       &:vertical {
         height: 17px !important;
@@ -200,7 +200,7 @@
       border-color: var(--button-border-color) !important;
       border-radius: var(--border-radius) !important;
       box-shadow: var(--button-shadow) !important;
-      background-color: #f2f2f2 !important;
+      background-color: var(--button-face) !important;
 
       &:vertical {
         height: 17px !important;
