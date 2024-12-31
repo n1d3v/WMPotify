@@ -75,11 +75,11 @@
     display: none;
 }
 
-.wmpotify-tabs-container {
+#wmpotify-tabs-container {
     display: flex;
     position: absolute;
 
-    > button {
+    > button:not(#wmpotify-tabs-overflow-button) {
         min-width: 99px;
         height: 36px;
         min-height: 0;
@@ -92,6 +92,10 @@
         font-weight: normal !important;
         display: block !important;
         transform: none !important;
+
+        &[data-hidden] {
+            display: none !important;
+        }
 
         svg {
             display: none;
@@ -128,6 +132,18 @@
             &:active {
                 border-image-source: url('resources/topbar/tab_active_pressed.png');
             }
+        }
+    }
+
+    > #wmpotify-tabs-overflow-button {
+        display: none;
+        width: 19px;
+        height: 36px;
+        border: none;
+        background: url('resources/topbar/overflow.png') no-repeat;
+
+        &:hover {
+            background-image: url('resources/topbar/overflow_hover.png');
         }
     }
 }

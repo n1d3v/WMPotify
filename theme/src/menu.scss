@@ -1,103 +1,3 @@
-@keyframes fade {
-    0% {
-        opacity: 0.3;
-    }
-    100% {
-        opacity: 1;
-    }
-}
-
-.contextMenuBg {
-    display: none;
-    position: absolute;
-    top: var(--menu-height);
-    overflow: hidden;
-    animation: fade 0.2s;
-    background-color: var(--menu);
-    color: var(--menu-text);
-    cursor: default;
-    box-shadow: var(--border-window-outer), var(--border-window-inner), 5px 5px 4px -4px rgba(0, 0, 0, 0.75);
-    box-sizing: content-box;
-}
-
-.contextMenuBg u {
-    border-bottom-color: var(--underline);
-}
-
-.contextMenuBg:focus {
-    outline: none;
-}
-
-.contextMenu {
-    position: absolute;
-    right: 5px;
-    bottom: 3px;
-    margin: 0 !important;
-    margin-right: 3px;
-}
-
-.contextMenuItem {
-    width: 100%;
-    height: calc(var(--menu-height) - 1px);
-    font-size: 11px;
-    padding-left: 2px;
-    position: relative;
-    font: var(--menu-font);
-    line-height: unset;
-}
-
-.contextMenuItem p {
-    margin: 0;
-    padding-top: 2px;
-}
-
-.contextMenuItem > p {
-    padding-left: 20px;
-}
-
-.contextMenuItem[data-active] {
-    background-color: var(--hilight);
-    color: var(--hilight-text);
-}
-
-.contextMenuItem[data-active] u {
-    border-bottom-color: var(--underline-hilight);
-}
-
-.contextMenuItem[data-hidden] {
-    display: none;
-}
-
-.contextMenu hr {
-    width: 100%;
-    margin-top: calc(var(--menu-height) / 4 - 1.5px);
-    margin-left: 1px;
-    margin-right: 0;
-    margin-bottom: calc(var(--menu-height) / 4 - 0.5px);
-    border: none;
-    border-top: solid 1px var(--button-shadow);
-    border-bottom: solid 1px var(--button-hilight);
-}
-
-.submenuMark {
-    position: absolute;
-    top: 50%;
-    right: -1px;
-    transform: translateY(calc(-50% - 4px));
-}
-
-.disabled,
-[data-disabled] {
-    color: var(--button-shadow) !important;
-    text-shadow: 1px 1px 0 var(--button-hilight) !important;
-}
-
-.disabled u,
-button[disabled] u,
-[data-disabled] u {
-    border-bottom-color: var(--underline-disabled);
-}
-
 :root {
   --menu-padding: 3px;
   --item-offset-left: 30px;
@@ -115,116 +15,252 @@ button[disabled] u,
   );
 }
 
-ul {
-  &[role] {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-    cursor: default;
-  }
-
-  &[role="menu"] {
-    min-width: 150px;
-    padding: 2px;
-    background: var(--surface);
-    color: initial;
-    border: 1px solid rgba(0, 0, 0, 0.4);
-    box-shadow: 4px 4px 3px -2px rgba(0, 0, 0, 0.5);
-    border-radius: 0;
-    overflow-x: hidden;
-
-    &::before {
-      content: "";
-      pointer-events: none;
-      position: absolute;
-      left: var(--item-offset-left);
-      width: 2px;
-      height: calc(100% - 4px);
-      box-shadow: inset 1px 0 rgba(0, 0, 0, 0.15), inset -1px 0 #fff;
+/* For Spotify menus */
+#context-menu {
+  ul:not([id*="curation-"]) {
+    &[role] {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      cursor: default;
     }
 
-    [role="menuitem"] & {
-      display: none;
-      position: absolute;
-      left: 0;
-      top: 100%;
-      z-index: 99;
-    }
+    &[role="menu"] {
+      min-width: 150px;
+      padding: 2px;
+      background: var(--surface);
+      color: initial;
+      border: 1px solid rgba(0, 0, 0, 0.4);
+      box-shadow: 4px 4px 3px -2px rgba(0, 0, 0, 0.5);
+      border-radius: 0;
+      overflow-x: hidden;
 
-    & [role="menuitem"] > [role="menu"] {
-      top: -4px;
-      left: 100%;
-    }
-
-    > [role="menuitem"],
-    .main-contextMenu-menuItem {
-      .main-contextMenu-menuItemButton {
-        height: 24px;
-
-        span {
-          margin-left: 21px;
-          line-height: 1.1;
-          overflow: visible;
-        }
+      .main-contextMenu-filterPlaylistSearchContainer {
+        height: unset;
       }
 
-      > a,
-      > button,
-      > label,
-      &[aria-haspopup="true"] {
-        all: unset;
-        position: relative;
-        display: flex;
-        justify-content: space-between;
-        width: 100%;
-        padding: 4px 10px 4px 10px;
-        box-sizing: border-box;
-        border: 1px solid transparent;
-        border-radius: 3px;
-        white-space: nowrap;
-
-        &:hover,
-        &:focus-visible {
-          background: var(--item-hover-background);
-          border-color: #b8d6fb;
-        }
-
-        span {
-          font: var(--menu-font);
-        }
+      .main-contextMenu-filterPlaylistSearch {
+        display: none;
       }
 
-      > button {
-        &:hover::before,
-        &::after {
-          content: none;
-        }
-      }
-
-      &[aria-haspopup="true"] {
-        &::after {
-          content: "";
-          position: absolute;
-          top: 50%;
-          right: 2px;
-          transform: translateY(-50%);
-          border: 4px solid transparent;
-          border-left-color: currentColor;
-        }
-      }
-
-      svg {
+      &::before {
+        content: "";
+        pointer-events: none;
         position: absolute;
-        width: 12px;
-        left: 6px;
+        left: var(--item-offset-left);
+        width: 2px;
+        height: calc(100% - 4px);
+        box-shadow: inset 1px 0 rgba(0, 0, 0, 0.15), inset -1px 0 #fff;
+      }
 
-        span:not(:first-child) &.Svg-img-icon-small { /* submenu mark */
-          left: auto;
-          right: 6px;
+      [role="menuitem"] & {
+        display: none;
+        position: absolute;
+        left: 0;
+        top: 100%;
+        z-index: 99;
+      }
+
+      & [role="menuitem"] > [role="menu"] {
+        top: -4px;
+        left: 100%;
+      }
+
+      > [role="menuitem"],
+      .main-contextMenu-menuItem {
+        .main-contextMenu-menuItemButton {
+          height: 24px;
+
+          span {
+            margin-left: 21px;
+            line-height: 1.1;
+            overflow: visible;
+          }
+        }
+
+        > a,
+        > button,
+        > label,
+        &[aria-haspopup="true"] {
+          all: unset;
+          position: relative;
+          display: flex;
+          justify-content: space-between;
+          width: 100%;
+          padding: 4px 10px 4px 10px;
+          box-sizing: border-box;
+          border: 1px solid transparent;
+          border-radius: 3px;
+          white-space: nowrap;
+
+          &:hover,
+          &:focus-visible {
+            background: var(--item-hover-background);
+            border-color: #b8d6fb;
+          }
+
+          span {
+            font: var(--menu-font);
+          }
+        }
+
+        > button {
+          &::after {
+            content: none;
+          }
+
+          span:not(:first-child) svg.Svg-img-icon-small { /* submenu mark */
+            left: auto;
+            top: 3px;
+            right: -3px;
+            transform: scale(0.6) rotate(90deg);
+          }
+
+          &[class*=" "] { /* has multiple classes, usually meaning a separator on top or bottom */
+            /* :not(:first-child) - dirty workaround for non-separator class being used in artist context menu ('Create Discog Collection') */
+            /* assume top here */
+            &::before {
+              top: -7px;
+              left: 29px;
+              width: calc(100% - 29px);
+              border: none;
+              border-top: solid 1px rgba(0, 0, 0, 0.15);
+              border-bottom: solid 1px var(--button-hilight);
+            }
+            margin-top: 9px;
+          }
+        }
+
+        svg {
+          position: absolute;
+          left: 4px;
+          transform: scale(0.75);
+        }
+      }
+
+      li:first-child,
+      li:nth-child(2),
+      li:nth-child(3),
+      li:nth-child(4),
+      li:nth-child(5),
+      li:nth-child(6) {
+        button[class*=" "] { /* has multiple classes, usually meaning a separator on top or bottom */
+          /* assume bottom here */
+          &::before {
+            content: '';
+            position: absolute;
+            top: unset !important;
+            bottom: -6px;
+            pointer-events: none;
+          }
+          margin-top: 0 !important;
+          margin-bottom: 9px;
         }
       }
     }
   }
+}
+
+/* For MadMenu */
+@keyframes fade {
+  0% {
+      opacity: 0.3;
+  }
+  100% {
+      opacity: 1;
+  }
+}
+
+.contextMenuBg {
+  display: none;
+  position: absolute;
+  top: var(--menu-height);
+  overflow: hidden;
+  animation: fade 0.2s;
+  background-color: var(--menu);
+  color: var(--menu-text);
+  cursor: default;
+  box-shadow: var(--border-window-outer), var(--border-window-inner), 5px 5px 4px -4px rgba(0, 0, 0, 0.75);
+  box-sizing: content-box;
+}
+
+.contextMenuBg u {
+  border-bottom-color: var(--underline);
+}
+
+.contextMenuBg:focus {
+  outline: none;
+}
+
+.contextMenu {
+  position: absolute;
+  right: 5px;
+  bottom: 3px;
+  margin: 0 !important;
+  margin-right: 3px;
+}
+
+.contextMenuItem {
+  width: 100%;
+  height: calc(var(--menu-height) - 1px);
+  font-size: 11px;
+  padding-left: 2px;
+  position: relative;
+  font: var(--menu-font);
+  line-height: unset;
+}
+
+.contextMenuItem p {
+  margin: 0;
+  padding-top: 2px;
+}
+
+.contextMenuItem > p {
+  padding-left: 20px;
+}
+
+.contextMenuItem[data-active] {
+  background-color: var(--hilight);
+  color: var(--hilight-text);
+}
+
+.contextMenuItem[data-active] u {
+  border-bottom-color: var(--underline-hilight);
+}
+
+.contextMenuItem[data-hidden] {
+  display: none;
+}
+
+.contextMenu hr {
+  width: 100%;
+  margin-top: calc(var(--menu-height) / 4 - 1.5px);
+  margin-left: 1px;
+  margin-right: 0;
+  margin-bottom: calc(var(--menu-height) / 4 - 0.5px);
+  border: none;
+  border-top: solid 1px var(--button-shadow-color);
+  border-bottom: solid 1px var(--button-hilight);
+  box-sizing: content-box;
+}
+
+.submenuMark {
+  position: absolute;
+  top: 50%;
+  right: -1px;
+  transform: translateY(calc(-50% - 4px));
+}
+
+.disabled,
+[data-disabled] {
+  color: var(--button-shadow-color) !important;
+  text-shadow: 1px 1px 0 var(--button-hilight) !important;
+}
+
+.disabled u,
+button[disabled] u,
+[data-disabled] u {
+  border-bottom-color: var(--underline-disabled);
 }
 
 .contextMenuBg {

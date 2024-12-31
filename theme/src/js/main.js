@@ -1,10 +1,13 @@
 import { MadMenu, createMadMenu } from './MadMenu';
 import { noControls } from './noControls';
 import { initQueuePanel } from './queue';
+import { formatTime } from './functions';
 
 (function() {
     const elementsRequired = [
         '.Root__globalNav',
+        '.main-globalNav-historyButtons',
+        '.main-globalNav-searchSection',
         '.main-globalNav-searchContainer > button',
         '.main-globalNav-searchContainer > div form button',
         '.custom-navlinks-scrollable_container div[role="presentation"] > button',
@@ -38,21 +41,41 @@ import { initQueuePanel } from './queue';
 
         const topbar = document.querySelector('.Root__globalNav');
         const tabsContainer = document.createElement('div');
-        tabsContainer.classList.add('wmpotify-tabs-container');
+        tabsContainer.id = 'wmpotify-tabs-container';
         topbar.insertBefore(tabsContainer, topbar.querySelector('.main-globalNav-searchSection'));
 
         const homeButton = document.querySelector('.main-globalNav-searchContainer > button');
         addTab(homeButton);
         const searchButton = document.querySelector('.main-globalNav-searchContainer > div form button');
         addTab(searchButton);
+        const tabs = [homeButton, searchButton];
         const customAppButtons = document.querySelectorAll('.custom-navlinks-scrollable_container div[role="presentation"] > button');
         for (const btn of customAppButtons) {
             addTab(btn);
+            tabs.push(btn);
         }
         const rightButtons = document.querySelectorAll('.main-topBar-topbarContentRight > .main-actionButtons > button');
         for (const btn of rightButtons) {
             addTab(btn);
+            tabs.push(btn);
         }
+        const menuItems = [];
+        for (const tab of tabs) {
+            menuItems.push({
+                text: tab.querySelector('.wmpotify-tab-label').textContent,
+                click: () => tab.click(),
+            });
+        }
+        createMadMenu('wmpotifyTab', menuItems);
+        const menu = new MadMenu(['wmpotifyTab']);
+        const overflowButton = document.createElement('button');
+        overflowButton.id = 'wmpotify-tabs-overflow-button';
+        overflowButton.addEventListener('click', () => {
+            menu.openMenu('wmpotifyTab', { top: '0', left: overflowButton.getBoundingClientRect().left + 'px' });
+        });
+        tabsContainer.appendChild(overflowButton);
+        handleTabOverflow();
+        window.addEventListener('resize', handleTabOverflow);
 
         const accountButton = document.querySelector('.main-topBar-topbarContentRight > button:last-child');
         const accountLabel = document.createElement('span');
@@ -74,7 +97,7 @@ import { initQueuePanel } from './queue';
 
         const stopButton = document.createElement('button');
         stopButton.setAttribute('aria-label', 'Stop');
-        stopButton.classList.add('wmpotify-stop-button');
+        stopButton.id = 'wmpotify-stop-button';
         stopButton.addEventListener('click', () => {
             Spicetify.Platform.PlayerAPI.clearQueue();
             Spicetify.Player.playUri("");
@@ -132,6 +155,24 @@ import { initQueuePanel } from './queue';
             label.classList.add('wmpotify-tab-label');
             btn.appendChild(label);
         }
+
+        function handleTabOverflow() {
+            const leftAreaWidth = document.querySelector('.main-globalNav-historyButtons').getBoundingClientRect().right;
+            const rightAreaWidth = window.innerWidth - document.querySelector('.main-topBar-topbarContentRight').getBoundingClientRect().left;
+            const extra = 160;
+
+            let hiddenTabs = 0;
+            while (window.innerWidth - leftAreaWidth - rightAreaWidth - extra < tabsContainer.getBoundingClientRect().width && hiddenTabs < tabs.length) {
+                tabs[tabs.length - 1 - hiddenTabs++].dataset.hidden = true;
+            }
+            hiddenTabs = document.querySelectorAll('#wmpotify-tabs-container button[data-hidden]').length;
+            while (hiddenTabs > 0 && window.innerWidth - leftAreaWidth - rightAreaWidth - extra > tabsContainer.getBoundingClientRect().width) {
+                delete tabs[tabs.length - hiddenTabs--].dataset.hidden;
+            }
+
+            overflowButton.style.display = hiddenTabs > 0 ? 'block' : '';
+        }
+        globalThis.handleTabOverflow = handleTabOverflow;
 
         function setupTrackInfoWidget() {
             updatePlayPauseButton();
@@ -205,18 +246,6 @@ import { initQueuePanel } from './queue';
         }
     }
 
-    function formatTime(milliseconds) {
-        let seconds = Math.floor(milliseconds / 1000);
-        let minutes = Math.floor(seconds / 60);
-        seconds = String(seconds % 60).padStart(2, '0');
-        if (minutes < 60) {
-            return `${minutes}:${seconds}`;
-        }
-        const hours = Math.floor(minutes / 60);
-        minutes = String(minutes % 60).padStart(2, '0');
-        return `${hours}:${minutes}:${seconds}`;
-    }
-
     function isReady() {
         return window.Spicetify &&
             window.Spicetify.CosmosAsync &&
@@ -244,34 +273,4 @@ import { initQueuePanel } from './queue';
             }
         }, 100);
     });
-    
-    // test
-    createMadMenu('test', [
-        {
-            text: '&Item 1',
-            click: () => console.log('Item 1 clicked')
-        },
-        {
-            text: 'I&tem 2',
-            click: () => console.log('Item 2 clicked')
-        },
-        {
-            text: '&Submenu',
-            submenu: 'testsub'
-        }
-    ])
-    createMadMenu('testsub', [
-        {
-            text: 'Sub&item 1',
-            click: () => console.log('Subitem 1 clicked')
-        },
-        {
-            text: 'Subi&tem 2',
-            click: () => console.log('Subitem 2 clicked')
-        }
-    ], 'test');
-    const menu = new MadMenu(document.createElement('div'), ['test'], ['testsub'], [], []);
-    menu.openMenu('test', { x: 300, y: 100 });
-    globalThis.menu = menu;
-    window.ignoreFocusLoss = true;
 })();

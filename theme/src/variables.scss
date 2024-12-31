@@ -12,7 +12,7 @@
     --button-face: #F0F0F0;
     --button-hilight: #FFFFFF;
     --button-light: #E3E3E3;
-    --button-shadow: #A0A0A0;
+    --button-shadow-color: #A0A0A0;
     --button-text: #000000;
     --gradient-active-title: #B9D1EA;
     --gradient-inactive-title: #D7E4F2;
@@ -45,7 +45,7 @@
 
     --underline: var(--menu-text);
     --underline-hilight: var(--hilight-text);
-    --underline-disabled: var(--button-shadow);
+    --underline-disabled: var(--button-shadow-color);
     
     --button-highlight: #fff;
     --button-face: #f2f2f2;

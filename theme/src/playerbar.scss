@@ -209,7 +209,8 @@ button[data-testid="cover-art-button"] {
         }
     }
 
-    .wmpotify-stop-button {
+    #wmpotify-stop-button {
+        position: relative;
         display: inline-flex;
         width: 25px;
         height: 25px;
@@ -294,7 +295,7 @@ button[data-testid="cover-art-button"] {
 .player-controls__left > div:nth-child(2) button:hover::before,
 .player-controls__left > button:nth-child(2):hover::before,
 .player-controls__buttons button[data-testid='control-button-repeat']:hover::after,
-.wmpotify-stop-button:hover::before,
+#wmpotify-stop-button:hover::before,
 .volume-bar__icon-button:hover::before {
     content: '';
     position: absolute;
@@ -308,7 +309,7 @@ button[data-testid="cover-art-button"] {
 .player-controls__left > div:nth-child(2) button:active::before,
 .player-controls__left > button:nth-child(2):active::before,
 .player-controls__buttons button[data-testid='control-button-repeat']:active::after,
-.wmpotify-stop-button:active::before,
+#wmpotify-stop-button:active::before,
 .volume-bar__icon-button:active::before {
     background-image: url('resources/playerbar/btn_pressed.png');
 }
