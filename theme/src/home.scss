@@ -1,0 +1,138 @@
+:root {
+    --item-hover-background: linear-gradient(
+        to bottom,
+        #ebf4fc 0%,
+        #eaf4fc 10%,
+        #e9f3fc 20%,
+        #e8f3fc 30%,
+        #e7f2fc 40%,
+        #e5f2fc 50%,
+        #e2f1fc 60%,
+        #e1f1fc 70%,
+        #e0f0fc 80%,
+        #dff0fc 90%,
+        #def0fc 100%
+    );
+}
+
+.main-home-homeHeader {
+    background: transparent !important;
+}
+
+.main-home-content {
+    .main-shelf-shelfGrid {
+        > div {
+            border: solid 1px transparent;
+            border-radius: 3px;
+
+            &::after {
+                display: none;
+            }
+
+            &:hover {
+                background: var(--item-hover-background);
+                border-color: #cde9f8;
+            }
+        }
+    }
+
+    .main-card-imageContainer {
+        > div:first-child {
+            border-radius: 0;
+            box-shadow: var(--album-shadow-big);
+
+            img {
+                border-radius: 0;
+            }
+        }
+
+        .main-card-PlayButtonContainer {
+            button {
+                width: 42px;
+                height: 43px;
+                background: url('resources/playerbar/play.png') no-repeat;
+
+                &:hover {
+                    background-image: url('resources/playerbar/play_hover.png');
+                }
+
+                &:active {
+                    background-image: url('resources/playerbar/play_pressed.png');
+                }
+
+                span {
+                    opacity: 0;
+                }
+            }
+
+            &.main-card-PlayButtonContainerVisible { /* Currently playing playlist - show pause button */
+                button {
+                    background-image: url('resources/playerbar/pause.png') ;
+
+                    &:hover {
+                        background-image: url('resources/playerbar/pause_hover.png');
+                    }
+
+                    &:active {
+                        background-image: url('resources/playerbar/pause_pressed.png');
+                    }
+                }
+
+            }
+        }
+    }
+
+    .view-homeShortcutsGrid-shortcut {
+        border: solid 1px transparent;
+        border-radius: 3px;
+
+        &:hover {
+            background: var(--item-hover-background);
+            border-color: #cde9f8;
+        }
+
+        .view-homeShortcutsGrid-imageContainer {
+            padding: 4px;
+            margin-top: -1px;
+
+            .view-homeShortcutsGrid-imageWrapper {
+                box-shadow: var(--album-shadow-small);
+            }
+        }
+
+        &:hover,
+        &:focus-within {
+            .view-homeShortcutsGrid-PlayButtonContainer button {
+                background: url('resources/playerbar/play.png') center / cover no-repeat;
+                border-radius: 0;
+    
+                &:hover {
+                    background-image: url('resources/playerbar/play_hover.png');
+                }
+    
+                &:active {
+                    background-image: url('resources/playerbar/play_pressed.png');
+                }
+    
+                span {
+                    opacity: 0;
+                }
+            }
+    
+            .view-homeShortcutsGrid-main:has(.view-homeShortcutsGrid-trailingIndicator) {
+                .view-homeShortcutsGrid-PlayButtonContainer button {
+                    background: url('resources/playerbar/pause.png') center / cover no-repeat;
+                    border-radius: 0;
+    
+                    &:hover {
+                        background-image: url('resources/playerbar/pause_hover.png');
+                    }
+    
+                    &:active {
+                        background-image: url('resources/playerbar/pause_pressed.png');
+                    }
+                }
+            }
+        }
+    }
+}

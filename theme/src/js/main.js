@@ -1,5 +1,5 @@
 import { MadMenu, createMadMenu } from './MadMenu';
-import { noControls } from './noControls';
+import { setControlHeight } from './noControls';
 import { initQueuePanel } from './queue';
 import { formatTime } from './functions';
 
@@ -10,6 +10,7 @@ import { formatTime } from './functions';
         '.main-globalNav-searchSection',
         '.main-globalNav-searchContainer > button',
         '.main-globalNav-searchContainer > div form button',
+        '.main-topBar-searchBar',
         '.custom-navlinks-scrollable_container div[role="presentation"] > button',
         '.main-topBar-topbarContentRight > .main-actionButtons > button',
         '.main-topBar-topbarContentRight > button:last-child',
@@ -33,11 +34,100 @@ import { formatTime } from './functions';
     }
 
     async function init() {
-        noControls();
-
         if (!localStorage.wmpotifyShowLibX) {
             document.body.dataset.hideLibx = true;
         }
+
+        // Supported: xp, aero, classic, basic, custom color
+        switch (localStorage.wmpotifyStyle) {
+            case 'xp':
+            case 'aero':
+            case 'classic':
+                break;
+            case undefined:
+                localStorage.wmpotifyStyle = 'xp';
+                break;
+            case 'basic':
+                if (document.hasFocus()) {
+                    document.body.style.backgroundColor = 'var(--active-title)';
+                } else {
+                    document.body.style.backgroundColor = 'var(--inactive-title)';
+                }
+                window.addEventListener('focus', () => {
+                    document.body.style.backgroundColor = 'var(--active-title)';
+                });
+                window.addEventListener('blur', () => {
+                    document.body.style.backgroundColor = 'var(--inactive-title)';
+                });
+                break;
+            default:
+                document.body.style.backgroundColor = localStorage.wmpotifyStyle;
+        }
+        document.documentElement.dataset.wmpotifyStyle = localStorage.wmpotifyStyle || 'xp';
+
+        // Supported: native, custom, spotify
+        // native: Use the native title bar (requires Linux or Windows with my Windhawk mod)
+        // custom: Use custom title bar implemented by this theme, install SpotEx for minimize/maximize buttons
+        // spotify: Use Spotify's window controls (default on unmodded Spotify client on Windows/macOS)
+        // Default: native if native title bar is available, custom if SpotEx is installed, spotify otherwise
+        let titleStyle = 'spotify';
+        if (localStorage.wmpotifyTitleStyle) {
+            titleStyle = localStorage.wmpotifyTitleStyle;
+        } else {
+            if (window.outerHeight - window.innerHeight > 0 ) {
+                titleStyle = 'native';
+            } else if (window.SpotEx) {
+                titleStyle = 'custom';
+            }
+        }
+        document.documentElement.dataset.wmpotifyTitleStyle = titleStyle;
+        switch (titleStyle) {
+            case 'native':
+                setControlHeight(0);
+                break;
+            case 'custom':
+                setControlHeight(0);
+                const titleButtons = document.createElement('div');
+                titleButtons.id = 'wmpotify-title-buttons';
+                if (window.SpotEx) {
+                    const minimizeButton = document.createElement('button');
+                    minimizeButton.id = 'wmpotify-minimize-button';
+                    minimizeButton.addEventListener('click', () => {
+                        SpotEx.updateWindow({ state: 'minimized' });
+                    });
+                    titleButtons.appendChild(minimizeButton);
+                    const maximizeButton = document.createElement('button');
+                    maximizeButton.id = 'wmpotify-maximize-button';
+                    maximizeButton.addEventListener('click', async () => {
+                        if (await SpotEx.getWindow().state === 'maximized') {
+                            SpotEx.updateWindow({ state: 'normal' });
+                        } else {
+                            SpotEx.updateWindow({ state: 'maximized' });
+                        }
+                    });
+                    titleButtons.appendChild(maximizeButton);
+                }
+                const closeButton = document.createElement('button');
+                closeButton.id = 'wmpotify-close-button';
+                closeButton.addEventListener('click', () => {
+                    window.close();
+                });
+            case 'spotify':
+                const titleBar = document.createElement('div');
+                titleBar.id = 'wmpotify-title-bar';
+                const titleText = document.createElement('span');
+                titleText.id = 'wmpotify-title-text';
+                titleText.textContent = await Spicetify.AppTitle.get();
+                titleBar.appendChild(titleText);
+                if (titleStyle === 'custom') {
+                    titleBar.appendChild(titleButtons);
+                } else {
+                    setControlHeight(25);
+                }
+                document.body.appendChild(titleBar);
+                break;
+        }
+
 
         const topbar = document.querySelector('.Root__globalNav');
         const tabsContainer = document.createElement('div');
@@ -75,6 +165,7 @@ import { formatTime } from './functions';
         });
         tabsContainer.appendChild(overflowButton);
         handleTabOverflow();
+        setTimeout(handleTabOverflow, 1000);
         window.addEventListener('resize', handleTabOverflow);
 
         const accountButton = document.querySelector('.main-topBar-topbarContentRight > button:last-child');
@@ -82,7 +173,25 @@ import { formatTime } from './functions';
         accountLabel.textContent = accountButton.getAttribute('aria-label');
         accountLabel.classList.add('wmpotify-user-label');
         accountButton.appendChild(accountLabel);
-        
+
+        const searchContainer = document.createElement('div');
+        searchContainer.id = 'wmpotify-search-container';
+        const searchBarWrapper = document.createElement('div');
+        searchBarWrapper.id = 'wmpotify-search-wrapper';
+        const searchBar = document.querySelector('.main-topBar-searchBar');
+        searchBarWrapper.appendChild(searchBar);
+        const searchClearButton = document.createElement('button');
+        searchClearButton.id = 'wmpotify-search-clear-button';
+        searchClearButton.setAttribute('aria-label', 'Clear search');
+        searchClearButton.addEventListener('click', () => {
+            searchBar.value = '';
+            searchBar.focus();
+            window.open('spotify:search');
+        });
+        searchBarWrapper.appendChild(searchClearButton);
+        searchContainer.appendChild(searchBarWrapper);
+        topbar.appendChild(searchContainer);
+
         const playPauseButton = document.querySelector(".player-controls__buttons button[data-testid='control-button-playpause']");
         Spicetify.Player.addEventListener("onplaypause", updatePlayPauseButton);
         new MutationObserver(updatePlayPauseButton).observe(playPauseButton, { attributes: true, attributeFilter: ['aria-label'] });
@@ -249,6 +358,8 @@ import { formatTime } from './functions';
     function isReady() {
         return window.Spicetify &&
             window.Spicetify.CosmosAsync &&
+            window.Spicetify.Platform?.PlayerAPI &&
+            window.Spicetify.AppTitle &&
             window.Spicetify.Player?.origin?._state &&
             elementsRequired.every(selector => document.querySelector(selector));
     }

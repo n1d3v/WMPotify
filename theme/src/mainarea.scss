@@ -1,3 +1,12 @@
+:root[data-wmpotify-style="aero"],
+:root[data-wmpotify-style="xp"] {
+    background: transparent;
+}
+
+:root[data-wmpotify-style="classic"] {
+    background: var(--button-face);
+}
+
 .Root__top-container {
     background: transparent;
 
@@ -37,22 +46,20 @@ body[data-hide-libx] {
 
 .Root__main-view {
     border-radius: 0 !important;
-}
 
-.main-home-homeHeader {
-    background: transparent !important;
-}
+    &:not(:has(section[data-testid="playlist-page"])) {
+        .main-topBar-container {
+            position: relative;
+            width: 100%;
+            height: 28px;
+            border-bottom: solid 1px var(--wmp11-separator-shadow);
+            outline: solid 1px var(--wmp11-separator-light);
+            overflow: hidden;
 
-.main-topBar-container {
-    position: relative;
-    width: 100%;
-    height: 28px;
-    border-bottom: solid 1px var(--wmp11-separator-shadow);
-    outline: solid 1px var(--wmp11-separator-light);
-    overflow: hidden;
-
-    &:has(.main-topBar-topbarContentWrapper:empty) {
-        display: none;
+            &:has(.main-topBar-topbarContentWrapper:empty) {
+                display: none;
+            }
+        }
     }
 }
 
@@ -100,6 +107,43 @@ body[data-hide-libx] {
 
     .main-nowPlayingView-coverArt {
         border-radius: 0;
-        box-shadow: 5px 5px 4px -4px rgba(0, 0, 0, 0.75) !important;
+        box-shadow: var(--album-shadow-big) !important;
+    }
+}
+
+:root[data-wmpotify-style="xp"] {
+    /* Add panel gaps again to show frames there */
+    /* And extra 8px on the left if LibX is shown */
+    .Root__main-view {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    #main:has(.Root__right-sidebar aside) .Root__main-view {
+        width: calc(100% + var(--panel-gap) - 3px);
+    }
+
+    .Root__globalNav {
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    #Desktop_LeftSidebar_Id {
+        margin-left: var(--panel-gap);
+    }
+
+    .Root__right-sidebar {
+        margin-right: 0;
+    }
+
+    body[data-hide-libx] {
+        .Root__main-view {
+            margin-left: calc(var(--panel-gap) * -2);
+            width: calc(100% + var(--panel-gap) * 2);
+        }
+
+        #main:has(.Root__right-sidebar aside) .Root__main-view {
+            width: calc(100% + var(--panel-gap) * 3 - 3px);
+        }
     }
 }

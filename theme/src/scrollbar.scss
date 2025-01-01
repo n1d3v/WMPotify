@@ -253,28 +253,38 @@
   }
 }
 
-/*
-[data-overlayscrollbars-initialize]::-webkit-scrollbar, [data-overlayscrollbars-initialize]::-webkit-scrollbar-corner, [data-overlayscrollbars-viewport~=scrollbarHidden]::-webkit-scrollbar, [data-overlayscrollbars-viewport~=scrollbarHidden]::-webkit-scrollbar-corner
-*/
+/* Remove Spotify's custom scrollbar and make it use the standard WebKit scrollbar */
 [data-overlayscrollbars-initialize],
 [data-overlayscrollbars-viewport] {
-    scrollbar-color: initial !important;
-    scrollbar-width: auto !important;
+  scrollbar-color: initial !important;
+  scrollbar-width: auto !important;
 
-    &::-webkit-scrollbar,
-    &::-webkit-scrollbar-corner {
-        -webkit-appearance: auto !important;
-        appearance: auto !important;
-        display: unset !important;
-        height: unset !important;
-        width: unset !important;
-    }
+  &::-webkit-scrollbar,
+  &::-webkit-scrollbar-corner {
+    -webkit-appearance: auto !important;
+    appearance: auto !important;
+    display: unset !important;
+    height: unset !important;
+    width: unset !important;
+  }
 
-    &:has(.LyricsScrollContainer) {
-        overflow: hidden !important;
-    }
+  &:has(.LyricsScrollContainer) {
+    overflow: hidden !important;
+  }
 }
 
 .os-scrollbar {
-    display: none !important;
+  display: none !important;
+}
+
+/* But exclude collapsed LibraryX sidebar */
+#Desktop_LeftSidebar_Id:not(:has(.main-yourLibraryX-libraryFilter)) {
+  [data-overlayscrollbars-initialize],
+  [data-overlayscrollbars-viewport] {
+    scrollbar-width: none !important;
+  }
+
+  .os-scrollbar {
+    display: block !important;
+  }
 }

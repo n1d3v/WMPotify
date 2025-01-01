@@ -12,7 +12,7 @@
             #wmpotify-queue-album-art {
                 width: 97px;
                 height: 97px;
-                box-shadow: 5px 5px 4px -4px rgba(0, 0, 0, 0.75);
+                box-shadow: var(--album-shadow-big);
                 position: absolute;
                 top: 9px;
                 left: 50%;

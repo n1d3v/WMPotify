@@ -182,14 +182,14 @@
   cursor: default;
   box-shadow: var(--border-window-outer), var(--border-window-inner), 5px 5px 4px -4px rgba(0, 0, 0, 0.75);
   box-sizing: content-box;
-}
 
-.contextMenuBg u {
-  border-bottom-color: var(--underline);
-}
+  u {
+    border-bottom-color: var(--underline);
+  }
 
-.contextMenuBg:focus {
-  outline: none;
+  &:focus {
+    outline: none;
+  }
 }
 
 .contextMenu {
@@ -208,28 +208,16 @@
   position: relative;
   font: var(--menu-font);
   line-height: unset;
-}
 
-.contextMenuItem p {
-  margin: 0;
-  padding-top: 2px;
-}
+  p {
+    margin: 0;
+    padding-top: 2px;
+    padding-left: 20px;
+  }
 
-.contextMenuItem > p {
-  padding-left: 20px;
-}
-
-.contextMenuItem[data-active] {
-  background-color: var(--hilight);
-  color: var(--hilight-text);
-}
-
-.contextMenuItem[data-active] u {
-  border-bottom-color: var(--underline-hilight);
-}
-
-.contextMenuItem[data-hidden] {
-  display: none;
+  &[data-hidden] {
+    display: none;
+  }
 }
 
 .contextMenu hr {
@@ -302,11 +290,8 @@ button[disabled] u,
   white-space: nowrap;
 
   &[data-active] {
-    background-color: unset !important;
     background: var(--item-hover-background);
     border-color: #b8d6fb;
-    box-shadow: none !important;
-    color: #000 !important;
   }
 
   &.disabled {

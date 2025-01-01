@@ -1,13 +1,13 @@
 // From https://github.com/ohitstom/spicetify-extensions/tree/main/noControls
-export function noControls() {
+export function setControlHeight(height) {
     // Function to check and apply the titlebar
 	const checkAndApplyTitlebar = API => {
 		if (API) {
 			if (API._updateUiClient?.updateTitlebarHeight) {
-				API._updateUiClient.updateTitlebarHeight({ height: 1 });
+				API._updateUiClient.updateTitlebarHeight({ height: height || 1 });
 			}
 
-			if (API._updateUiClient?.setButtonsVisibility) {
+			if (API._updateUiClient?.setButtonsVisibility && (!height || height <= 1)) {
 				API._updateUiClient.setButtonsVisibility(false);
 			}
 
@@ -20,7 +20,7 @@ export function noControls() {
 
 		Spicetify.CosmosAsync.post("sp://messages/v1/container/control", {
 			type: "update_titlebar",
-			height: "1px"
+			height: height ? height + "px" : "1px",
 		});
 	};
 

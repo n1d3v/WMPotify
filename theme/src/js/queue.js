@@ -54,8 +54,11 @@ export function initQueuePanel() {
     processQueueItems();
     new MutationObserver(processQueueItems).observe(document.querySelectorAll('#queue-panel ul')[1], { childList: true });
     new MutationObserver(() => {
-        processQueueItems();
-        new MutationObserver(processQueueItems).observe(document.querySelectorAll('#queue-panel ul')[1], { childList: true });
+        const panelContent = document.querySelectorAll('#queue-panel ul')[1];
+        if (panelContent) {
+            processQueueItems();
+            new MutationObserver(processQueueItems).observe(panelContent, { childList: true });
+        }
     }).observe(document.querySelector('#queue-panel'), { childList: true });
 
     const tabs = document.querySelectorAll('#Desktop_PanelContainer_Id div[role="tablist"] button');

@@ -1,5 +1,45 @@
+:root {
+    --prev: url('resources/playerbar/prev.png');
+    --prev-hover: url('resources/playerbar/prev_hover.png');
+    --prev-pressed: url('resources/playerbar/prev_pressed.png');
+    --prev-disabled: url('resources/playerbar/prev_disabled.png');
+    --play: url('resources/playerbar/play.png');
+    --play-hover: url('resources/playerbar/play_hover.png');
+    --play-pressed: url('resources/playerbar/play_pressed.png');
+    --play-disabled: url('resources/playerbar/play_disabled.png');
+    --pause: url('resources/playerbar/pause.png');
+    --pause-hover: url('resources/playerbar/pause_hover.png');
+    --pause-pressed: url('resources/playerbar/pause_pressed.png');
+    --pause-disabled: url('resources/playerbar/pause_disabled.png');
+    --next: url('resources/playerbar/next.png');
+    --next-hover: url('resources/playerbar/next_hover.png');
+    --next-pressed: url('resources/playerbar/next_pressed.png');
+    --next-disabled: url('resources/playerbar/next_disabled.png');
+    --repeat: url('resources/playerbar/repeat.png');
+    --repeat-active: url('resources/playerbar/repeat_active.png');
+    --shuffle: url('resources/playerbar/shuffle.png');
+    --shuffle-active: url('resources/playerbar/shuffle_active.png');
+    --stop: url('resources/playerbar/stop.png');
+    --stop-disabled: url('resources/playerbar/stop_disabled.png');
+    --miniplayer: url('resources/playerbar/miniplayer.png');
+    --miniplayer-hover: url('resources/playerbar/miniplayer_hover.png');
+    --miniplayer-pressed: url('resources/playerbar/miniplayer_pressed.png');
+    --miniplayer-disabled: url('resources/playerbar/miniplayer_disabled.png');
+    --fullscreen: url('resources/playerbar/fullscreen.png');
+    --fullscreen-hover: url('resources/playerbar/fullscreen_hover.png');
+    --fullscreen-pressed: url('resources/playerbar/fullscreen_pressed.png');
+    --fullscreen-disabled: url('resources/playerbar/fullscreen_disabled.png');
+    --vol-muted: url('resources/playerbar/vol_muted.png');
+    --vol-low: url('resources/playerbar/vol_low.png');
+    --vol-mid: url('resources/playerbar/vol_mid.png');
+    --vol-high: url('resources/playerbar/vol_high.png');
+}
+
 .Root__now-playing-bar {
+    position: relative;
     margin: calc(var(--panel-gap) * -1);
+    width: calc(100% + var(--panel-gap) * 2);
+    padding-right: calc(var(--panel-gap) * 2);
 }
 
 .main-nowPlayingBar-nowPlayingBar {
@@ -26,7 +66,7 @@ button[data-testid="cover-art-button"] {
 .main-nowPlayingWidget-coverArt .cover-art {
     max-width: 33px;
     max-height: 33px;
-    box-shadow: 1px 1px rgba(0, 0, 0, 0.2) !important;
+    box-shadow: var(--album-shadow-small) !important;
 }
 
 .main-coverSlotCollapsed-navAltContainer {
@@ -41,8 +81,6 @@ button[data-testid="cover-art-button"] {
     font-size: 12px;
     margin-top: -3px;
     margin-left: -6px;
-    text-shadow: 0 0 10px white, 0 0 10px white, 0 0 10px white, 0 0 10px white,
-        0 0 10px white,0 0 10px white, 0 0 10px white, 0 0 10px white;
 }
 
 .main-nowPlayingWidget-trackInfo {
@@ -75,20 +113,20 @@ button[data-testid="cover-art-button"] {
             height: 25px;
             margin-right: -1px;
             border-radius: 0;
-            background: url('resources/playerbar/prev.png') no-repeat;
+            background: var(--prev) no-repeat;
             align-self: center;
             transform: none !important;
 
             &:disabled {
-                background-image: url('resources/playerbar/prev_disabled.png') !important;
+                background-image: var(--prev-disabled) !important;
             }
 
             &:hover {
-                background-image: url('resources/playerbar/prev_hover.png');
+                background-image: var(--prev-hover);
             }
 
             &:active {
-                background-image: url('resources/playerbar/prev_pressed.png');
+                background-image: var(--prev-pressed);
             }
         }
 
@@ -97,35 +135,35 @@ button[data-testid="cover-art-button"] {
             height: 43px;
             border-radius: 0;
             align-self: center;
-            background: url('resources/playerbar/play.png') no-repeat;
+            background: var(--play) no-repeat;
             transform: none !important;
 
             &:disabled {
-                background-image: url('resources/playerbar/play_disabled.png') !important;
+                background-image: var(--play-disabled) !important;
             }
 
             &:hover {
-                background-image: url('resources/playerbar/play_hover.png');
+                background-image: var(--play-hover);
             }
 
             &:active {
-                background-image: url('resources/playerbar/play_pressed.png');
+                background-image: var(--play-pressed);
             }
 
             &.playing {
-                background-image: url('resources/playerbar/pause.png');
+                background-image: var(--pause);
             }
 
             &.playing:disabled {
-                background-image: url('resources/playerbar/pause_disabled.png') !important;
+                background-image: var(--pause-disabled) !important;
             }
 
             &.playing:hover {
-                background-image: url('resources/playerbar/pause_hover.png');
+                background-image: var(--pause-hover);
             }
 
             &.playing:active {
-                background-image: url('resources/playerbar/pause_pressed.png');
+                background-image: var(--pause-pressed);
             }
         }
 
@@ -135,19 +173,19 @@ button[data-testid="cover-art-button"] {
             margin-left: -1px;
             border-radius: 0;
             align-self: center;
-            background: url('resources/playerbar/next.png') no-repeat;
+            background: var(--next) no-repeat;
             transform: none !important;
 
             &:disabled {
-                background-image: url('resources/playerbar/next_disabled.png') !important;
+                background-image: var(--next-disabled) !important;
             }
 
             &:hover {
-                background-image: url('resources/playerbar/next_hover.png');
+                background-image: var(--next-hover);
             }
 
             &:active {
-                background-image: url('resources/playerbar/next_pressed.png');
+                background-image: var(--next-pressed);
             }
         }
     }
@@ -163,8 +201,6 @@ button[data-testid="cover-art-button"] {
         padding: 6px;
         font-size: 12px;
         margin-top: -3px;
-        text-shadow: 0 0 10px white, 0 0 10px white, 0 0 10px white, 0 0 10px white,
-            0 0 10px white,0 0 10px white, 0 0 10px white, 0 0 10px white;
     }
 
     /* Shuffle button, wrapped in a div only if it's enabled */
@@ -174,12 +210,12 @@ button[data-testid="cover-art-button"] {
         height: 25px;
         border-radius: 0;
         align-self: center;
-        background: url('resources/playerbar/shuffle.png') no-repeat;
+        background: var(--shuffle) no-repeat;
         transform: none !important;
         margin-right: -2px;
 
         &.Button-buttonTertiary-textBrightAccent-small-small-iconOnly-useBrowserDefaultFocusStyle {
-            background-image: url('resources/playerbar/shuffle_active.png');
+            background-image: var(--shuffle-active);
         }
 
         &::after {
@@ -196,7 +232,7 @@ button[data-testid="cover-art-button"] {
         height: 25px;
         border-radius: 0 !important;
         align-self: center;
-        background: url('resources/playerbar/repeat.png') no-repeat;
+        background: var(--repeat) no-repeat;
         transform: none !important;
         margin-right: 12px;
 
@@ -205,7 +241,7 @@ button[data-testid="cover-art-button"] {
         }
 
         &:not([aria-checked='false']) {
-            background-image: url('resources/playerbar/repeat_active.png');
+            background-image: var(--repeat-active);
         }
     }
 
@@ -217,12 +253,12 @@ button[data-testid="cover-art-button"] {
         border: none;
         border-radius: 0;
         align-self: center;
-        background: url('resources/playerbar/stop.png') no-repeat 0 -1px;
+        background: var(--stop) no-repeat 0 -1px;
         transform: none !important;
         margin-right: 1px;
 
         &:disabled {
-            background-image: url('resources/playerbar/stop_disabled.png');
+            background-image: var(--stop-disabled);
         }
     }
 }
@@ -241,7 +277,7 @@ button[data-testid="cover-art-button"] {
         height: 25px;
         border-radius: 0;
         align-self: center;
-        background: url('resources/playerbar/vol_mid.png') no-repeat;
+        background: var(--vol-mid) no-repeat;
         transform: none !important;
 
         svg {
@@ -249,19 +285,19 @@ button[data-testid="cover-art-button"] {
         }
 
         &[data-vol='muted'] {
-            background-image: url('resources/playerbar/vol_muted.png');
+            background-image: var(--vol-muted);
         }
 
         &[data-vol='low'] {
-            background-image: url('resources/playerbar/vol_low.png');
+            background-image: var(--vol-low);
         }
 
         &[data-vol='mid'] {
-            background-image: url('resources/playerbar/vol_mid.png');
+            background-image: var(--vol-mid);
         }
 
         &[data-vol='high'] {
-            background-image: url('resources/playerbar/vol_high.png');
+            background-image: var(--vol-high);
         }
     }
 
@@ -322,7 +358,7 @@ button[data-testid="cover-art-button"] {
         height: 21px;
         margin-right: 8px;
         border-radius: 0;
-        background: url('resources/playerbar/miniplayer.png') no-repeat center;
+        background: var(--miniplayer) no-repeat center;
         transform: none !important;
 
         svg {
@@ -330,15 +366,15 @@ button[data-testid="cover-art-button"] {
         }
 
         &:hover {
-            background-image: url('resources/playerbar/miniplayer_hover.png');
+            background-image: var(--miniplayer-hover);
         }
 
         &:active {
-            background-image: url('resources/playerbar/miniplayer_pressed.png');
+            background-image: var(--miniplayer-pressed);
         }
 
         &:disabled {
-            background-image: url('resources/playerbar/miniplayer_disabled.png') !important;
+            background-image: var(--miniplayer-disabled) !important;
         }
     }
 
@@ -347,7 +383,7 @@ button[data-testid="cover-art-button"] {
         width: 21px;
         height: 21px;
         border-radius: 0;
-        background: url('resources/playerbar/fullscreen.png') no-repeat center;
+        background: var(--fullscreen) no-repeat center;
         scale: 1 !important;
         transform: none !important;
 
@@ -356,15 +392,15 @@ button[data-testid="cover-art-button"] {
         }
 
         &:hover {
-            background-image: url('resources/playerbar/fullscreen_hover.png');
+            background-image: var(--fullscreen-hover);
         }
 
         &:active {
-            background-image: url('resources/playerbar/fullscreen_pressed.png');
+            background-image: var(--fullscreen-pressed);
         }
 
         &:disabled {
-            background-image: url('resources/playerbar/fullscreen_disabled.png') !important;
+            background-image: var(--fullscreen-disabled) !important;
         }
     }
 }
@@ -417,4 +453,109 @@ button[data-testid="cover-art-button"] {
 
 .main-connectBar-connectBar {
     display: none;
+}
+
+:root[data-wmpotify-style="xp"] {
+    --player-bar-height: 69px;
+
+    --prev: url('resources/playerbar/xp/prev.png');
+    --prev-hover: url('resources/playerbar/xp/prev_hover.png');
+    --prev-pressed: url('resources/playerbar/xp/prev_pressed.png');
+    --prev-disabled: url('resources/playerbar/xp/prev_disabled.png');
+    --play: url('resources/playerbar/xp/play.png');
+    --play-hover: url('resources/playerbar/xp/play_hover.png');
+    --play-pressed: url('resources/playerbar/xp/play_pressed.png');
+    --play-disabled: url('resources/playerbar/xp/play_disabled.png');
+    --pause: url('resources/playerbar/xp/pause.png');
+    --pause-hover: url('resources/playerbar/xp/pause_hover.png');
+    --pause-pressed: url('resources/playerbar/xp/pause_pressed.png');
+    --pause-disabled: url('resources/playerbar/xp/pause_disabled.png');
+    --next: url('resources/playerbar/xp/next.png');
+    --next-hover: url('resources/playerbar/xp/next_hover.png');
+    --next-pressed: url('resources/playerbar/xp/next_pressed.png');
+    --next-disabled: url('resources/playerbar/xp/next_disabled.png');
+    --repeat: url('resources/playerbar/xp/repeat.png');
+    --repeat-active: url('resources/playerbar/xp/repeat_active.png');
+    --shuffle: url('resources/playerbar/xp/shuffle.png');
+    --shuffle-active: url('resources/playerbar/xp/shuffle_active.png');
+    --stop: url('resources/playerbar/xp/stop.png');
+    --stop-disabled: url('resources/playerbar/xp/stop_disabled.png');
+    --miniplayer: url('resources/playerbar/xp/miniplayer.png');
+    --miniplayer-hover: url('resources/playerbar/xp/miniplayer_hover.png');
+    --miniplayer-pressed: url('resources/playerbar/xp/miniplayer_pressed.png');
+    --miniplayer-disabled: url('resources/playerbar/xp/miniplayer_disabled.png');
+    --fullscreen: url('resources/playerbar/xp/fullscreen.png');
+    --fullscreen-hover: url('resources/playerbar/xp/fullscreen_hover.png');
+    --fullscreen-pressed: url('resources/playerbar/xp/fullscreen_pressed.png');
+    --fullscreen-disabled: url('resources/playerbar/xp/fullscreen_disabled.png');
+    --vol-muted: url('resources/playerbar/xp/vol_muted.png');
+    --vol-low: url('resources/playerbar/xp/vol_low.png');
+    --vol-mid: url('resources/playerbar/xp/vol_mid.png');
+    --vol-high: url('resources/playerbar/xp/vol_high.png');
+
+    .Root__now-playing-bar {
+        padding-left: var(--panel-gap);
+        padding-right: calc(var(--panel-gap) * 3);
+        border-image: url('resources/playerbar/xp/bottom_texture.png') 0 16 0 16 fill stretch;
+        border-image-width: 0 16px 0 16px;
+
+        &::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: calc(50% - var(--panel-gap));
+            transform: translateX(-50%);
+            width: 558px;
+            height: 59px;
+            background: url('resources/playerbar/xp/bg_large.png') center no-repeat;
+            z-index: -2;
+        }
+    }
+
+    .main-nowPlayingBar-nowPlayingBar {
+        height: 60px;
+        margin-bottom: 9px;
+    }
+
+    .player-controls__buttons {
+        background: none;
+    }
+
+    .playback-bar {
+        bottom: 57px;
+    }
+
+    .x-progressBar-progressBarBg {
+        border-color: transparent;
+        outline-color: transparent;
+    }
+
+    .wmpotify-track-info,
+    .wmpotify-time-text {
+        color: white;
+    }
+}
+
+:root[data-wmpotify-style="aero"] {
+    .wmpotify-track-info,
+    .wmpotify-time-text {
+        text-shadow: var(--aero-text-glow);
+    }
+}
+
+:root[data-wmpotify-style="basic"] {
+    .wmpotify-track-info,
+    .wmpotify-time-text {
+        color: #002963;
+    }
+
+    .main-nowPlayingBar-nowPlayingBar svg {
+        color: #002963 !important;
+    }
+}
+
+:root[data-wmpotify-style="classic"] {
+    .main-nowPlayingBar-nowPlayingBar * {
+        color: var(--button-text) !important;
+    }
 }

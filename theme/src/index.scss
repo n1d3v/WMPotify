@@ -3,10 +3,12 @@
 @import "menu.scss";
 @import "button.scss";
 @import "scrollbar.scss";
+@import "frame.scss";
 @import "topbar.scss";
 @import "mainarea.scss";
 @import "queue.scss";
 @import "playerbar.scss";
+@import "home.scss";
 
 html > body::after { display: none !important; }
 .Root__globalNav { padding-inline: 8px !important; }
@@ -14,6 +16,9 @@ html > body::after { display: none !important; }
 
 * {
     font-family: var(--ui-font);
+}
+
+#main * {
     -webkit-app-region: no-drag !important;
 }
 

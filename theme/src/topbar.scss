@@ -66,6 +66,9 @@
     > :not(button) {
         display: flex;
         align-items: center;
+        * {
+            color: white;
+        }
     }
 }
 
@@ -75,6 +78,7 @@
     display: none;
 }
 
+/* Tabs */
 #wmpotify-tabs-container {
     display: flex;
     position: absolute;
@@ -148,6 +152,7 @@
     }
 }
 
+/* User button */
 .main-topBar-topbarContentRight > button:last-child {
     min-width: 64px;
     width: auto;
@@ -176,4 +181,76 @@
     &:active {
         border-image-source: url('resources/topbar/user_pressed.png');
     }
+}
+
+/* Search bar */
+#wmpotify-search-container {
+    position: absolute;
+    top: 36px;
+    left: 0;
+    width: 100%;
+    height: 30px;
+    border-bottom: solid 1px var(--wmp11-separator-light);
+    box-shadow: var(--wmp11-separator-shadow) -1px -1px inset;
+    z-index: 99;
+    display: none;
+
+    #wmpotify-search-wrapper {
+        float: right;
+        position: relative;
+        margin: 2px;
+        width: 225px;
+        height: 24px;
+        border: solid 1px #f4f7fc;
+        background: linear-gradient(to bottom, #5e5f61, #c0c3c6);
+
+        .main-topBar-searchBar {
+            margin: 1px;
+            width: calc(100% - 2px);
+            height: 20px;
+            border: solid 1px white;
+            background-color: #f6f9fc;
+            font-size: 12px;
+            border-radius: 0;
+            min-height: 0;
+            padding-inline: 4px;
+            padding-block: unset;
+            box-shadow: none;
+        }
+
+        #wmpotify-search-clear-button {
+            position: absolute;
+            top: 1px;
+            right: 0px;
+            width: 26px;
+            height: 20px;
+            border: none;
+            background: url('resources/topbar/search.png') no-repeat;
+        }
+
+        &:has(.main-topBar-searchBar:not(:placeholder-shown)) #wmpotify-search-clear-button {
+            background: url('resources/topbar/clear.png') no-repeat;
+
+            &:hover {
+                background: url('resources/topbar/clear_hover.png') no-repeat;
+            }
+
+            &:active {
+                background: url('resources/topbar/clear_pressed.png') no-repeat;
+            }
+        }
+    }
+}
+
+#main:has(.Root__right-sidebar aside) #wmpotify-search-container {
+    left: 0;
+    width: calc(100vw - var(--panel-width) * 1px - 3px);
+}
+
+#main:has(#searchPage) #wmpotify-search-container {
+    display: block;
+}
+
+.Root__main-view:has(#searchPage) {
+    margin-top: 30px;
 }

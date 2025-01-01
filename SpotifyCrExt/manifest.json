@@ -1,0 +1,26 @@
+{
+  "manifest_version": 2,
+  "name": "Spotify API Extender",
+  "version": "1.0",
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://xpui.app.spotify.com/*"],
+      "js": ["content.js"]
+    }
+  ],
+  "externally_connectable": {
+    "ids": ["*"],
+    "matches": ["https://xpui.app.spotify.com/*"]
+  },
+  "permissions": [
+    "tabs",
+    "activeTab",
+    "*://*/*"
+  ],
+  "web_accessible_resources": [
+    "exposed.js"
+  ]
+}
