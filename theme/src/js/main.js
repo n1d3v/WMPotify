@@ -10,7 +10,7 @@ import Config from './config';
         '.main-globalNav-historyButtons',
         '.main-globalNav-searchSection',
         '.main-globalNav-searchContainer > button',
-        '.main-globalNav-searchContainer > div form button',
+        '.main-globalNav-searchContainer div form button',
         '.main-topBar-searchBar',
         '.custom-navlinks-scrollable_container div[role="presentation"] > button',
         '.main-topBar-topbarContentRight > .main-actionButtons > button',
@@ -27,7 +27,7 @@ import Config from './config';
         '.volume-bar .progress-bar',
         '.main-nowPlayingBar-left',
         '.main-nowPlayingWidget-trackInfo',
-        '.Root__right-sidebar > div > div',
+        '.Root__right-sidebar div[class]',
     ];
 
     const tabNameSubstitutes = {
@@ -164,7 +164,7 @@ import Config from './config';
 
         const homeButton = document.querySelector('.main-globalNav-searchContainer > button');
         addTab(homeButton);
-        const searchButton = document.querySelector('.main-globalNav-searchContainer > div form button');
+        const searchButton = document.querySelector('.main-globalNav-searchContainer div form button');
         addTab(searchButton);
         const tabs = [homeButton, searchButton];
         const customAppButtons = document.querySelectorAll('.custom-navlinks-scrollable_container div[role="presentation"] > button');
@@ -282,7 +282,7 @@ import Config from './config';
         observer.observe(playerControlsLeft, { childList: true });
 
         initQueuePanel();
-        new MutationObserver(initQueuePanel).observe(document.querySelector('.Root__right-sidebar > div > div'), { childList: true });
+        new MutationObserver(initQueuePanel).observe(document.querySelector('.Root__right-sidebar div[class]'), { childList: true });
 
         function addTab(btn) {
             tabsContainer.appendChild(btn);
