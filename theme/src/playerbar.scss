@@ -73,6 +73,24 @@ button[data-testid="cover-art-button"] {
     border-radius: 0;
 }
 
+div[data-testid='now-playing-widget'] {
+    max-width: calc((100vw - 438px) / 2 - 60px);
+}
+
+.main-nowPlayingBar-nowPlayingBar:has(.wmpotify-time-text[data-mode='2']) div[data-testid='now-playing-widget'] {
+    max-width: calc((100vw - 438px) / 2 - 100px);
+}
+
+:root[data-wmpotify-style="xp"] {
+    div[data-testid='now-playing-widget'] {
+        max-width: calc((100vw - 498px) / 2 - 60px);
+    }
+
+    .main-nowPlayingBar-nowPlayingBar:has(.wmpotify-time-text[data-mode='2']) div[data-testid='now-playing-widget'] {
+        max-width: calc((100vw - 498px) / 2 - 100px);
+    }
+}
+
 .wmpotify-track-info {
     overflow: hidden;
     text-overflow: ellipsis;
@@ -131,6 +149,7 @@ button[data-testid="cover-art-button"] {
         }
 
         &[data-testid='control-button-playpause'] {
+            position: relative;
             width: 42px;
             height: 43px;
             border-radius: 0;
@@ -138,12 +157,27 @@ button[data-testid="cover-art-button"] {
             background: var(--play) no-repeat;
             transform: none !important;
 
+            &::before {
+                content: '';
+                position: absolute;
+                top: -4px;
+                left: -5px;
+                width: 52px;
+                height: 52px;
+                background: url('resources/playerbar/play_glow.png') no-repeat;
+                transition: opacity 0.3s;
+                opacity: 0;
+            }
+
             &:disabled {
                 background-image: var(--play-disabled) !important;
             }
 
             &:hover {
                 background-image: var(--play-hover);
+                &::before {
+                    opacity: 1;
+                }
             }
 
             &:active {
@@ -192,15 +226,19 @@ button[data-testid="cover-art-button"] {
 }
 
 .player-controls__left {
-    position: relative;
-
-    .wmpotify-time-text {
+    .wmpotify-time-text-container {
         position: absolute;
-        top: 12px;
-        left: -40px;
+        left: 0;
+        bottom: 11px;
+        width: calc((100vw - 438px) / 2);
+        text-align: right;
         padding: 6px;
         font-size: 12px;
-        margin-top: -3px;
+        pointer-events: none;
+    }
+
+    .wmpotify-time-text {
+        pointer-events: auto;
     }
 
     /* Shuffle button, wrapped in a div only if it's enabled */
@@ -534,6 +572,11 @@ button[data-testid="cover-art-button"] {
     .wmpotify-time-text {
         color: white;
     }
+
+    .wmpotify-time-text-container {
+        bottom: 20px;
+        width: calc((100vw - 498px) / 2);
+    }
 }
 
 :root[data-wmpotify-style="aero"] {
@@ -551,11 +594,5 @@ button[data-testid="cover-art-button"] {
 
     .main-nowPlayingBar-nowPlayingBar svg {
         color: #002963 !important;
-    }
-}
-
-:root[data-wmpotify-style="classic"] {
-    .main-nowPlayingBar-nowPlayingBar * {
-        color: var(--button-text) !important;
     }
 }

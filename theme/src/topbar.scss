@@ -3,6 +3,7 @@
     background: url('resources/topbar/bgstrip.png') repeat-x;
     border-image: url('resources/topbar/bg.png') 2 / 2px 1px 2px 1px;
     justify-content: center;
+    padding-inline: 8px !important;
 }
 
 .main-globalNav-historyButtons {
@@ -243,8 +244,15 @@
 }
 
 #main:has(.Root__right-sidebar aside) #wmpotify-search-container {
-    left: 0;
     width: calc(100vw - var(--panel-width) * 1px - 3px);
+}
+
+:root[data-wmpotify-style="xp"] {
+    width: calc(100vw - var(--panel-gap) * 2 - 3px);
+
+    #main:has(.Root__right-sidebar aside) #wmpotify-search-container {
+        width: calc(100vw - var(--panel-gap) * 2 - var(--panel-width) * 1px - 3px);
+    }
 }
 
 #main:has(#searchPage) #wmpotify-search-container {

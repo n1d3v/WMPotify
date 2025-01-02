@@ -1,13 +1,19 @@
-// From https://github.com/ohitstom/spicetify-extensions/tree/main/noControls
+let controlHeight = 1;
+
 export function setControlHeight(height) {
-    // Function to check and apply the titlebar
+	controlHeight = height || 1;
+}
+
+// From https://github.com/ohitstom/spicetify-extensions/tree/main/noControls
+export function init() {
+	// Function to check and apply the titlebar
 	const checkAndApplyTitlebar = API => {
 		if (API) {
 			if (API._updateUiClient?.updateTitlebarHeight) {
-				API._updateUiClient.updateTitlebarHeight({ height: height || 1 });
+				API._updateUiClient.updateTitlebarHeight({ height: controlHeight });
 			}
 
-			if (API._updateUiClient?.setButtonsVisibility && (!height || height <= 1)) {
+			if (API._updateUiClient?.setButtonsVisibility && (controlHeight <= 1)) {
 				API._updateUiClient.setButtonsVisibility(false);
 			}
 
@@ -20,7 +26,7 @@ export function setControlHeight(height) {
 
 		Spicetify.CosmosAsync.post("sp://messages/v1/container/control", {
 			type: "update_titlebar",
-			height: height ? height + "px" : "1px",
+			height: controlHeight + "px",
 		});
 	};
 
@@ -48,4 +54,14 @@ export function setControlHeight(height) {
 
 	// Add event listener for fullscreen change
 	document.addEventListener("fullscreenchange", handleFullscreenChange);
+	window.addEventListener("resize", () => {
+		setTimeout(() => {
+			handleFullscreenChange();
+		}, 100);
+	});
 }
+
+export default ControlManager = {
+	init,
+	setControlHeight,
+};

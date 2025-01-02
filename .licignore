@@ -3,6 +3,5 @@ theme/src/resources
 theme/dist
 
 # unknown licenses
-theme/src/js/noControls.js
 CustomApps/wmpvis/src/spadapter.js
 CustomApps/wmpvis/dist

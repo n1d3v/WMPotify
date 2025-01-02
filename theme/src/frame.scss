@@ -49,28 +49,134 @@
             border-image-source: url('resources/frame/titlebar.png');
         }
 
-        &::before {
-            content: '';
+        #wmpotify-title-icon {
             position: absolute;
             top: 4px;
             left: 7px;
             width: 16px;
             height: 16px;
             background: url('resources/frame/spotify_16.png') no-repeat;
+            -webkit-app-region: no-drag !important;
+        }
+
+        #wmpotify-title-buttons {
+            position: absolute;
+            top: 0;
+            right: 7px;
+            width: 93px;
+            height: 18px;
+            display: flex;
+            gap: 0;
+            -webkit-app-region: no-drag !important;
+
+            button {
+                position: relative;
+                width: 25px;
+                border: none;
+                background: -1px 0 no-repeat;
+
+                &::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    height: 20px;
+                    z-index: -1;
+                }
+            }
+
+            #wmpotify-minimize-button {
+                background-image: url('resources/frame/minimize.png');
+
+                &:hover::before {
+                    left: -1px;
+                    width: 26px;
+                    background: url('resources/frame/minimize_hover.png') no-repeat;
+                }
+
+                &:active::before {
+                    background: url('resources/frame/minimize_pressed.png') no-repeat;
+                }
+            }
+
+            #wmpotify-maximize-button {
+                background-image: url('resources/frame/maximize.png');
+                background-position-x: 1px;
+
+                &[data-maximized] {
+                    background-image: url('resources/frame/restore.png');
+                }
+
+                &:hover::before {
+                    width: 25px;
+                    background: url('resources/frame/maximize_hover.png') no-repeat;
+                }
+
+                &:active::before {
+                    background: url('resources/frame/maximize_pressed.png') no-repeat;
+                }
+            }
+
+            #wmpotify-close-button {
+                background-image: url('resources/frame/close.png');
+                width: 43px;
+
+                &:hover::before {
+                    width: 44px;
+                    background: url('resources/frame/close_hover.png') no-repeat;
+                }
+
+                &:active::before {
+                    background: url('resources/frame/close_pressed.png') no-repeat;
+                }
+            }
+
+            &:not(:has(#wmpotify-maximize-button)) {
+                width: 43px;
+
+                #wmpotify-close-button {
+                    background-position-x: 1px;
+
+                    &:hover::before {
+                        left: -1px;
+                        width: 45px;
+                        background: url('resources/frame/closeonly_hover.png') no-repeat;
+                    }
+
+                    &:active::before {
+                        background: url('resources/frame/closeonly_pressed.png') no-repeat;
+                    }
+                }
+            }
         }
     }
 
     #wmpotify-title-text {
         font-size: 14px;
         font-weight: 300;
-        font-family: sans-serif;
+        font-family: Tahoma, sans-serif;
         color: white;
         margin-left: 33px;
     }
 
-    &[data-wmpotify-title-style="spotify"] {
+    &[data-wmpotify-title-style="spotify"],
+    &[data-wmpotify-title-style="keepmenu"] {
         #wmpotify-title-text {
             margin-left: 50px;
+        }
+    }
+
+    &.spotify__os--is-macos:not([data-wmpotify-title-style="custom"]) {
+        #wmpotify-title-icon {
+            display: none;
+        }
+
+        #wmpotify-title-text {
+            margin-left: 0;
+            position: absolute;
+            top: 2px;
+            left: 50%;
+            transform: translateX(-50%);
         }
     }
 }

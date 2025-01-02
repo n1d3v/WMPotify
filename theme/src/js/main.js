@@ -1,7 +1,8 @@
 import { MadMenu, createMadMenu } from './MadMenu';
-import { setControlHeight } from './noControls';
+import ControlManager from './ControlManager';
 import { initQueuePanel } from './queue';
 import { formatTime } from './functions';
+import Config from './config';
 
 (function() {
     const elementsRequired = [
@@ -14,6 +15,7 @@ import { formatTime } from './functions';
         '.custom-navlinks-scrollable_container div[role="presentation"] > button',
         '.main-topBar-topbarContentRight > .main-actionButtons > button',
         '.main-topBar-topbarContentRight > button:last-child',
+        '.Root__main-view',
         '.player-controls__left',
         '.player-controls__buttons button[data-testid="control-button-skip-back"]',
         '.player-controls__buttons button[data-testid="control-button-repeat"]',
@@ -38,11 +40,10 @@ import { formatTime } from './functions';
             document.body.dataset.hideLibx = true;
         }
 
-        // Supported: xp, aero, classic, basic, custom color
+        // Supported: xp, aero, basic
         switch (localStorage.wmpotifyStyle) {
             case 'xp':
             case 'aero':
-            case 'classic':
                 break;
             case undefined:
                 localStorage.wmpotifyStyle = 'xp';
@@ -65,28 +66,36 @@ import { formatTime } from './functions';
         }
         document.documentElement.dataset.wmpotifyStyle = localStorage.wmpotifyStyle || 'xp';
 
-        // Supported: native, custom, spotify
-        // native: Use the native title bar (requires Linux or Windows with my Windhawk mod)
-        // custom: Use custom title bar implemented by this theme, install SpotEx for minimize/maximize buttons
-        // spotify: Use Spotify's window controls (default on unmodded Spotify client on Windows/macOS)
+        // Supported: native, custom, spotify, keepmenu
+        // native: Use the native title bar (requires Linux or Windows with my Windhawk mod) Assumes native title bar is available and removes any custom title bar in the client area
+        // custom: Use custom title bar implemented by this theme, install Spotify API Extender for minimize/maximize buttons
+        // spotify: Use Spotify's window controls (default on unmodded Spotify client on Windows/macOS, unavailable on Linux)
+        // keepmenu: Use custom window controls but keep the space for Spotify's menu (useful when only controls are hidden with the WH mod, Windows only)
         // Default: native if native title bar is available, custom if SpotEx is installed, spotify otherwise
         let titleStyle = 'spotify';
-        if (localStorage.wmpotifyTitleStyle) {
+        if (localStorage.wmpotifyTitleStyle && ['native', 'custom', 'spotify', 'keepmenu'].includes(localStorage.wmpotifyTitleStyle)) {
             titleStyle = localStorage.wmpotifyTitleStyle;
         } else {
-            if (window.outerHeight - window.innerHeight > 0 ) {
+            if (window.outerHeight - window.innerHeight > 0) {
                 titleStyle = 'native';
             } else if (window.SpotEx) {
                 titleStyle = 'custom';
             }
         }
+        if (titleStyle === 'keepmenu' && !navigator.userAgent.includes('Windows')) {
+            titleStyle = 'spotify';
+        }
+        if (titleStyle === 'spotify' && navigator.userAgent.includes('Linux')) {
+            titleStyle = 'native';
+        }
         document.documentElement.dataset.wmpotifyTitleStyle = titleStyle;
         switch (titleStyle) {
             case 'native':
-                setControlHeight(0);
+                ControlManager.setControlHeight(0);
                 break;
             case 'custom':
-                setControlHeight(0);
+                ControlManager.setControlHeight(0);
+            case 'keepmenu':
                 const titleButtons = document.createElement('div');
                 titleButtons.id = 'wmpotify-title-buttons';
                 if (window.SpotEx) {
@@ -99,35 +108,54 @@ import { formatTime } from './functions';
                     const maximizeButton = document.createElement('button');
                     maximizeButton.id = 'wmpotify-maximize-button';
                     maximizeButton.addEventListener('click', async () => {
-                        if (await SpotEx.getWindow().state === 'maximized') {
+                        if ((await SpotEx.getWindow()).state === 'maximized') {
                             SpotEx.updateWindow({ state: 'normal' });
                         } else {
                             SpotEx.updateWindow({ state: 'maximized' });
                         }
                     });
                     titleButtons.appendChild(maximizeButton);
+                    window.addEventListener('resize', async () => {
+                        if ((await SpotEx.getWindow()).state === 'maximized') {
+                            maximizeButton.dataset.maximized = true;
+                        } else {
+                            delete maximizeButton.dataset.maximized;
+                        }
+                    });
                 }
                 const closeButton = document.createElement('button');
                 closeButton.id = 'wmpotify-close-button';
                 closeButton.addEventListener('click', () => {
                     window.close();
                 });
+                titleButtons.appendChild(closeButton);
             case 'spotify':
                 const titleBar = document.createElement('div');
                 titleBar.id = 'wmpotify-title-bar';
+                const titleIcon = document.createElement('div');
+                titleIcon.id = 'wmpotify-title-icon';
+                titleIcon.addEventListener('dblclick', () => {
+                    window.close();
+                });
+                titleBar.appendChild(titleIcon);
                 const titleText = document.createElement('span');
                 titleText.id = 'wmpotify-title-text';
                 titleText.textContent = await Spicetify.AppTitle.get();
                 titleBar.appendChild(titleText);
-                if (titleStyle === 'custom') {
+                if (titleStyle === 'custom' || titleStyle === 'keepmenu') {
                     titleBar.appendChild(titleButtons);
-                } else {
-                    setControlHeight(25);
+                }
+                if (titleStyle === 'keepmenu' || titleStyle === 'spotify') {
+                    ControlManager.setControlHeight(25);
                 }
                 document.body.appendChild(titleBar);
+                Spicetify.AppTitle.sub((title) => {
+                    titleText.textContent = title;
+                });
                 break;
         }
 
+        ControlManager.init();
 
         const topbar = document.querySelector('.Root__globalNav');
         const tabsContainer = document.createElement('div');
@@ -192,6 +220,9 @@ import { formatTime } from './functions';
         searchContainer.appendChild(searchBarWrapper);
         topbar.appendChild(searchContainer);
 
+        Config.init();
+        new Spicetify.Menu.Item('WMPotify Properties', false, Config.open).register();
+
         const playPauseButton = document.querySelector(".player-controls__buttons button[data-testid='control-button-playpause']");
         Spicetify.Player.addEventListener("onplaypause", updatePlayPauseButton);
         new MutationObserver(updatePlayPauseButton).observe(playPauseButton, { attributes: true, attributeFilter: ['aria-label'] });
@@ -222,23 +253,20 @@ import { formatTime } from './functions';
         playerControlsRight.appendChild(volumeBar);
 
         const timeTexts = document.querySelectorAll('.playback-bar .encore-text'); // 0: elapsed, 1: total (both in HH:MM:SS format)
+        const timeTextContainer = document.createElement('div');
+        timeTextContainer.classList.add('wmpotify-time-text-container');
         const timeText = document.createElement('span');
         timeText.classList.add('wmpotify-time-text');
         let timeTextMode = parseInt(localStorage.wmpotifyTimeTextMode || 0); // 0: remaining, 1: elapsed, 2: elapsed / total
-        if (timeTextMode === 2) {
-            timeText.style.left = '-80px';
-        }
         updateTimeText();
+        timeText.dataset.mode = timeTextMode;
         timeText.addEventListener('click', () => {
             timeTextMode = (timeTextMode + 1) % 3;
+            timeText.dataset.mode = timeTextMode;
             localStorage.wmpotifyTimeTextMode = timeTextMode;
-            if (timeTextMode === 2) {
-                timeText.style.left = '-80px';
-            } else {
-                timeText.style.left = '';
-            }
         });
-        playerControlsLeft.insertAdjacentElement('afterbegin', timeText);
+        timeTextContainer.appendChild(timeText);
+        playerControlsLeft.insertAdjacentElement('afterbegin', timeTextContainer);
         Spicetify.Player.addEventListener("onprogress", updateTimeText);
 
         // Shuffle button is often removed and re-added, so we need this to keep it in place
@@ -342,14 +370,32 @@ import { formatTime } from './functions';
         function updateTimeText() {
             switch (timeTextMode) {
                 case 0:
-                    const remaining = Spicetify.Player.data.item.metadata.duration - Spicetify.Player.getProgress();
-                    timeText.textContent = formatTime(remaining);
+                    {
+                        const remaining = Spicetify.Player.data.item.metadata.duration - Spicetify.Player.getProgress();
+                        timeText.textContent = formatTime(remaining, true);
+                    }
                     break;
                 case 1:
-                    timeText.textContent = timeTexts[0].textContent;
+                    {
+                        let elapsed = timeTexts[0].textContent;
+                        if (elapsed.length === 4 || elapsed.length === 7) { // idk if there's a hour-long song
+                            elapsed = '0' + elapsed;
+                        }
+                        timeText.textContent = elapsed;
+                    }
                     break;
                 case 2:
-                    timeText.textContent = `${timeTexts[0].textContent} / ${timeTexts[1].textContent}`;
+                    {
+                        let elapsed = timeTexts[0].textContent;
+                        if (elapsed.length === 4 || elapsed.length === 7) {
+                            elapsed = '0' + elapsed;
+                        }
+                        let total = timeTexts[1].textContent;
+                        if (total.length === 4 || total.length === 7) {
+                            total = '0' + total;
+                        }
+                        timeText.textContent = `${elapsed} / ${total}`;
+                    }
                     break;
             }
         }
@@ -361,6 +407,7 @@ import { formatTime } from './functions';
             window.Spicetify.Platform?.PlayerAPI &&
             window.Spicetify.AppTitle &&
             window.Spicetify.Player?.origin?._state &&
+            window.Spicetify.Menu &&
             elementsRequired.every(selector => document.querySelector(selector));
     }
 
