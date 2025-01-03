@@ -1,3 +1,7 @@
+:root {
+    --album-art-placeholder: url('resources/sidebar/album_art_placeholder.png');
+}
+
 /* <aside aria-label="Queue" class="ffFwfKcPDbmAPLXzxzKq" id="Desktop_PanelContainer_Id" tabindex="-1"> */
 #Desktop_PanelContainer_Id > div:has(#queue-panel) {
     > div:first-child { /* panel header (tabs) */
@@ -17,6 +21,10 @@
                 top: 9px;
                 left: 50%;
                 transform: translateX(-50%);
+
+                &[src*="data:image"] {
+                    box-shadow: none;
+                }
             }
 
             #wmpotify-queue-song-title {
@@ -96,6 +104,36 @@
     #history-panel {
         > div:first-child > div:first-child {
             gap: 0;
+        }
+
+        /* Nothing in queue message */
+        > div:first-child:has(> svg:first-child) {
+            height: 170px;
+
+            svg {
+                display: none;
+            }
+
+            div {
+                h1 {
+                    display: none;
+                }
+
+                p {
+                    font-size: 12px;
+                    color: black;
+                }
+            }
+
+            a button span {
+                display: inline;
+                padding: 0;
+                color: var(--hot-tracking-color);
+                background: none;
+                font-size: 12px;
+                font-weight: normal;
+                text-decoration: underline;
+            }
         }
 
         .x-entityImage-imageContainer {

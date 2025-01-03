@@ -39,27 +39,21 @@ export function initQueuePanel() {
     queueToolbar.appendChild(clearButton);
     belowSeparator.insertAdjacentElement('afterbegin', queueToolbar);
 
+    const placeholderImage = getComputedStyle(document.documentElement).getPropertyValue('--album-art-placeholder').trim().slice(5, -2);
     const topPanel = document.createElement('div');
     topPanel.id = 'wmpotify-queue-npv';
     const albumArt = document.createElement('img');
     albumArt.id = 'wmpotify-queue-album-art';
-    albumArt.src = document.querySelector('.main-nowPlayingWidget-coverArt .cover-art img')?.src || '';
+    albumArt.src = document.querySelector('.main-nowPlayingWidget-coverArt .cover-art img')?.src || placeholderImage;
     topPanel.appendChild(albumArt);
     const songTitle = document.createElement('div');
     songTitle.id = 'wmpotify-queue-song-title';
-    songTitle.textContent = document.querySelector('.main-trackInfo-name')?.textContent || '';
+    songTitle.textContent = document.querySelector('.main-trackInfo-name')?.textContent || 'No items';
     topPanel.appendChild(songTitle);
     top.insertAdjacentElement('afterbegin', topPanel);
 
-    processQueueItems();
-    new MutationObserver(processQueueItems).observe(document.querySelectorAll('#queue-panel ul')[1], { childList: true });
-    new MutationObserver(() => {
-        const panelContent = document.querySelectorAll('#queue-panel ul')[1];
-        if (panelContent) {
-            processQueueItems();
-            new MutationObserver(processQueueItems).observe(panelContent, { childList: true });
-        }
-    }).observe(document.querySelector('#queue-panel'), { childList: true });
+    onQueuePanelInit();
+    new MutationObserver(onQueuePanelInit).observe(document.querySelector('#queue-panel'), { childList: true });
 
     const tabs = document.querySelectorAll('#Desktop_PanelContainer_Id div[role="tablist"] button');
     let menuItems = [];
@@ -88,9 +82,17 @@ export function initQueuePanel() {
     Spicetify.Player.addEventListener('songchange', () => {
         playlistButton.textContent = Spicetify.Player.data?.context?.metadata?.context_description || 'Now Playing';
         playlistButton.innerHTML += '<span class="expandMark">⏷</span>';
-        albumArt.src = Spicetify.Player.data?.item?.album?.images?.[0]?.url?.replace('spotify:image:', 'https://i.scdn.co/image/') || '';
-        songTitle.textContent = Spicetify.Player.data?.item?.name || '';
+        albumArt.src = Spicetify.Player.data?.item?.album?.images?.[0]?.url?.replace('spotify:image:', 'https://i.scdn.co/image/') || placeholderImage;
+        songTitle.textContent = Spicetify.Player.data?.item?.name || 'No items';
     });
+}
+
+function onQueuePanelInit() {
+    const panelContent = document.querySelectorAll('#queue-panel ul')[1];
+    if (panelContent) {
+        processQueueItems();
+        new MutationObserver(processQueueItems).observe(panelContent, { childList: true });
+    }
 }
 
 function processQueueItems() {

@@ -3,6 +3,7 @@ import ControlManager from './ControlManager';
 import { initQueuePanel } from './queue';
 import { formatTime } from './functions';
 import Config from './config';
+import { setTintColor } from './tinting';
 
 (function() {
     const elementsRequired = [
@@ -26,7 +27,6 @@ import Config from './config';
         '.volume-bar__icon-button',
         '.volume-bar .progress-bar',
         '.main-nowPlayingBar-left',
-        '.main-nowPlayingWidget-trackInfo',
         '.Root__right-sidebar div[class]',
     ];
 
@@ -137,7 +137,7 @@ import Config from './config';
                 titleIcon.addEventListener('dblclick', () => {
                     window.close();
                 });
-                titleBar.appendChild(titleIcon);
+                document.body.appendChild(titleIcon); // Put it outside the title bar to prevent it from being tinted
                 const titleText = document.createElement('span');
                 titleText.id = 'wmpotify-title-text';
                 titleText.textContent = await Spicetify.AppTitle.get();
@@ -153,6 +153,11 @@ import Config from './config';
                     titleText.textContent = title;
                 });
                 break;
+        }
+
+        if (localStorage.wmpotifyTintColor) {
+            const [hue, sat] = localStorage.wmpotifyTintColor.split(',');
+            setTintColor(hue, sat);
         }
 
         ControlManager.init();
@@ -371,7 +376,7 @@ import Config from './config';
             switch (timeTextMode) {
                 case 0:
                     {
-                        const remaining = Spicetify.Player.data.item.metadata.duration - Spicetify.Player.getProgress();
+                        const remaining = Spicetify.Player.data?.item?.metadata?.duration - Spicetify.Player.getProgress();
                         timeText.textContent = formatTime(remaining, true);
                     }
                     break;

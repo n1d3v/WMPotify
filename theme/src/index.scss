@@ -1,26 +1,17 @@
 /*! WMPotify for Spicetify by Ingan121 */
 @import "variables.scss";
-@import "menu.scss";
-@import "button.scss";
-@import "scrollbar.scss";
-@import "frame.scss";
-@import "topbar.scss";
-@import "mainarea.scss";
-@import "queue.scss";
-@import "playerbar.scss";
-@import "config.scss";
-@import "home.scss";
-
-* {
-    font-family: var(--ui-font);
-}
-
-#main * {
-    -webkit-app-region: no-drag !important;
-}
-
-body {
-    overflow: hidden;
-    min-width: 0;
-    min-height: 0;
-}
+@import "global.scss";
+@import "controls/menu.scss";
+@import "controls/scrollbar.scss";
+@import "controls/button.scss";
+@import "controls/checkbox.scss";
+@import "controls/dropdown.scss";
+@import "controls/slider.scss";
+@import "ui/frame.scss";
+@import "ui/topbar.scss";
+@import "ui/mainarea.scss";
+@import "ui/playerbar.scss";
+@import "pages/queue.scss";
+@import "pages/config.scss";
+@import "pages/home.scss";
+@import "tinting.scss";

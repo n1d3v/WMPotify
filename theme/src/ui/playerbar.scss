@@ -48,6 +48,11 @@
     svg {
         color: white !important;
     }
+
+    /* Nothing is playing, so hide the time text */
+    &:not(:has(.main-nowPlayingWidget-trackInfo)) .wmpotify-time-text {
+        display: none;
+    }
 }
 
 .main-nowPlayingWidget-nowPlaying {
@@ -300,6 +305,7 @@ div[data-testid='now-playing-widget'] {
         }
     }
 }
+
 
 .player-controls__right {
     gap: 0;

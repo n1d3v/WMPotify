@@ -1,0 +1,17 @@
+:root {
+    --wmpotify-tint-hue: 0deg;
+    --wmpotify-tint-sat: 1;
+}
+
+#wmpotify-title-bar,
+#main::before,
+#main::after,
+.Root__globalNav,
+.Root__now-playing-bar,
+.wmpotify-tintable {
+    filter: hue-rotate(var(--wmpotify-tint-hue)) saturate(var(--wmpotify-tint-sat));
+}
+
+.Root__now-playing-bar img {
+    filter: hue-rotate(calc(var(--wmpotify-tint-hue) * -1)) saturate(calc(1 / var(--wmpotify-tint-sat)));
+}

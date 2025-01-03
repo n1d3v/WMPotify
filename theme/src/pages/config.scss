@@ -43,9 +43,45 @@
         }
     }
 
+    &-prev {
+        margin-top: 4px;
+        margin-left: 3px;
+        width: 18px;
+        height: 18px;
+        background: url('resources/config/prev.png') no-repeat;
+        border: none;
+
+        &:hover {
+            background-image: url('resources/config/prev_hover.png');
+        }
+
+        &:active {
+            background-image: url('resources/config/prev_pressed.png');
+        }
+    }
+
+    &-next {
+        margin-top: 4px;
+        margin-left: -1px;
+        width: 18px;
+        height: 18px;
+        background: url('resources/config/next.png') no-repeat;
+        border: none;
+
+        &:hover {
+            background-image: url('resources/config/next_hover.png');
+        }
+
+        &:active {
+            background-image: url('resources/config/next_pressed.png');
+        }
+    }
+
     &-title {
+        position: absolute;
+        top: 4px;
+        left: 46px;
         font-weight: bold;
-        margin-top: 1px;
     }
 
     &-close {
@@ -66,13 +102,24 @@
         }
     }
 
-    a {
-        color: white !important;
-        text-decoration: none;
+    .wmpotify-config-tab-content {
+        display: none;
+    }
 
-        &:hover {
-            text-decoration: underline;
-        }
+    &-hue {
+        width: 354px;
+        height: 3px;
+        background: url('resources/config/hue.png') no-repeat;
+    }
+
+    &-sat {
+        width: 354px;
+        height: 3px;
+        background: url('resources/config/sat.png') no-repeat;
+    }
+
+    a {
+        color: #abd5fd !important;
     }
 }
 

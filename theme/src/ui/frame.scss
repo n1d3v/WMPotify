@@ -30,6 +30,17 @@
         height: calc(100% - 25px);
     }
 
+    #wmpotify-title-icon {
+        position: absolute;
+        top: 4px;
+        left: 7px;
+        width: 16px;
+        height: 16px;
+        background: url('resources/frame/spotify_16.png') no-repeat;
+        -webkit-app-region: no-drag !important;
+        z-index: 3;
+    }
+
     #wmpotify-title-bar {
         position: fixed;
         top: 0;
@@ -47,16 +58,6 @@
 
         &:has(#wmpotify-minimize-button) {
             border-image-source: url('resources/frame/titlebar.png');
-        }
-
-        #wmpotify-title-icon {
-            position: absolute;
-            top: 4px;
-            left: 7px;
-            width: 16px;
-            height: 16px;
-            background: url('resources/frame/spotify_16.png') no-repeat;
-            -webkit-app-region: no-drag !important;
         }
 
         #wmpotify-title-buttons {

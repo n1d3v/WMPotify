@@ -1,4 +1,7 @@
 export function formatTime(milliseconds, padFirst) {
+    if (!milliseconds || isNaN(milliseconds)) {
+        return '00:00';
+    }
     let seconds = Math.floor(milliseconds / 1000);
     let minutes = Math.floor(seconds / 60);
     seconds = String(seconds % 60).padStart(2, '0');
