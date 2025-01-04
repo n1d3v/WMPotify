@@ -1,13 +1,13 @@
 :root {
   --menu-padding: 3px;
   --item-offset-left: 30px;
-  --item-hover-background: linear-gradient(
+  --menu-item-hover-background: linear-gradient(
     to bottom,
     #fff9,
     #e6ecf5cc 90%,
     #fffc
   );
-  --item-hover-background-disabled: linear-gradient(
+  --menu-item-hover-background-disabled: linear-gradient(
     to bottom,
     #fff9,
     #e6e6e6cc 90%,
@@ -95,7 +95,7 @@
 
           &:hover,
           &:focus-visible {
-            background: var(--item-hover-background);
+            background: var(--menu-item-hover-background);
             border-color: #b8d6fb;
           }
 
@@ -303,7 +303,7 @@ button[disabled] u,
   white-space: nowrap;
 
   &[data-active] {
-    background: var(--item-hover-background);
+    background: var(--menu-item-hover-background);
     border-color: #b8d6fb;
   }
 
@@ -311,7 +311,7 @@ button[disabled] u,
     color: #6d6d6d !important;
     text-shadow: none !important;
     &[data-active] {
-      background: var(--item-hover-background-disabled);
+      background: var(--menu-item-hover-background-disabled);
       border-color: #d4d3d3;
     }
   }
@@ -330,7 +330,7 @@ button[disabled] u,
 
   &::after {
     all: unset; /* unset the standalone checkbox/radio styles */
-    background: var(--item-hover-background);
+    background: var(--menu-item-hover-background);
     box-shadow: 0 0 0 1px #b3d3f9;
     border-radius: inherit;
     box-sizing: border-box;

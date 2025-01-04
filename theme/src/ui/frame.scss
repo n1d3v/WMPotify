@@ -38,7 +38,7 @@
         height: 16px;
         background: url('resources/frame/spotify_16.png') no-repeat;
         -webkit-app-region: no-drag !important;
-        z-index: 3;
+        z-index: 1000;
     }
 
     #wmpotify-title-bar {
@@ -47,16 +47,26 @@
         left: 0;
         width: 100%;
         height: 25px;
-        border-image: url('resources/frame/titlebar_nocontrols.png') 0 103 0 12 fill stretch;
-        border-image-width: 0 103px 0 12px;
-        z-index: 2;
+        z-index: 999;
         -webkit-app-region: drag !important;
 
-        &:has(#wmpotify-title-buttons) {
+        &::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 25px;
+            border-image: url('resources/frame/titlebar_nocontrols.png') 0 103 0 12 fill stretch;
+            border-image-width: 0 103px 0 12px;
+            z-index: -1;
+        }
+
+        &:has(#wmpotify-title-buttons)::before {
             border-image-source: url('resources/frame/titlebar_closeonly.png');
         }
 
-        &:has(#wmpotify-minimize-button) {
+        &:has(#wmpotify-minimize-button)::before {
             border-image-source: url('resources/frame/titlebar.png');
         }
 
@@ -178,6 +188,17 @@
             top: 2px;
             left: 50%;
             transform: translateX(-50%);
+        }
+    }
+
+    &:fullscreen {
+        #wmpotify-title-bar {
+            display: none;
+        }
+
+        #main {
+            margin-top: 0;
+            height: 100%;
         }
     }
 }

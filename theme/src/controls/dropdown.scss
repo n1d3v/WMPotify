@@ -1,4 +1,5 @@
-select.wmpotify-aero:not([multiple]) {
+select.wmpotify-aero:not([multiple]),
+.main-dropDown-dropDown {
   font: var(--font);
   padding: 2px 3px;
   border: var(--button-border);
@@ -42,4 +43,8 @@ select.wmpotify-aero:not([multiple]) {
     background: transparent !important;
     color: unset !important;
   }
+}
+
+.main-dropDown-dropDown {
+  height: auto;
 }

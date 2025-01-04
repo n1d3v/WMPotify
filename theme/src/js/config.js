@@ -19,7 +19,7 @@ function init() {
 
     configWindow.id = 'wmpotify-config';
     configWindow.innerHTML = `
-        <div id="wmpotify-config-topborder"></div>
+        <div id="wmpotify-config-topborder" class="wmpotify-tintable"></div>
         <button id="wmpotify-config-prev"></button>
         <button id="wmpotify-config-next"></button>
         <p id="wmpotify-config-title">Color Chooser</p>
@@ -97,11 +97,11 @@ function open() {
         return;
     }
     configWindow.style.display = 'block';
-    // if (localStorage.wmpotifyTintColor) {
-    //     const [hue, sat] = localStorage.wmpotifyTintColor.split(',');
-    //     elements.hue.value = (hue + 180) % 360;
-    //     elements.sat.value = sat * 121 / 100;
-    // }
+    if (localStorage.wmpotifyTintColor) {
+        const [hue, sat] = localStorage.wmpotifyTintColor.split(',');
+        elements.hue.value = parseInt(hue) + 180;
+        elements.sat.value = parseInt(sat) * 121 / 100;
+    }
 }
 
 function close() {
@@ -131,7 +131,6 @@ function nextTab() {
 function onColorChange() {
     const hue = elements.hue.value - 180;
     const sat = elements.sat.value * 100 / 121;
-    elements.sat.style.filter = `hue-rotate(${hue}deg)`;
     setTintColor(hue, sat);
     localStorage.wmpotifyTintColor = hue + ',' + sat;
 }

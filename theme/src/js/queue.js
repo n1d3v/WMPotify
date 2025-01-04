@@ -22,7 +22,10 @@ export function initQueuePanel() {
     playlistButton.id = 'wmpotify-queue-playlist-button';
     playlistButton.classList.add('wmpotify-toolbar-button');
     playlistButton.addEventListener('click', () => {
-        window.open(Spicetify.Player.data.context.uri);
+        const url = Spicetify.Player.data?.context?.uri;
+        if (url) {
+            window.open(url);
+        }
     });
     playlistButton.textContent = document.querySelector('#queue-panel div[data-flip-id*="section-header-"] a')?.textContent || 'Now Playing';
     playlistButton.innerHTML += '<span class="expandMark">⏷</span>';

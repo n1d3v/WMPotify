@@ -1,20 +1,3 @@
-:root {
-    --item-hover-background: linear-gradient(
-        to bottom,
-        #ebf4fc 0%,
-        #eaf4fc 10%,
-        #e9f3fc 20%,
-        #e8f3fc 30%,
-        #e7f2fc 40%,
-        #e5f2fc 50%,
-        #e2f1fc 60%,
-        #e1f1fc 70%,
-        #e0f0fc 80%,
-        #dff0fc 90%,
-        #def0fc 100%
-    );
-}
-
 .main-home-homeHeader {
     background: transparent !important;
 }
@@ -31,7 +14,7 @@
 
             &:hover {
                 background: var(--item-hover-background);
-                border-color: #cde9f8;
+                border-color: var(--item-hover-border);
             }
         }
     }
@@ -88,7 +71,7 @@
 
         &:hover {
             background: var(--item-hover-background);
-            border-color: #cde9f8;
+            border-color: var(--item-hover-border);
         }
 
         .view-homeShortcutsGrid-imageContainer {
