@@ -1,0 +1,56 @@
+.Root__right-sidebar {
+    .BeautifulLyricsBackground-Container {
+        opacity: 0;
+    }
+
+    aside.NowPlayingView * {
+        color: black;
+    }
+
+    .main-nowPlayingView-coverArt {
+        border-radius: 0;
+        box-shadow: var(--album-shadow-big) !important;
+    }
+
+    .main-nowPlayingView-contextItemInfo::before {
+        display: none;
+    }
+
+    .main-nowPlayingView-aboutArtistV2Button {
+        background: transparent;
+    }
+
+    .main-nowPlayingView-section {
+        background: transparent;
+    }
+
+    .main-trackInfo-artists a {
+        color: var(--gray-text) !important;
+    }
+
+    aside.NowPlayingView {
+        &:has(.canvasVideoContainerNPV) {
+            .main-trackInfo-contentWrapper h1 {
+                color: white !important;
+            }
+
+            .main-nowPlayingView-trackInfo {
+                a, span {
+                    color: white !important;
+                }
+
+                .main-trackInfo-artists a {
+                    color: lightgray !important;
+                }
+            }
+
+            .main-nowPlayingView-contextItemInfo button svg:not(.Svg-img-icon-small-textBrightAccent) {
+                fill: white !important;
+            }
+        }
+    }
+
+    .main-nowPlayingView-aboutArtistV2ImageContainer .main-nowPlayingView-sectionHeaderText {
+        color: white !important;
+    }
+}

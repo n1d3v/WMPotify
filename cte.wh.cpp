@@ -68,18 +68,18 @@
   $name: Show Spotify's custom window controls*
 - transparentcontrols: false
   $name: Make Spotify's custom window controls transparent
-- ignoreminsize: false
-  $name: Ignore minimum window size
-  $description: Allows resizing the window below the minimum size set by Spotify
-- transparentrendering: false
+- transparentrendering: true
   $name: Enable transparent rendering*
-  $description: Make the transparent parts of the web contents transparent. Will use the ButtonFace color instead if the classic theme is being used and native frames are enabled
+  $description: "Make the transparent parts of the web contents transparent\nWill use the ButtonFace color instead if the classic theme is being used and native frames are enabled\nChrome runtime is required for this to work"
 - noforceddarkmode: false
   $name: Disable forced dark mode
   $description: Prevents Spotify from forcing dark mode on the CEF UI & web contents
-- forceextensions: false
+- forceextensions: true
   $name: Force enable Chrome extensions
   $description: Always enable Chrome extensions support, regardless of the DevTools status
+- ignoreminsize: false
+  $name: Ignore minimum window size
+  $description: Allows resizing the window below the minimum size set by Spotify
 - allowuntested: false
   $name: (Advanced) Use unsafe methods on untested CEF versions
   $description: Allows calling unsafe functions on untested CEF versions. May cause crashes or other issues. If disabled, an inefficient alternative method will be used on untested versions.
@@ -211,6 +211,8 @@ int set_background_color_offset = NULL;
 HWND mainHwnd = NULL;
 int minWidth = 0;
 int minHeight = 0;
+BOOL hwAcclerated = FALSE;
+BOOL dwmBackdropEnabled = FALSE;
 
 // Same offset for all versions that supports window control hiding
 // Cuz get_preferred_size is the very first function in the struct (cef_panel_delegate_t->(cef_view_delegate_t)base.get_preferred_size)
@@ -221,17 +223,41 @@ int minHeight = 0;
     int get_preferred_size_offset = 0x14;
 #endif
 
+// Whether DwmExtendFrameIntoClientArea should be called
+// False if DWM is disabled, visual styles are disabled, or some kind of basic themer is used
+BOOL IsDwmEnabled() {
+    if (!IsAppThemed() && !IsThemeActive()) {
+        return FALSE;
+    }
+    BOOL dwmEnabled = FALSE;
+    DwmIsCompositionEnabled(&dwmEnabled);
+    BOOL dwmFrameEnabled = FALSE;
+    if (dwmEnabled && mainHwnd != NULL) {
+        DwmGetWindowAttribute(mainHwnd, DWMWA_NCRENDERING_ENABLED, &dwmFrameEnabled, sizeof(dwmFrameEnabled));
+    } else {
+        return dwmEnabled;
+    }
+    return dwmEnabled && dwmFrameEnabled;
+}
+
 LRESULT CALLBACK SubclassProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, DWORD_PTR dwRefData) {
     // dwRefData is 1 if the window is created by cef_window_create_top_level
     // Assumed 1 if this mod is loaded after the window is created
     // dwRefData is 2 if the window is created by cef_window_create_top_level and is_frameless is hooked
     switch (uMsg) {
         case WM_NCACTIVATE:
-            // Fix MicaForEveryone not working well without native frames
-            return DefWindowProc(hWnd, uMsg, wParam, lParam);
+            if (dwmBackdropEnabled) {
+                // Fix MicaForEveryone not working well with native frames
+                return DefWindowProc(hWnd, uMsg, wParam, lParam);
+            }
+            break;
+        case WM_NCPAINT:
+            if (hWnd == mainHwnd && hwAcclerated && cte_settings.transparentrendering && !cte_settings.showframe && !IsDwmEnabled()) {
+                // Do not draw anything
+                return 0;
+            }
         case WM_NCHITTEST:
         case WM_NCLBUTTONDOWN:
-        case WM_NCPAINT:
         case WM_NCCALCSIZE:
             // Unhook Spotify's custom window control event handling
             // Also unhook WM_NCPAINT to fix non-DWM frames randomly going black
@@ -249,6 +275,13 @@ LRESULT CALLBACK SubclassProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam
                 MINMAXINFO* mmi = (MINMAXINFO*)lParam;
                 mmi->ptMinTrackSize.x = minWidth;
                 mmi->ptMinTrackSize.y = minHeight;
+                return 0;
+            }
+            break;
+        case WM_PAINT:
+            if (hWnd == mainHwnd && hwAcclerated && cte_settings.transparentrendering && !cte_settings.showframe) {
+                // Do not draw anything
+                ValidateRect(hWnd, NULL);
                 return 0;
             }
             break;
@@ -460,12 +493,6 @@ _cef_window_t* CEF_EXPORT cef_window_create_top_level_hook(void* delegate) {
         if (WindhawkUtils::SetWindowSubclassFromAnyThread(hWnd, SubclassProc, is_frameless_hooked ? 2 : 1)) {
             Wh_Log(L"Subclassed %p", hWnd);
         }
-        if (cte_settings.showframe == FALSE && cte_settings.transparentrendering == TRUE) {
-            // Make the window layered to make the transparent parts of the web contents transparent
-            SetWindowLong(hWnd, GWL_EXSTYLE, GetWindowLong(hWnd, GWL_EXSTYLE) | WS_EX_LAYERED);
-            // Any subsequent SetLayeredWindowAttributes call will make the black GDI surface (i think) appear again
-            // TODO: This makes nothing visible if hardware acceleration is disabled. Detect that (properly) and don't run this code (maybe hook CreateProcessW and check for gpu process launch?)
-        }
         if (mainHwnd == NULL) {
             mainHwnd = hWnd;
         }
@@ -574,6 +601,45 @@ HRESULT WINAPI SetWindowThemeAttribute_hook(HWND hwnd, enum WINDOWTHEMEATTRIBUTE
     }
 }
 
+using CreateProcessAsUserW_t = decltype(&CreateProcessAsUserW);
+CreateProcessAsUserW_t CreateProcessAsUserW_original;
+BOOL WINAPI CreateProcessAsUserW_hook(
+    HANDLE hToken,
+    LPCWSTR lpApplicationName,
+    LPWSTR lpCommandLine,
+    LPSECURITY_ATTRIBUTES lpProcessAttributes,
+    LPSECURITY_ATTRIBUTES lpThreadAttributes,
+    BOOL bInheritHandles,
+    DWORD dwCreationFlags,
+    LPVOID lpEnvironment,
+    LPCWSTR lpCurrentDirectory,
+    LPSTARTUPINFOW lpStartupInfo,
+    LPPROCESS_INFORMATION lpProcessInformation
+) {
+    Wh_Log(L"CreateProcessAsUserW_hook");
+
+    BOOL result = CreateProcessAsUserW_original(
+        hToken,
+        lpApplicationName,
+        lpCommandLine,
+        lpProcessAttributes,
+        lpThreadAttributes,
+        bInheritHandles,
+        dwCreationFlags,
+        lpEnvironment,
+        lpCurrentDirectory,
+        lpStartupInfo,
+        lpProcessInformation
+    );
+
+    if (result && lpCommandLine && wcsstr(lpCommandLine, L"--type=gpu-process")) {
+        hwAcclerated = TRUE;
+        Wh_Log(L"GPU process detected, hardware acceleration enabled");
+    }
+
+    return result;
+}
+
 BOOL queryResponsePending = FALSE;
 
 // WindhawkComm: Simple communication protocol between this mod and the Spotify JS
@@ -584,7 +650,7 @@ void HandleWindhawkComm(LPCWSTR clipText) {
         if (mainHwnd == NULL) {
             return;
         }
-        if (!IsAppThemed() && !IsThemeActive()) {
+        if (!IsDwmEnabled()) {
             return;
         }
         int left, right, top, bottom;
@@ -648,16 +714,19 @@ void HandleWindhawkComm(LPCWSTR clipText) {
             DwmSetWindowAttribute(mainHwnd, DWMWA_USE_HOSTBACKDROPBRUSH, &value, sizeof(value));
             DWM_SYSTEMBACKDROP_TYPE backdrop_type = DWMSBT_MAINWINDOW;
             DwmSetWindowAttribute(mainHwnd, DWMWA_SYSTEMBACKDROP_TYPE, &backdrop_type, sizeof(backdrop_type));
+            dwmBackdropEnabled = TRUE;
         } else if (wcscmp(clipText + 16, L"acrylic") == 0) {
             BOOL value = TRUE;
             DwmSetWindowAttribute(mainHwnd, DWMWA_USE_HOSTBACKDROPBRUSH, &value, sizeof(value));
             DWM_SYSTEMBACKDROP_TYPE backdrop_type = DWMSBT_TRANSIENTWINDOW;
             DwmSetWindowAttribute(mainHwnd, DWMWA_SYSTEMBACKDROP_TYPE, &backdrop_type, sizeof(backdrop_type));
+            dwmBackdropEnabled = TRUE;
         } else if (wcscmp(clipText + 16, L"tabbed") == 0) {
             BOOL value = TRUE;
             DwmSetWindowAttribute(mainHwnd, DWMWA_USE_HOSTBACKDROPBRUSH, &value, sizeof(value));
             DWM_SYSTEMBACKDROP_TYPE backdrop_type = DWMSBT_TABBEDWINDOW;
             DwmSetWindowAttribute(mainHwnd, DWMWA_SYSTEMBACKDROP_TYPE, &backdrop_type, sizeof(backdrop_type));
+            dwmBackdropEnabled = TRUE;
         }
     // /WH:ResizeTo:<width>:<height>
     } else if (wcsncmp(clipText, L"/WH:ResizeTo:", 13) == 0) {
@@ -707,6 +776,8 @@ HANDLE WINAPI SetClipboardData_hook(UINT uFormat, HANDLE hMem) {
                 Wh_Log(L"Handling WindhawkComm");
                 HandleWindhawkComm(clipboardText);
                 return NULL;
+            } else {
+                EmptyClipboard_original();
             }
         }
     }
@@ -724,19 +795,24 @@ HANDLE WINAPI GetClipboardData_hook(UINT uFormat) {
             LPCWSTR response = L"{\
                 \"type\":\"CTEWHQueryResponse\",\
                 \"version\":0.6,\
-                \"showframe\":%s,\
-                \"showframeonothers\":%s,\
-                \"showmenu\":%s,\
-                \"showcontrols\":%s,\
-                \"transparentcontrols\":%s,\
-                \"ignoreminsize\":%s,\
-                \"transparentrendering\":%s,\
-                \"noforceddarkmode\":%s,\
-                \"forceextensions\":%s,\
+                \"options\":{\
+                    \"showframe\":%s,\
+                    \"showframeonothers\":%s,\
+                    \"showmenu\":%s,\
+                    \"showcontrols\":%s,\
+                    \"transparentcontrols\":%s,\
+                    \"ignoreminsize\":%s,\
+                    \"transparentrendering\":%s,\
+                    \"noforceddarkmode\":%s,\
+                    \"forceextensions\":%s\
+                },\
                 \"isOnTestedVersion\":%s,\
                 \"supportedCommands\":[\"ExtendFrame\",\"Minimize\",\"MaximizeRestore\",\"Close\",\"SetLayered\",\"SetBackdrop\"],\
                 \"isMaximized\":%s,\
-                \"isMainWndLoaded\":%s}";
+                \"isMainWndLoaded\":%s,\
+                \"isThemingEnabled\":%s,\
+                \"isDwmEnabled\":%s\
+            }";
             wchar_t responseBuffer[1024];
             swprintf(responseBuffer, 1024, response,
                 cte_settings.showframe ? L"true" : L"false",
@@ -748,9 +824,11 @@ HANDLE WINAPI GetClipboardData_hook(UINT uFormat) {
                 cte_settings.transparentrendering ? L"true" : L"false",
                 cte_settings.noforceddarkmode ? L"true" : L"false",
                 cte_settings.forceextensions ? L"true" : L"false",
-                is_frameless_offset != NULL ? L"true" : L"false",
+                get_window_handle_offset != NULL ? L"true" : L"false",
                 mainHwnd != NULL ? IsZoomed(mainHwnd) ? L"true" : L"false" : L"false",
-                mainHwnd != NULL ? L"true" : L"false"
+                mainHwnd != NULL ? L"true" : L"false",
+                IsAppThemed() ? L"true" : L"false",
+                IsDwmEnabled() ? L"true" : L"false"
             );
             HANDLE hMem = GlobalAlloc(GMEM_MOVEABLE, (wcslen(responseBuffer) + 1) * sizeof(wchar_t));
             if (hMem) {
@@ -882,17 +960,6 @@ BOOL Wh_ModInit() {
         Wh_Log(L"set_background_color offset: %#x", set_background_color_offset);
     }
 
-    if ((is_frameless_offset == NULL || !cte_settings.showframe) &&
-        (!isSpotify || add_child_view_offset == NULL || (cte_settings.showmenu && cte_settings.showcontrols)) &&
-        !cte_settings.showframeonothers && !cte_settings.ignoreminsize
-    ) {
-        Wh_Log(L"Nothing to hook, exiting");
-        if (is_frameless_offset == NULL) {
-            Wh_Log(L"This version of CEF is not supported!");
-        }
-        return FALSE;
-    }
-
     Wh_SetFunctionHook((void*)cef_window_create_top_level,
                        (void*)cef_window_create_top_level_hook,
                        (void**)&cef_window_create_top_level_original);
@@ -909,9 +976,11 @@ BOOL Wh_ModInit() {
                            (void**)&SetClipboardData_original);
         Wh_SetFunctionHook((void*)GetClipboardData, (void*)GetClipboardData_hook,
                            (void**)&GetClipboardData_original);
+        Wh_SetFunctionHook((void*)CreateProcessAsUserW, (void*)CreateProcessAsUserW_hook,
+                            (void**)&CreateProcessAsUserW_original);
 
         // Patch the executable in memory to enable transparent rendering, disable forced dark mode, or force enable extensions
-        // (Only do this on process startup as patching after CEF initialization is useless)
+        // (Only do this on process startup as patching after CEF initialization is pointless)
         if (isInitialThread) {
             if (cte_settings.transparentrendering) {
                 if (EnableTransparentRendering(pbExecutable)) {

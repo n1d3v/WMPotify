@@ -3,6 +3,10 @@
     background: transparent;
 }
 
+:root[data-wmpotify-style="xp"][data-wmpotify-title-style="native"] {
+    background: black;
+}
+
 .Root__top-container {
     background: transparent;
 
@@ -91,19 +95,6 @@ body[data-hide-libx] {
                 display: none;
             }
         }
-    }
-
-    .BeautifulLyricsBackground-Container {
-        opacity: 0;
-    }
-
-    aside.NowPlayingView * {
-        color: black !important;
-    }
-
-    .main-nowPlayingView-coverArt {
-        border-radius: 0;
-        box-shadow: var(--album-shadow-big) !important;
     }
 }
 

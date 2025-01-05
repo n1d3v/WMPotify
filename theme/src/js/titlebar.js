@@ -13,7 +13,9 @@ export async function createTitlebar(mode) {
         case 'keepmenu':
             const titleButtons = document.createElement('div');
             titleButtons.id = 'wmpotify-title-buttons';
-            if (window.SpotEx && whStatus && whStatus.supportedCommands.includes('Minimize')) {
+            if (window.SpotEx ||
+                (whStatus && whStatus.supportedCommands.includes('Minimize') && whStatus.isMainWndLoaded)
+            ) {
                 const minimizeButton = document.createElement('button');
                 minimizeButton.id = 'wmpotify-minimize-button';
                 minimizeButton.addEventListener('click', () => {
@@ -46,7 +48,7 @@ export async function createTitlebar(mode) {
                             delete maximizeButton.dataset.maximized;
                         }
                     } else {
-                        if (await WindhawkComm.query()?.isMaximized) {
+                        if ((await WindhawkComm.query())?.isMaximized) {
                             maximizeButton.dataset.maximized = true;
                         } else {
                             delete maximizeButton.dataset.maximized;
@@ -57,11 +59,7 @@ export async function createTitlebar(mode) {
             const closeButton = document.createElement('button');
             closeButton.id = 'wmpotify-close-button';
             closeButton.addEventListener('click', () => {
-                if (whStatus && whStatus.supportedCommands.includes('Close')) {
-                    WindhawkComm.close();
-                } else {
-                    window.close();
-                }
+                closeWindow();
             });
             titleButtons.appendChild(closeButton);
         case 'spotify':
@@ -70,7 +68,7 @@ export async function createTitlebar(mode) {
             const titleIcon = document.createElement('div');
             titleIcon.id = 'wmpotify-title-icon';
             titleIcon.addEventListener('dblclick', () => {
-                window.close();
+                closeWindow();
             });
             titleBar.appendChild(titleIcon);
             const titleText = document.createElement('span');
@@ -88,5 +86,14 @@ export async function createTitlebar(mode) {
                 titleText.textContent = title;
             });
             break;
+    }
+}
+
+async function closeWindow() {
+    const whStatus = await WindhawkComm.query();
+    if (whStatus?.supportedCommands?.includes('Close') && whStatus?.isMainWndLoaded) {
+        WindhawkComm.close();
+    } else {
+        window.close();
     }
 }

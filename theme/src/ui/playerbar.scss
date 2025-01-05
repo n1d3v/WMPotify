@@ -467,6 +467,7 @@ div[data-testid='now-playing-widget'] {
 
     .x-progressBar-fillColor {
         background: linear-gradient(to bottom, #84c5ff 1px, #0f41cd 1.5px, #6e96ff 2.5px);
+        height: 3px;
 
         &::after {
             content: '';
@@ -497,6 +498,51 @@ div[data-testid='now-playing-widget'] {
 
 .main-connectBar-connectBar {
     display: none;
+}
+
+:root:not([data-wmpotify-style="xp"]) {
+    .main-nowPlayingBar-right {
+        button[data-testid="control-button-npv"] {
+            width: 21px;
+            height: 21px;
+            margin-right: 8px;
+            border-radius: 0;
+            background: url('resources/playerbar/npv.png') no-repeat center;
+            transform: none !important;
+
+            svg {
+                display: none;
+            }
+
+            &:hover {
+                background-image: url('resources/playerbar/npv_hover.png');
+            }
+
+            &:active {
+                background-image: url('resources/playerbar/npv_pressed.png');
+            }
+        }
+
+        button[data-testid="control-button-queue"] {
+            width: 21px;
+            height: 21px;
+            border-radius: 0;
+            background: url('resources/playerbar/queue.png') no-repeat center;
+            transform: none !important;
+
+            svg {
+                display: none;
+            }
+
+            &:hover {
+                background-image: url('resources/playerbar/queue_hover.png');
+            }
+
+            &:active {
+                background-image: url('resources/playerbar/queue_pressed.png');
+            }
+        }
+    }
 }
 
 :root[data-wmpotify-style="xp"] {

@@ -17,21 +17,86 @@
         background: none !important;
         border-image: url('resources/ui/listview_header.png') 0 0 1 2 fill stretch;
         border-image-width: 0 0 1px 2px;
-        height: 20px;
+        height: 23px;
+        box-shadow: var(--wmp11-separator-light) 0 -1px 0 0, var(--wmp11-separator-shadow) 0 -2px 0 0; 
 
         .main-trackList-trackListHeaderRow {
-            height: 20px;
+            height: 25px;
+            grid-gap: 0;
+
+            .main-trackList-sortable,
+            .main-trackList-rowSectionIndex > div {
+                color: #77797d;
+            }
+
+            > div {
+                border-image: url('resources/ui/listview_header.png') 0 2 1 2 fill stretch;
+                border-image-width: 0 2px 1px 2px;
+                padding-left: 5px;
+
+                &:has(button) {
+                    &:focus-within {
+                        border-image-source: url('resources/ui/listview_header_selected.png');
+                    }
+
+                    &:hover {
+                        border-image-source: url('resources/ui/listview_header_hover.png');
+                    }
+
+                    &:active {
+                        border-image-source: url('resources/ui/listview_header_pressed.png');
+                    }
+                }
+
+                > div {
+                    width: 100%;
+                    button {
+                        width: 100%;
+                        justify-content: flex-start;
+
+                        .Svg-img-icon-small-textBrightAccent {
+                            fill: black !important;
+                            order: 1;
+                            width: 11px;
+                            margin-top: -2px;
+                        }
+                    }
+                }
+            }
+
+            .main-trackList-rowSectionIndex {
+                min-width: 30px;
+            }
         }
     }
 
-    .main-trackList-rowSectionStart img {
-        border-radius: 0 !important;
-        box-shadow: var(--album-shadow-small);
+    .main-trackList-trackListRow {
+        > div {
+            padding-left: 5px;
+        }
+
+        .main-trackList-rowSectionStart img {
+            border-radius: 0 !important;
+            box-shadow: var(--album-shadow-small);
+        }
+
+        &:hover {
+            background: var(--item-hover-background);
+            border-color: var(--item-hover-border);
+        }
     }
 
-    .main-trackList-trackListRow:hover {
-        background: var(--item-hover-background);
-        border-color: var(--item-hover-border);
+    div[style*="--text-subdued"] span {
+        color: var(--gray-text);
+    }
+
+    .playlist-playlist-searchBoxContainer {
+        span, svg, input {
+            color: var(--text-subdued);
+        }
+        input::placeholder {
+            color: var(--gray-text);
+        }
     }
 
     .main-actionBar-ActionBarRow {
@@ -70,21 +135,34 @@
 }
 
 .Root__main-view:has(.playlist-playlist-playlist) {
-    header button {
-        width: 42px;
-        height: 43px;
-        background: url('resources/playerbar/play.png') no-repeat;
+    header {
+        height: 62px;
 
-        &:hover {
-            background-image: url('resources/playerbar/play_hover.png');
+        .main-topBar-background {
+            border-radius: 0;
+            width: calc(100% - var(--scrollbar-size));
+    
+            .main-topBar-overlay {
+                background: var(--wmp11-window);
+            }
         }
 
-        &:active {
-            background-image: url('resources/playerbar/play_pressed.png');
-        }
+        button {
+            width: 42px;
+            height: 43px;
+            background: url('resources/playerbar/play.png') no-repeat;
 
-        span {
-            opacity: 0;
+            &:hover {
+                background-image: url('resources/playerbar/play_hover.png');
+            }
+
+            &:active {
+                background-image: url('resources/playerbar/play_pressed.png');
+            }
+
+            span {
+                opacity: 0;
+            }
         }
     }
 

@@ -33,8 +33,9 @@ const elementsRequired = [
     '.Root__right-sidebar div[class]',
 ];
 
-let availableWhCommands = [];
+let style = 'xp';
 let titleStyle = 'spotify';
+let earlyInitDone = false;
 
 async function earlyInit() {
     if (!localStorage.wmpotifyShowLibX) {
@@ -44,19 +45,24 @@ async function earlyInit() {
     await WindhawkComm.init();
 
     const whStatus = await WindhawkComm.query();
-    if (whStatus) {
-        availableWhCommands = whStatus.supportedCommands;
-        if (!localStorage.wmpotifyStyle) {
-            if (availableWhCommands.includes('ExtendFrame')) {
-                localStorage.wmpotifyStyle = 'aero';
-            }
+    if (whStatus && !localStorage.wmpotifyStyle && window.outerHeight - window.innerHeight > 0 && whStatus.isThemingEnabled) {
+        if (whStatus.supportedCommands?.includes('ExtendFrame') &&
+            whStatus.options?.transparentrendering &&
+            whStatus.isMainWndLoaded &&
+            whStatus.isDwmEnabled) {
+            style = 'aero';
+        } else if (!whStatus.isDwmEnabled) {
+            style = 'basic';
         }
     }
 
     // Supported: xp, aero, basic
-    switch (localStorage.wmpotifyStyle) {
+    if (localStorage.wmpotifyStyle && ['xp', 'aero', 'basic'].includes(localStorage.wmpotifyStyle)) {
+        style = localStorage.wmpotifyStyle;
+    }
+    await WindhawkComm.setBackdrop('mica'); // win11
+    switch (style) {
         case 'xp':
-        case undefined:
             await WindhawkComm.extendFrame(0, 0, 0, 0);
             break;
         case 'aero':
@@ -65,21 +71,19 @@ async function earlyInit() {
         case 'basic':
             await WindhawkComm.extendFrame(0, 0, 0, 0);
             if (document.hasFocus()) {
-                document.body.style.backgroundColor = 'var(--active-title)';
+                document.body.style.backgroundColor = '#b9d1ea';
             } else {
-                document.body.style.backgroundColor = 'var(--inactive-title)';
+                document.body.style.backgroundColor = '#d7e4f2';
             }
             window.addEventListener('focus', () => {
-                document.body.style.backgroundColor = 'var(--active-title)';
+                document.body.style.backgroundColor = '#b9d1ea';
             });
             window.addEventListener('blur', () => {
-                document.body.style.backgroundColor = 'var(--inactive-title)';
+                document.body.style.backgroundColor = '#d7e4f2';
             });
             break;
-        default:
-            document.body.style.backgroundColor = localStorage.wmpotifyStyle;
     }
-    document.documentElement.dataset.wmpotifyStyle = localStorage.wmpotifyStyle || 'xp';
+    document.documentElement.dataset.wmpotifyStyle = style;
 
     // Supported: native, custom, spotify, keepmenu
     // native: Use the native title bar (requires Linux or Windows with my Windhawk mod) Assumes native title bar is available and removes any custom title bar in the client area
@@ -90,10 +94,11 @@ async function earlyInit() {
     if (localStorage.wmpotifyTitleStyle && ['native', 'custom', 'spotify', 'keepmenu'].includes(localStorage.wmpotifyTitleStyle)) {
         titleStyle = localStorage.wmpotifyTitleStyle;
     } else {
+        console.log('WMPotify EarlyInit:', window.SpotEx, whStatus);
         if (window.outerHeight - window.innerHeight > 0) {
             titleStyle = 'native';
-        } else if (window.SpotEx || availableWhCommands.includes('Minimize')) {
-            if (!whStatus.showframe && whStatus.showmenu && !whStatus.showcontrols) {
+        } else if (window.SpotEx || (whStatus?.supportedCommands?.includes('Minimize') && whStatus?.isMainWndLoaded)) {
+            if (whStatus?.options?.showmenu && !whStatus.options.showcontrols) {
                 titleStyle = 'keepmenu';
             } else {
                 titleStyle = 'custom';
@@ -107,6 +112,8 @@ async function earlyInit() {
         titleStyle = 'native';
     }
     document.documentElement.dataset.wmpotifyTitleStyle = titleStyle;
+
+    earlyInitDone = true;
 }
 
 earlyInit();
@@ -134,7 +141,8 @@ async function init() {
 }
 
 function isReady() {
-    return window.Spicetify &&
+    return earlyInitDone &&
+        window.Spicetify &&
         window.Spicetify.CosmosAsync &&
         window.Spicetify.Platform?.PlayerAPI &&
         window.Spicetify.AppTitle &&

@@ -34,6 +34,7 @@ function init() {
         <section class="wmpotify-config-tab-content" data-tab-title="General">
             <label for="wmpotify-config-style">Style</label>
             <select id="wmpotify-config-style" class="wmpotify-aero">
+                <option value="auto">Auto</option>
                 <option value="xp">XP</option>
                 <option value="aero">Aero</option>
                 <option value="basic">Basic</option>
@@ -146,7 +147,11 @@ function apply() {
     const style = configWindow.querySelector('#wmpotify-config-style').value;
     const titleStyle = configWindow.querySelector('#wmpotify-config-title-style').value;
     const showLibX = configWindow.querySelector('#wmpotify-config-show-libx').checked;
-    localStorage.wmpotifyStyle = style;
+    if (style !== 'auto') {
+        localStorage.wmpotifyStyle = style;
+    } else {
+        delete localStorage.wmpotifyStyle;
+    }
     if (titleStyle !== 'auto') {
         localStorage.wmpotifyTitleStyle = titleStyle;
     } else {
