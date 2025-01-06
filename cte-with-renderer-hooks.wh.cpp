@@ -208,6 +208,8 @@ int add_child_view_offset = NULL;
 int get_window_handle_offset = NULL;
 int set_background_color_offset = NULL;
 
+BOOL isRendererProcess = FALSE;
+
 HWND mainHwnd = NULL;
 int minWidth = 0;
 int minHeight = 0;
@@ -469,6 +471,13 @@ BOOL ForceEnableExtensions(char* pbExecutable) {
     return PatchMemory(pbExecutable, targetRegex, targetPatchBytes, 1, 1);
 }
 
+BOOL MarkCTEWHInJS(char* pbExecutable) {
+    std::string targetRegex = R"(document.domain=\')";
+    std::string targetPatch = "window.ctewh='0.6";
+    std::vector<uint8_t> targetPatchBytes(targetPatch.begin(), targetPatch.end());
+    return PatchMemory(pbExecutable, targetRegex, targetPatchBytes, 1, 1);
+}
+
 typedef int CEF_CALLBACK (*is_frameless_t)(struct _cef_window_delegate_t* self, struct _cef_window_t* window);
 int CEF_CALLBACK is_frameless_hook(struct _cef_window_delegate_t* self, struct _cef_window_t* window) {
     Wh_Log(L"is_frameless_hook");
@@ -620,8 +629,20 @@ BOOL WINAPI CreateProcessAsUserW_hook(
 ) {
     Wh_Log(L"CreateProcessAsUserW_hook");
 
-    BOOL result = CreateProcessAsUserW_original(
-        hToken,
+    // BOOL result = CreateProcessAsUserW_original(
+    //     NULL,
+    //     lpApplicationName,
+    //     lpCommandLine,
+    //     lpProcessAttributes,
+    //     lpThreadAttributes,
+    //     bInheritHandles,
+    //     dwCreationFlags,
+    //     lpEnvironment,
+    //     lpCurrentDirectory,
+    //     lpStartupInfo,
+    //     lpProcessInformation
+    // );
+    BOOL result = CreateProcessW(
         lpApplicationName,
         lpCommandLine,
         lpProcessAttributes,
@@ -638,6 +659,7 @@ BOOL WINAPI CreateProcessAsUserW_hook(
         hwAccelerated = TRUE;
         Wh_Log(L"GPU process detected, hardware acceleration enabled");
     }
+    Wh_Log(L"lpCommandLine: %s", lpCommandLine);
 
     return result;
 }
@@ -887,6 +909,135 @@ int FindOffset(int major, int minor, cte_offset_t offsets[], int offsets_size, B
     return NULL;
 }
 
+typedef struct _cef_string_utf16_t {
+  char16_t* str;
+  size_t length;
+  void (*dtor)(char16_t* str);
+} cef_string_utf16_t;
+
+typedef cef_string_utf16_t cef_string_t;
+typedef cef_string_utf16_t* cef_string_userfree_utf16_t;
+typedef cef_string_userfree_utf16_t cef_string_userfree_t;
+
+typedef struct _cef_v8value_t {
+    void (*dtor)(struct _cef_v8value_t* self);
+} cef_v8value_t;
+
+typedef struct _cef_base_ref_counted_t {
+  ///
+  // Size of the data structure.
+  ///
+  size_t size;
+
+  ///
+  // Called to increment the reference count for the object. Should be called
+  // for every new copy of a pointer to a given object.
+  ///
+  void(CEF_CALLBACK* add_ref)(struct _cef_base_ref_counted_t* self);
+
+  ///
+  // Called to decrement the reference count for the object. If the reference
+  // count falls to 0 the object should self-delete. Returns true (1) if the
+  // resulting reference count is 0.
+  ///
+  int(CEF_CALLBACK* release)(struct _cef_base_ref_counted_t* self);
+
+  ///
+  // Returns true (1) if the current reference count is 1.
+  ///
+  int(CEF_CALLBACK* has_one_ref)(struct _cef_base_ref_counted_t* self);
+
+  ///
+  // Returns true (1) if the current reference count is at least 1.
+  ///
+  int(CEF_CALLBACK* has_at_least_one_ref)(struct _cef_base_ref_counted_t* self);
+} cef_base_ref_counted_t;
+
+///
+/// Structure that should be implemented to handle V8 function calls. The
+/// functions of this structure will be called on the thread associated with the
+/// V8 function.
+///
+typedef struct _cef_v8handler_t {
+  ///
+  /// Base structure.
+  ///
+  cef_base_ref_counted_t base;
+
+  ///
+  /// Handle execution of the function identified by |name|. |object| is the
+  /// receiver ('this' object) of the function. |arguments| is the list of
+  /// arguments passed to the function. If execution succeeds set |retval| to
+  /// the function return value. If execution fails set |exception| to the
+  /// exception that will be thrown. Return true (1) if execution was handled.
+  ///
+  int(CEF_CALLBACK* execute)(struct _cef_v8handler_t* self,
+                             const cef_string_t* name,
+                             struct _cef_v8value_t* object,
+                             size_t argumentsCount,
+                             struct _cef_v8value_t* const* arguments,
+                             struct _cef_v8value_t** retval,
+                             cef_string_t* exception);
+} cef_v8handler_t;
+
+typedef cef_v8value_t* (*cef_v8value_create_function_t)(const cef_string_t* name, cef_v8handler_t* handler);
+cef_v8value_create_function_t cef_v8value_create_function_original;
+cef_v8value_create_function_t cef_v8value_create_function_hook = [](const cef_string_t* name, cef_v8handler_t* handler) -> cef_v8value_t* {
+    Wh_Log(L"cef_v8value_create_function called with name: %s", name->str);
+    return cef_v8value_create_function_original(name, handler);
+};
+
+using UpdateProcThreadAttribute_t = decltype(&UpdateProcThreadAttribute);
+UpdateProcThreadAttribute_t UpdateProcThreadAttribute_original;
+BOOL WINAPI UpdateProcThreadAttribute_hook(
+    LPPROC_THREAD_ATTRIBUTE_LIST lpAttributeList,
+    DWORD dwFlags,
+    DWORD_PTR Attribute,
+    PVOID lpValue,
+    SIZE_T cbSize,
+    PVOID lpPreviousValue,
+    PSIZE_T lpReturnSize
+) {
+    Wh_Log(L"UpdateProcThreadAttribute_hook called, ignoring.");
+    return TRUE;
+}
+
+using SetProcessMitigationPolicy_t = decltype(&SetProcessMitigationPolicy);
+SetProcessMitigationPolicy_t SetProcessMitigationPolicy_original;
+BOOL WINAPI SetProcessMitigationPolicy_hook(
+    PROCESS_MITIGATION_POLICY MitigationPolicy,
+    PVOID lpBuffer,
+    SIZE_T dwLength
+) {
+    Wh_Log(L"SetProcessMitigationPolicy_hook called, ignoring.");
+    return TRUE;
+}
+
+using SetTokenInformation_t = decltype(&SetTokenInformation);
+SetTokenInformation_t SetTokenInformation_original;
+BOOL WINAPI SetTokenInformation_hook(HANDLE TokenHandle, TOKEN_INFORMATION_CLASS TokenInformationClass, LPVOID TokenInformation, DWORD TokenInformationLength) {
+    Wh_Log(L"SetTokenInformation_hook called, ignoring.");
+    return TRUE;
+}
+
+BOOL InitSpotifyRendererHooks(BOOL isInitialThread, char* pbExecutable, HMODULE cefModule) {
+    Wh_Log(L"Initializing Spotify renderer hooks");
+    Wh_SetFunctionHook((void*)SetTokenInformation, (void*)SetTokenInformation_hook, (void**)&SetTokenInformation_original);
+
+    if (isInitialThread) {
+        if (MarkCTEWHInJS((char*)GetModuleHandle(NULL))) {
+            Wh_Log(L"Marked CTEWH in JS");
+        }
+    }
+
+    cef_v8value_create_function_t cef_v8value_create_function =
+        (cef_v8value_create_function_t)GetProcAddress(cefModule, "cef_v8value_create_function");
+    Wh_SetFunctionHook((void*)cef_v8value_create_function, (void*)cef_v8value_create_function_hook,
+                       (void**)&cef_v8value_create_function_original);
+
+    return TRUE;
+}
+
 // The mod is being initialized, load settings, hook functions, and do other
 // initialization stuff if required.
 BOOL Wh_ModInit() {
@@ -898,12 +1049,8 @@ BOOL Wh_ModInit() {
 
     LoadSettings();
 
-    // Check if this process is auxilliary process by checking if the arguments contain --type=
-    LPWSTR args = GetCommandLineW();
-    if (wcsstr(args, L"--type=") != NULL) {
-        Wh_Log(L"Auxilliary process detected, skipping");
-        return FALSE;
-    }
+    Wh_SetFunctionHook((void*)UpdateProcThreadAttribute, (void*)UpdateProcThreadAttribute_hook, (void**)&UpdateProcThreadAttribute_original);
+    Wh_SetFunctionHook((void*)SetProcessMitigationPolicy, (void*)SetProcessMitigationPolicy_hook, (void**)&SetProcessMitigationPolicy_original);
 
     char* pbExecutable = (char*)GetModuleHandle(NULL);
 
@@ -919,6 +1066,25 @@ BOOL Wh_ModInit() {
         Wh_Log(L"Failed to load CEF!");
         return FALSE;
     }
+
+    // Check if the app is Spotify
+    wchar_t exeName[MAX_PATH];
+    GetModuleFileName(NULL, exeName, MAX_PATH);
+    BOOL isSpotify = wcsstr(_wcsupr(exeName), L"SPOTIFY.EXE") != NULL;
+    if (isSpotify) {
+        Wh_Log(L"Spotify detected");
+    }
+
+    // Check if this process is auxilliary process by checking if the arguments contain --type=
+    LPWSTR args = GetCommandLineW();
+    if (wcsstr(args, L"--type=") != NULL) {
+        if (isSpotify && wcsstr(args, L"--type=renderer") != NULL) {
+            return InitSpotifyRendererHooks(isInitialThread, pbExecutable, cefModule);
+        }
+        Wh_Log(L"Auxilliary process detected, skipping. (type=%s)", args + 7);
+        return FALSE;
+    }
+
     cef_window_create_top_level_t cef_window_create_top_level =
         (cef_window_create_top_level_t)GetProcAddress(cefModule,
                                                 "cef_window_create_top_level");
@@ -940,14 +1106,6 @@ BOOL Wh_ModInit() {
         cef_version_info(6),
         cef_version_info(7)
     );
-
-    // Check if the app is Spotify
-    wchar_t exeName[MAX_PATH];
-    GetModuleFileName(NULL, exeName, MAX_PATH);
-    BOOL isSpotify = wcsstr(_wcsupr(exeName), L"SPOTIFY.EXE") != NULL;
-    if (isSpotify) {
-        Wh_Log(L"Spotify detected");
-    }
 
     // Get appropriate offsets for current CEF version
     is_frameless_offset = FindOffset(major, minor, is_frameless_offsets, ARRAYSIZE(is_frameless_offsets));

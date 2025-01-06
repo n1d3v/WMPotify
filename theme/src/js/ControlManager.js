@@ -6,6 +6,11 @@ export function setControlHeight(height) {
 
 // From https://github.com/ohitstom/spicetify-extensions/tree/main/noControls
 export function init() {
+	if (Spicetify.Config.extensions.includes("noControls.js")) {
+		Spicetify.showNotification("[WMPotify] Incompatible extension 'No Controls' detected! Some features of WMPotify will be disabled.");
+		return;
+	}
+
 	// Function to check and apply the titlebar
 	const checkAndApplyTitlebar = API => {
 		if (API) {

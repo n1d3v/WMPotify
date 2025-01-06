@@ -159,12 +159,12 @@ window.addEventListener('load', () => {
             try {
                 await init();
             } catch (e) {
-                alert('[WMPotify] An error occurred during initialization. Please check the console for more information.');
+                (Spicetify.showNotification || window.alert)('[WMPotify] An error occurred during initialization. Please check the console for more information.');
                 console.error('WMPotify: Error during init:', e);
             }
             console.log('WMPotify: Theme loaded');
         } else if (cnt++ > 80) {
-            alert('[WMPotify] Theme loading failed. Please refresh the page to try again. Please make sure you have compatible Spoitfy version and have global navbar enabled.');
+            (Spicetify.showNotification || window.alert)('[WMPotify] Theme loading failed. Please refresh the page to try again. Please make sure you have compatible Spoitfy version and have global navbar enabled.');
             clearInterval(interval);
             const missing = [];
             for (const selector of elementsRequired) {
