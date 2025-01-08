@@ -128,9 +128,11 @@
 #include <libloaderapi.h>
 #include <windhawk_api.h>
 #include <windhawk_utils.h>
+#include <codecvt>
 #include <thread>
 #include <vector>
 #include <regex>
+#include <aclapi.h>
 #include <dwmapi.h>
 #include <sddl.h>
 #include <uxtheme.h>
@@ -140,8 +142,6 @@
 #define CEF_EXPORT __cdecl
 #define cef_window_handle_t HWND
 #define ANY_MINOR -1
-
-typedef uint32_t cef_color_t;
 
 struct cte_settings {
     BOOL showframe;
@@ -223,17 +223,104 @@ BOOL g_hwAccelerated = FALSE;
 BOOL g_dwmBackdropEnabled = FALSE;
 
 HANDLE g_hSrvPipe = INVALID_HANDLE_VALUE;
+HANDLE g_hClientPipe = INVALID_HANDLE_VALUE;
 BOOL g_shouldClosePipe = FALSE;
 std::thread g_pipeThread;
 
-// Same offset for all versions that supports window control hiding
-// Cuz get_preferred_size is the very first function in the struct (cef_panel_delegate_t->(cef_view_delegate_t)base.get_preferred_size)
-// And cef_base_ref_counted_t, which is the base struct of cef_view_delegate_t, hasn't changed since 94
-#ifdef _WIN64
-    int get_preferred_size_offset = 0x28;
-#else
-    int get_preferred_size_offset = 0x14;
-#endif
+#pragma region CEF structs (as minimal as possible)
+typedef struct _cef_string_utf16_t {
+  char16_t* str;
+  size_t length;
+  void (*dtor)(char16_t* str);
+} cef_string_utf16_t;
+
+typedef cef_string_utf16_t cef_string_t;
+typedef cef_string_utf16_t* cef_string_userfree_utf16_t;
+typedef cef_string_userfree_utf16_t cef_string_userfree_t;
+
+typedef struct _cef_string_list_t* cef_string_list_t;
+
+typedef uint32_t cef_color_t;
+
+typedef struct _cef_base_ref_counted_t {
+  size_t size;
+  void(CEF_CALLBACK* add_ref)(struct _cef_base_ref_counted_t* self);
+  int(CEF_CALLBACK* release)(struct _cef_base_ref_counted_t* self);
+  int(CEF_CALLBACK* has_one_ref)(struct _cef_base_ref_counted_t* self);
+  int(CEF_CALLBACK* has_at_least_one_ref)(struct _cef_base_ref_counted_t* self);
+} cef_base_ref_counted_t;
+
+typedef struct _cef_size_t {
+  int width;
+  int height;
+} cef_size_t;
+
+typedef struct _cef_view_delegate_t {
+  cef_base_ref_counted_t base;
+  cef_size_t(CEF_CALLBACK* get_preferred_size)(struct _cef_view_delegate_t* self);
+} cef_view_delegate_t;
+
+typedef struct _cef_panel_delegate_t {
+  cef_view_delegate_t base;
+} cef_panel_delegate_t;
+
+typedef struct _cef_basetime_t {
+  int64_t val;
+} cef_basetime_t;
+
+typedef enum {
+  V8_PROPERTY_ATTRIBUTE_NONE = 0,
+  V8_PROPERTY_ATTRIBUTE_READONLY = 1 << 0,
+  V8_PROPERTY_ATTRIBUTE_DONTENUM = 1 << 1,
+  V8_PROPERTY_ATTRIBUTE_DONTDELETE = 1 << 2
+} cef_v8_propertyattribute_t;
+
+typedef struct _cef_v8handler_t {
+  cef_base_ref_counted_t base;
+  int(CEF_CALLBACK* execute)(struct _cef_v8handler_t* self,
+                             const cef_string_t* name,
+                             struct _cef_v8value_t* object,
+                             size_t argumentsCount,
+                             struct _cef_v8value_t* const* arguments,
+                             struct _cef_v8value_t** retval,
+                             cef_string_t* exception);
+} cef_v8handler_t;
+
+// CEF 108+
+// typedef struct _cef_v8value_t {
+//     cef_base_ref_counted_t base;
+
+//     int(CEF_CALLBACK* is_valid)(struct _cef_v8value_t* self);
+//     int(CEF_CALLBACK* is_undefined)(struct _cef_v8value_t* self);
+//     int(CEF_CALLBACK* is_null)(struct _cef_v8value_t* self);
+//     int(CEF_CALLBACK* is_bool)(struct _cef_v8value_t* self);
+//     int(CEF_CALLBACK* is_int)(struct _cef_v8value_t* self);
+//     int(CEF_CALLBACK* is_uint)(struct _cef_v8value_t* self);
+//     int(CEF_CALLBACK* is_double)(struct _cef_v8value_t* self);
+//     int(CEF_CALLBACK* is_date)(struct _cef_v8value_t* self);
+//     int(CEF_CALLBACK* is_string)(struct _cef_v8value_t* self);
+//     int(CEF_CALLBACK* is_object)(struct _cef_v8value_t* self);
+//     int(CEF_CALLBACK* is_array)(struct _cef_v8value_t* self);
+//     int(CEF_CALLBACK* is_array_buffer)(struct _cef_v8value_t* self);
+//     int(CEF_CALLBACK* is_function)(struct _cef_v8value_t* self);
+//     int(CEF_CALLBACK* is_promise)(struct _cef_v8value_t* self);
+//     int(CEF_CALLBACK* is_same)(struct _cef_v8value_t* self, struct _cef_v8value_t* that);
+//     int(CEF_CALLBACK* get_bool_value)(struct _cef_v8value_t* self);
+//     int32_t(CEF_CALLBACK* get_int_value)(struct _cef_v8value_t* self);
+//     uint32_t(CEF_CALLBACK* get_uint_value)(struct _cef_v8value_t* self);
+//     double(CEF_CALLBACK* get_double_value)(struct _cef_v8value_t* self);
+//     cef_basetime_t(CEF_CALLBACK* get_date_value)(struct _cef_v8value_t* self);
+//     cef_string_userfree_t(CEF_CALLBACK* get_string_value)(struct _cef_v8value_t* self);
+//     cef_string_userfree_t(CEF_CALLBACK* get_function_name)(struct _cef_v8value_t* self);
+//     cef_v8handler_t*(CEF_CALLBACK* get_function_handler)(struct _cef_v8value_t* self);
+//     _cef_v8value_t*(CEF_CALLBACK* execute_function)(struct _cef_v8value_t* self, struct _cef_v8value_t* object, size_t argumentsCount, struct _cef_v8value_t* const* arguments);
+//     _cef_v8value_t*(CEF_CALLBACK* execute_function_with_context)(struct _cef_v8value_t* self, struct _cef_v8context_t* context, struct _cef_v8value_t* object, size_t argumentsCount, struct _cef_v8value_t* const* arguments);
+//     _cef_v8value_t*(CEF_CALLBACK* get_value_bykey)(struct _cef_v8value_t* self, const cef_string_t* key);
+//     _cef_v8value_t*(CEF_CALLBACK* get_value_byindex)(struct _cef_v8value_t* self, int index);
+//     int(CEF_CALLBACK* set_value_bykey)(struct _cef_v8value_t* self, const cef_string_t* key, struct _cef_v8value_t* value, cef_v8_propertyattribute_t attribute);
+//     int(CEF_CALLBACK* set_value_byindex)(struct _cef_v8value_t* self, int index, struct _cef_v8value_t* value);
+// } cef_v8value_t;
+#pragma endregion
 
 // Whether DwmExtendFrameIntoClientArea should be called
 // False if DWM is disabled, visual styles are disabled, or some kind of basic themer is used
@@ -395,8 +482,6 @@ BOOL PatchMemory(char* pbExecutable, const std::string& targetRegex, const std::
 
             Wh_Log(L"Match found in section %d at position: %p", i, pos);
 
-            //Wh_Log(L"targetPatch.size(): %d", targetPatch.size());
-
             // #include <iomanip>
             // #include <sstream>
             // // Log the bytes before patching
@@ -467,8 +552,6 @@ BOOL EnableTransparentRendering(char* pbExecutable) {
         targetPatch[5] = 0x8b;
     #endif
 
-    Wh_Log(L"targetPatch: %02x %02x %02x %02x %02x %02x", targetPatch[0], targetPatch[1], targetPatch[2], targetPatch[3], targetPatch[4], targetPatch[5]);
-
     return PatchMemory(pbExecutable, targetRegex, targetPatch, 0, 4);
 }
 
@@ -486,12 +569,12 @@ BOOL ForceEnableExtensions(char* pbExecutable) {
     return PatchMemory(pbExecutable, targetRegex, targetPatchBytes, 1, 1);
 }
 
-BOOL MarkCTEWHInJS(char* pbExecutable) {
-    std::string targetRegex = R"(document.domain=\')";
-    std::string targetPatch = "window.ctewh='0.6";
-    std::vector<uint8_t> targetPatchBytes(targetPatch.begin(), targetPatch.end());
-    return PatchMemory(pbExecutable, targetRegex, targetPatchBytes, 1, 1);
-}
+// BOOL MarkCTEWHInJS(char* pbExecutable) {
+//     std::string targetRegex = R"(document.domain=\')";
+//     std::string targetPatch = "window.ctewh='0.6";
+//     std::vector<uint8_t> targetPatchBytes(targetPatch.begin(), targetPatch.end());
+//     return PatchMemory(pbExecutable, targetRegex, targetPatchBytes, 1, 1);
+// }
 
 typedef int CEF_CALLBACK (*is_frameless_t)(struct _cef_window_delegate_t* self, struct _cef_window_t* window);
 int CEF_CALLBACK is_frameless_hook(struct _cef_window_delegate_t* self, struct _cef_window_t* window) {
@@ -577,9 +660,9 @@ void CEF_CALLBACK add_child_view_hook(struct _cef_panel_t* self, struct _cef_vie
     return;
 }
 
-typedef _cef_panel_t* CEF_EXPORT (*cef_panel_create_t)(void* delegate);
+typedef _cef_panel_t* CEF_EXPORT (*cef_panel_create_t)(cef_panel_delegate_t* delegate);
 cef_panel_create_t CEF_EXPORT cef_panel_create_original;
-_cef_panel_t* CEF_EXPORT cef_panel_create_hook(void* delegate) {
+_cef_panel_t* CEF_EXPORT cef_panel_create_hook(cef_panel_delegate_t* delegate) {
     Wh_Log(L"cef_panel_create_hook");
     if ((cnt != 2 || cte_settings.showmenu == FALSE) && // left panel
         (cnt != -1 || cte_settings.showcontrols == FALSE) // right panel
@@ -587,7 +670,7 @@ _cef_panel_t* CEF_EXPORT cef_panel_create_hook(void* delegate) {
         // Nullify get_preferred_size to make the leftover space from hiding the window controls clickable
         // This has side effect of making the menu button ignore the height set by cosmos endpoint (used by noControls Spicetify extension)
         // So only nullify get_preferred_size for the left panel if menu button is hidden
-        *((void**)((char*)delegate + get_preferred_size_offset)) = NULL;
+        delegate->base.get_preferred_size = NULL;
     }
     _cef_panel_t* panel = cef_panel_create_original(delegate);
     if (add_child_view_offset != NULL) {
@@ -628,46 +711,6 @@ HRESULT WINAPI SetWindowThemeAttribute_hook(HWND hwnd, enum WINDOWTHEMEATTRIBUTE
     } else {
         return SetWindowThemeAttribute_original(hwnd, eAttribute, pvAttribute, cbAttribute);
     }
-}
-
-using CreateProcessAsUserW_t = decltype(&CreateProcessAsUserW);
-CreateProcessAsUserW_t CreateProcessAsUserW_original;
-BOOL WINAPI CreateProcessAsUserW_hook(
-    HANDLE hToken,
-    LPCWSTR lpApplicationName,
-    LPWSTR lpCommandLine,
-    LPSECURITY_ATTRIBUTES lpProcessAttributes,
-    LPSECURITY_ATTRIBUTES lpThreadAttributes,
-    BOOL bInheritHandles,
-    DWORD dwCreationFlags,
-    LPVOID lpEnvironment,
-    LPCWSTR lpCurrentDirectory,
-    LPSTARTUPINFOW lpStartupInfo,
-    LPPROCESS_INFORMATION lpProcessInformation
-) {
-    Wh_Log(L"CreateProcessAsUserW_hook");
-
-    BOOL result = CreateProcessAsUserW_original(
-        NULL,
-        lpApplicationName,
-        lpCommandLine,
-        lpProcessAttributes,
-        lpThreadAttributes,
-        bInheritHandles,
-        dwCreationFlags,
-        lpEnvironment,
-        lpCurrentDirectory,
-        lpStartupInfo,
-        lpProcessInformation
-    );
-
-    if (result && lpCommandLine && wcsstr(lpCommandLine, L"--type=gpu-process")) {
-        g_hwAccelerated = TRUE;
-        Wh_Log(L"GPU process detected, hardware acceleration enabled");
-    }
-    Wh_Log(L"lpCommandLine: %s", lpCommandLine);
-
-    return result;
 }
 
 BOOL queryResponsePending = FALSE;
@@ -785,31 +828,112 @@ void HandleWindhawkComm(LPCWSTR clipText) {
     }
 }
 
-void CreateNamedPipeServer() {
-    LPCWSTR securityDescriptorString = L"D:(A;OICI;GA;;;WD)"; // Allow all users (WD) full access (GA)
+// Copy-pasted from https://source.chromium.org/chromium/chromium/src/+/main:third_party/crashpad/crashpad/util/win/registration_protocol_win.cc;drc=f39c57f31413abcb41d3068cfb2c7a1718003cc5;l=253
+// Same logic as in crashpad to allow processes with untrusted integrity level to connect to the named pipe
+void* GetSecurityDescriptorWithUser(const wchar_t* sddl_string, size_t* size) {
+    if (size)
+        *size = 0;
 
-    PSECURITY_DESCRIPTOR pSecurityDescriptor = NULL;
-    if (!ConvertStringSecurityDescriptorToSecurityDescriptor(securityDescriptorString, SDDL_REVISION_1, &pSecurityDescriptor, NULL)) {
-        Wh_Log(L"ConvertStringSecurityDescriptorToSecurityDescriptor failed, GLE=%d. Pipe won't be accessible to sandboxed CEF renderers.", GetLastError());
+    PSECURITY_DESCRIPTOR base_sec_desc;
+    if (!ConvertStringSecurityDescriptorToSecurityDescriptor(
+            sddl_string, SDDL_REVISION_1, &base_sec_desc, nullptr)) {
+        Wh_Log(L"ConvertStringSecurityDescriptorToSecurityDescriptor failed");
+        return nullptr;
+    }
+
+    EXPLICIT_ACCESS access;
+    wchar_t username[] = L"CURRENT_USER";
+    BuildExplicitAccessWithName(
+        &access, username, GENERIC_ALL, GRANT_ACCESS, NO_INHERITANCE);
+
+    PSECURITY_DESCRIPTOR user_sec_desc;
+    ULONG user_sec_desc_size;
+    DWORD error = BuildSecurityDescriptor(nullptr,
+                                          nullptr,
+                                          1,
+                                          &access,
+                                          0,
+                                          nullptr,
+                                          base_sec_desc,
+                                          &user_sec_desc_size,
+                                          &user_sec_desc);
+    if (error != ERROR_SUCCESS) {
+        SetLastError(error);
+        Wh_Log(L"BuildSecurityDescriptor failed");
+        return nullptr;
+    }
+
+    *size = user_sec_desc_size;
+    return user_sec_desc;
+}
+
+const void* GetSecurityDescriptorForNamedPipeInstance(size_t* size) {
+    // Get a security descriptor which grants the current user and SYSTEM full
+    // access to the named pipe. Also grant AppContainer RW access through the ALL
+    // APPLICATION PACKAGES SID (S-1-15-2-1). Finally add an Untrusted Mandatory
+    // Label for non-AppContainer sandboxed users.
+    static size_t sd_size;
+    static void* sec_desc = GetSecurityDescriptorWithUser(
+        L"D:(A;;GA;;;SY)(A;;GWGR;;;S-1-15-2-1)(A;;GA;;;LW)S:(ML;;;;;S-1-16-0)", &sd_size);
+
+    if (size)
+        *size = sd_size;
+    return sec_desc;
+}
+
+// void LogSecurityDescriptor(HANDLE hPipe) {
+//     PSECURITY_DESCRIPTOR pSD = NULL;
+//     DWORD dwRes = GetSecurityInfo(
+//         hPipe,
+//         SE_KERNEL_OBJECT,
+//         DACL_SECURITY_INFORMATION,
+//         NULL,
+//         NULL,
+//         NULL,
+//         NULL,
+//         &pSD
+//     );
+
+//     if (dwRes == ERROR_SUCCESS) {
+//         LPWSTR sdString = NULL;
+//         if (ConvertSecurityDescriptorToStringSecurityDescriptor(pSD, SDDL_REVISION_1, DACL_SECURITY_INFORMATION, &sdString, NULL)) {
+//             Wh_Log(L"Security Descriptor: %s", sdString);
+//             LocalFree(sdString);
+//         } else {
+//             Wh_Log(L"ConvertSecurityDescriptorToStringSecurityDescriptor failed, GLE=%d", GetLastError());
+//         }
+//         LocalFree(pSD);
+//     } else {
+//         Wh_Log(L"GetSecurityInfo failed, GLE=%d", GetLastError());
+//     }
+// }
+
+void CreateNamedPipeServer(LPCWSTR pipeName) {
+    void* pSecurityDescriptor = const_cast<void*>(GetSecurityDescriptorForNamedPipeInstance(NULL));
+    if (!pSecurityDescriptor) {
+        Wh_Log(L"GetSecurityDescriptorForNamedPipeInstance failed. Pipe won't be accessible to sandboxed CEF renderers.");
     }
 
     SECURITY_ATTRIBUTES securityAttributes = {};
     securityAttributes.nLength = sizeof(SECURITY_ATTRIBUTES);
     securityAttributes.lpSecurityDescriptor = pSecurityDescriptor;
-    securityAttributes.bInheritHandle = FALSE;
+    securityAttributes.bInheritHandle = TRUE;
+
+    Wh_Log(L"Pipe name: %s", pipeName);
 
     while (!g_shouldClosePipe) {
         g_hSrvPipe = CreateNamedPipe(
-            L"\\\\.\\pipe\\CTEWHSpotifyBrowserProcPipe", // Pipe name
-            PIPE_ACCESS_DUPLEX,                          // Read/Write access
-            PIPE_TYPE_MESSAGE |                          // Message type pipe
-            PIPE_READMODE_MESSAGE |                      // Message-read mode
-            PIPE_WAIT,                                   // Blocking mode
-            PIPE_UNLIMITED_INSTANCES,                    // Max instances
-            512,                                         // Output buffer size
-            512,                                         // Input buffer size
-            0,                                           // Client time-out
-            &securityAttributes);                        // Security attributes
+            pipeName,                                        // Pipe name
+            PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,       // Read/Write access with overlapped I/O
+            PIPE_TYPE_MESSAGE |                              // Message type pipe
+            PIPE_READMODE_MESSAGE |                          // Message-read mode
+            PIPE_WAIT,                                       // Blocking mode
+            PIPE_UNLIMITED_INSTANCES,                        // Max instances
+            512,                                             // Output buffer size
+            512,                                             // Input buffer size
+            0,                                               // Client time-out
+            pSecurityDescriptor ? &securityAttributes : NULL // Security attributes
+        );
 
         if (g_hSrvPipe == INVALID_HANDLE_VALUE) {
             Wh_Log(L"CreateNamedPipe failed, GLE=%d", GetLastError());
@@ -823,11 +947,13 @@ void CreateNamedPipeServer() {
             Wh_Log(L"Client connected, waiting for message...");
             wchar_t buffer[512];
             DWORD bytesRead;
-            BOOL result = ReadFile(g_hSrvPipe, buffer, sizeof(buffer) - sizeof(wchar_t), &bytesRead, NULL);
-            if (result) {
-                buffer[bytesRead / sizeof(wchar_t)] = L'\0';
-                Wh_Log(L"Received message: %s", buffer);
-                HandleWindhawkComm(buffer);
+            while (!g_shouldClosePipe) {
+                BOOL result = ReadFile(g_hSrvPipe, buffer, sizeof(buffer) - sizeof(wchar_t), &bytesRead, NULL);
+                if (result) {
+                    buffer[bytesRead / sizeof(wchar_t)] = L'\0';
+                    Wh_Log(L"Received message: %s", buffer);
+                    HandleWindhawkComm(buffer);
+                }
             }
         } else {
             Wh_Log(L"ConnectNamedPipe failed, GLE=%d", GetLastError());
@@ -841,62 +967,205 @@ void CreateNamedPipeServer() {
     LocalFree(pSecurityDescriptor);
 }
 
-void CheckIfIsFunctionHooked(LPCSTR functionName) {
-    // Get the address of the original function from ntdll.dll
-    HMODULE hNtdll = GetModuleHandleA("ntdll.dll");
-    if (!hNtdll) {
-        Wh_Log(L"Failed to get handle of ntdll.dll.");
-    }
+using SetEnvironmentVariableW_t = decltype(&SetEnvironmentVariableW);
+SetEnvironmentVariableW_t SetEnvironmentVariableW_original;
 
-    FARPROC originalFunction = GetProcAddress(hNtdll, functionName);
-    if (!originalFunction) {
-        Wh_Log(L"Failed to get address of %hs from ntdll.dll.", functionName);
+BOOL WINAPI SetEnvironmentVariableW_hook(LPCWSTR lpName, LPCWSTR lpValue) {
+    if (lpName && wcscmp(lpName, L"CHROME_CRASHPAD_PIPE_NAME") == 0 && lpValue) {
+        wchar_t pipeName[256];
+        Wh_Log(L"Setting CHROME_CRASHPAD_PIPE_NAME to: %s", lpValue);
+        wcscpy(pipeName, lpValue);
+        wcscat(pipeName, L"_CTEWH");
+        g_pipeThread = std::thread([=]() {
+            // Impersonate a Crashpad pipe name (plus "_CTEWH") to make the Chrome sandbox accept our connection
+            // (It only works after CEF renderer init is complete; won't work in the WH mod init which runs before that)
+            // (Chrome sandbox patches NtCreateFile of the renderer from the parent so the mod init is subject to this restriction)
+            CreateNamedPipeServer(pipeName);
+        });
+        g_pipeThread.detach();
     }
-
-    // Get the address of the function in memory
-    FARPROC currentFunction = GetProcAddress(GetModuleHandle(NULL), functionName);
-    if (!currentFunction) {
-        Wh_Log(L"Failed to get address of %hs from current module.", functionName);
-    }
-
-    // Compare the addresses
-    if (originalFunction != currentFunction) {
-        Wh_Log(L"%hs is hooked.", functionName);
-    } else {
-        Wh_Log(L"%hs is not hooked.", functionName);
-    }
-
-    BYTE* functionBytes = (BYTE*)originalFunction;
-    if (functionBytes[0] == 0xE9 || functionBytes[0] == 0xE8) {
-        Wh_Log(L"%hs is hooked by a jump.", functionName);
-    }
+    return SetEnvironmentVariableW_original(lpName, lpValue);
 }
 
-void SendNamedPipeMessage(LPCWSTR message) {
-    HANDLE hPipe = CreateFile(
-        L"\\\\.\\pipe\\CTEWHSpotifyBrowserProcPipe",
+// renderer and gpu process spawn with this when --no-sandbox is used
+using CreateProcessW_t = decltype(&CreateProcessW);
+CreateProcessW_t CreateProcessW_original;
+BOOL WINAPI CreateProcessW_hook(
+    LPCWSTR lpApplicationName,
+    LPWSTR lpCommandLine,
+    LPSECURITY_ATTRIBUTES lpProcessAttributes,
+    LPSECURITY_ATTRIBUTES lpThreadAttributes,
+    BOOL bInheritHandles,
+    DWORD dwCreationFlags,
+    LPVOID lpEnvironment,
+    LPCWSTR lpCurrentDirectory,
+    LPSTARTUPINFOW lpStartupInfo,
+    LPPROCESS_INFORMATION lpProcessInformation
+) {
+    Wh_Log(L"CreateProcessW_hook");
+
+    BOOL result = CreateProcessW_original(
+        lpApplicationName,
+        lpCommandLine,
+        lpProcessAttributes,
+        lpThreadAttributes,
+        bInheritHandles,
+        dwCreationFlags,
+        lpEnvironment,
+        lpCurrentDirectory,
+        lpStartupInfo,
+        lpProcessInformation
+    );
+
+    if (result && lpCommandLine && wcsstr(lpCommandLine, L"--type=gpu-process")) {
+        g_hwAccelerated = TRUE;
+        Wh_Log(L"GPU process detected, hardware acceleration enabled");
+    }
+    Wh_Log(L"lpCommandLine: %s", lpCommandLine);
+
+    return result;
+}
+
+// renderer and gpu process spawn with this when sandbox is enabled
+using CreateProcessAsUserW_t = decltype(&CreateProcessAsUserW);
+CreateProcessAsUserW_t CreateProcessAsUserW_original;
+BOOL WINAPI CreateProcessAsUserW_hook(
+    HANDLE hToken,
+    LPCWSTR lpApplicationName,
+    LPWSTR lpCommandLine,
+    LPSECURITY_ATTRIBUTES lpProcessAttributes,
+    LPSECURITY_ATTRIBUTES lpThreadAttributes,
+    BOOL bInheritHandles,
+    DWORD dwCreationFlags,
+    LPVOID lpEnvironment,
+    LPCWSTR lpCurrentDirectory,
+    LPSTARTUPINFOW lpStartupInfo,
+    LPPROCESS_INFORMATION lpProcessInformation
+) {
+    Wh_Log(L"CreateProcessAsUserW_hook");
+
+    BOOL result = CreateProcessAsUserW_original(
+        hToken,
+        lpApplicationName,
+        lpCommandLine,
+        lpProcessAttributes,
+        lpThreadAttributes,
+        bInheritHandles,
+        dwCreationFlags,
+        lpEnvironment,
+        lpCurrentDirectory,
+        lpStartupInfo,
+        lpProcessInformation
+    );
+
+    if (result && lpCommandLine && wcsstr(lpCommandLine, L"--type=gpu-process")) {
+        g_hwAccelerated = TRUE;
+        Wh_Log(L"GPU process detected, hardware acceleration enabled");
+    }
+    Wh_Log(L"lpCommandLine: %s", lpCommandLine);
+
+    return result;
+}
+
+int ConnectToNamedPipe(LPCWSTR pipeName) {
+    Wh_Log(L"Pipe name: %s", pipeName);
+
+    g_hClientPipe = CreateFile(
+        pipeName,
         GENERIC_READ | GENERIC_WRITE,
         0,
         NULL,
         OPEN_EXISTING,
-        0,
+        FILE_FLAG_OVERLAPPED,
         NULL
     );
 
-    if (hPipe == INVALID_HANDLE_VALUE) {
-        Wh_Log(L"CreateFile failed, GLE=%d", GetLastError());
+    if (g_hClientPipe == INVALID_HANDLE_VALUE) {
+        int gle = GetLastError();
+        Wh_Log(L"CreateFile failed, GLE=%d", gle);
+        return gle;
+    }
+
+    g_pipeThread = std::thread([]() {
+        wchar_t buffer[512];
+        DWORD bytesRead;
+        OVERLAPPED overlapped = {};
+        overlapped.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+        if (!overlapped.hEvent) {
+            Wh_Log(L"CreateEvent failed, GLE=%d", GetLastError());
+            return;
+        }
+
+        while (!g_shouldClosePipe) {
+            BOOL result = ReadFile(g_hClientPipe, buffer, sizeof(buffer) - sizeof(wchar_t), &bytesRead, &overlapped);
+            if (!result && GetLastError() == ERROR_IO_PENDING) {
+                DWORD waitResult = WaitForSingleObject(overlapped.hEvent, INFINITE);
+                if (waitResult == WAIT_OBJECT_0) {
+                    if (GetOverlappedResult(g_hClientPipe, &overlapped, &bytesRead, FALSE)) {
+                        buffer[bytesRead / sizeof(wchar_t)] = L'\0';
+                        Wh_Log(L"Received message: %s", buffer);
+                    }
+                }
+            }
+        }
+        CloseHandle(overlapped.hEvent);
+        CloseHandle(g_hClientPipe);
+        g_hClientPipe = INVALID_HANDLE_VALUE;
+    });
+    g_pipeThread.detach();
+
+    return 0;
+}
+
+int SendNamedPipeMessage(LPCWSTR message) {
+    if (g_hClientPipe == INVALID_HANDLE_VALUE) {
+        Wh_Log(L"SendNamedPipeMessage failed: pipe is not connected");
+        return ERROR_PIPE_NOT_CONNECTED;
     }
 
     DWORD bytesWritten;
     size_t messageLength = wcslen(message) * sizeof(wchar_t);
-    BOOL result = WriteFile(hPipe, message, messageLength, &bytesWritten, NULL);
-    if (!result || bytesWritten != messageLength) {
-        Wh_Log(L"WriteFile failed, GLE=%d", GetLastError());
+    Wh_Log(L"Sending message: %s", message);
+
+    OVERLAPPED overlapped = {};
+    overlapped.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+    if (!overlapped.hEvent) {
+        int gle = GetLastError();
+        Wh_Log(L"CreateEvent failed, GLE=%d", gle);
+        return gle;
     }
 
-    CloseHandle(hPipe);
+    BOOL result = WriteFile(g_hClientPipe, message, messageLength, &bytesWritten, &overlapped);
+    if (!result && GetLastError() != ERROR_IO_PENDING) {
+        int gle = GetLastError();
+        Wh_Log(L"WriteFile failed, GLE=%d", gle);
+        CloseHandle(overlapped.hEvent);
+        return gle;
+    }
+
+    // Wait for the write operation to complete
+    DWORD waitResult = WaitForSingleObject(overlapped.hEvent, INFINITE);
+    if (waitResult != WAIT_OBJECT_0) {
+        int gle = GetLastError();
+        Wh_Log(L"WaitForSingleObject failed, GLE=%d", gle);
+        CloseHandle(overlapped.hEvent);
+        return gle;
+    }
+
+    // Check the result of the write operation
+    if (!GetOverlappedResult(g_hClientPipe, &overlapped, &bytesWritten, FALSE)) {
+        int gle = GetLastError();
+        Wh_Log(L"GetOverlappedResult failed, GLE=%d", gle);
+        CloseHandle(overlapped.hEvent);
+        return gle;
+    }
+
+    Wh_Log(L"Message sent successfully");
+    CloseHandle(overlapped.hEvent);
+    return 0;
 }
 
+#pragma region Cursed clipboard-based IPC that will be removed once proper v8 bindings are implemented
 using EmptyClipboard_t = decltype(&EmptyClipboard);
 EmptyClipboard_t EmptyClipboard_original;
 BOOL WINAPI EmptyClipboard_hook() {
@@ -986,6 +1255,7 @@ HANDLE WINAPI GetClipboardData_hook(UINT uFormat) {
     }
     return GetClipboardData_original(uFormat);
 }
+#pragma endregion
 
 typedef int (*cef_version_info_t)(int entry);
 
@@ -1028,81 +1298,7 @@ int FindOffset(int major, int minor, cte_offset_t offsets[], int offsets_size, B
     return NULL;
 }
 
-typedef struct _cef_string_utf16_t {
-  char16_t* str;
-  size_t length;
-  void (*dtor)(char16_t* str);
-} cef_string_utf16_t;
-
-typedef cef_string_utf16_t cef_string_t;
-typedef cef_string_utf16_t* cef_string_userfree_utf16_t;
-typedef cef_string_userfree_utf16_t cef_string_userfree_t;
-
-typedef struct _cef_string_list_t* cef_string_list_t;
-
-typedef struct _cef_base_ref_counted_t {
-  ///
-  // Size of the data structure.
-  ///
-  size_t size;
-
-  ///
-  // Called to increment the reference count for the object. Should be called
-  // for every new copy of a pointer to a given object.
-  ///
-  void(CEF_CALLBACK* add_ref)(struct _cef_base_ref_counted_t* self);
-
-  ///
-  // Called to decrement the reference count for the object. If the reference
-  // count falls to 0 the object should self-delete. Returns true (1) if the
-  // resulting reference count is 0.
-  ///
-  int(CEF_CALLBACK* release)(struct _cef_base_ref_counted_t* self);
-
-  ///
-  // Returns true (1) if the current reference count is 1.
-  ///
-  int(CEF_CALLBACK* has_one_ref)(struct _cef_base_ref_counted_t* self);
-
-  ///
-  // Returns true (1) if the current reference count is at least 1.
-  ///
-  int(CEF_CALLBACK* has_at_least_one_ref)(struct _cef_base_ref_counted_t* self);
-} cef_base_ref_counted_t;
-
-typedef struct _cef_basetime_t {
-  int64_t val;
-} cef_basetime_t;
-
-typedef enum {
-  ///
-  /// Writeable, Enumerable, Configurable
-  ///
-  V8_PROPERTY_ATTRIBUTE_NONE = 0,
-
-  ///
-  /// Not writeable
-  ///
-  V8_PROPERTY_ATTRIBUTE_READONLY = 1 << 0,
-
-  ///
-  /// Not enumerable
-  ///
-  V8_PROPERTY_ATTRIBUTE_DONTENUM = 1 << 1,
-
-  ///
-  /// Not configurable
-  ///
-  V8_PROPERTY_ATTRIBUTE_DONTDELETE = 1 << 2
-} cef_v8_propertyattribute_t;
-
-///
-/// Structure representing a V8 value handle. V8 handles can only be accessed
-/// from the thread on which they are created. Valid threads for creating a V8
-/// handle include the render process main thread (TID_RENDERER) and WebWorker
-/// threads. A task runner for posting tasks on the associated thread can be
-/// retrieved via the cef_v8context_t::get_task_runner() function.
-///
+#pragma region "full cef_v8value_t in case it's needed later"
 typedef struct _cef_v8value_t {
   ///
   /// Base structure.
@@ -1481,31 +1677,91 @@ typedef struct _cef_v8value_t {
 } cef_v8value_t;
 
 ///
-/// Structure that should be implemented to handle V8 function calls. The
-/// functions of this structure will be called on the thread associated with the
-/// V8 function.
+/// Structure representing a V8 context handle. V8 handles can only be accessed
+/// from the thread on which they are created. Valid threads for creating a V8
+/// handle include the render process main thread (TID_RENDERER) and WebWorker
+/// threads. A task runner for posting tasks on the associated thread can be
+/// retrieved via the cef_v8context_t::get_task_runner() function.
 ///
-typedef struct _cef_v8handler_t {
+typedef struct _cef_v8context_t {
   ///
   /// Base structure.
   ///
   cef_base_ref_counted_t base;
 
   ///
-  /// Handle execution of the function identified by |name|. |object| is the
-  /// receiver ('this' object) of the function. |arguments| is the list of
-  /// arguments passed to the function. If execution succeeds set |retval| to
-  /// the function return value. If execution fails set |exception| to the
-  /// exception that will be thrown. Return true (1) if execution was handled.
+  /// Returns the task runner associated with this context. V8 handles can only
+  /// be accessed from the thread on which they are created. This function can
+  /// be called on any render process thread.
   ///
-  int(CEF_CALLBACK* execute)(struct _cef_v8handler_t* self,
-                             const cef_string_t* name,
-                             struct _cef_v8value_t* object,
-                             size_t argumentsCount,
-                             struct _cef_v8value_t* const* arguments,
-                             struct _cef_v8value_t** retval,
-                             cef_string_t* exception);
-} cef_v8handler_t;
+  struct _cef_task_runner_t*(CEF_CALLBACK* get_task_runner)(
+      struct _cef_v8context_t* self);
+
+  ///
+  /// Returns true (1) if the underlying handle is valid and it can be accessed
+  /// on the current thread. Do not call any other functions if this function
+  /// returns false (0).
+  ///
+  int(CEF_CALLBACK* is_valid)(struct _cef_v8context_t* self);
+
+  ///
+  /// Returns the browser for this context. This function will return an NULL
+  /// reference for WebWorker contexts.
+  ///
+  struct _cef_browser_t*(CEF_CALLBACK* get_browser)(
+      struct _cef_v8context_t* self);
+
+  ///
+  /// Returns the frame for this context. This function will return an NULL
+  /// reference for WebWorker contexts.
+  ///
+  struct _cef_frame_t*(CEF_CALLBACK* get_frame)(struct _cef_v8context_t* self);
+
+  ///
+  /// Returns the global object for this context. The context must be entered
+  /// before calling this function.
+  ///
+  struct _cef_v8value_t*(CEF_CALLBACK* get_global)(
+      struct _cef_v8context_t* self);
+
+  ///
+  /// Enter this context. A context must be explicitly entered before creating a
+  /// V8 Object, Array, Function or Date asynchronously. exit() must be called
+  /// the same number of times as enter() before releasing this context. V8
+  /// objects belong to the context in which they are created. Returns true (1)
+  /// if the scope was entered successfully.
+  ///
+  int(CEF_CALLBACK* enter)(struct _cef_v8context_t* self);
+
+  ///
+  /// Exit this context. Call this function only after calling enter(). Returns
+  /// true (1) if the scope was exited successfully.
+  ///
+  int(CEF_CALLBACK* exit)(struct _cef_v8context_t* self);
+
+  ///
+  /// Returns true (1) if this object is pointing to the same handle as |that|
+  /// object.
+  ///
+  int(CEF_CALLBACK* is_same)(struct _cef_v8context_t* self,
+                             struct _cef_v8context_t* that);
+
+  ///
+  /// Execute a string of JavaScript code in this V8 context. The |script_url|
+  /// parameter is the URL where the script in question can be found, if any.
+  /// The |start_line| parameter is the base line number to use for error
+  /// reporting. On success |retval| will be set to the return value, if any,
+  /// and the function will return true (1). On failure |exception| will be set
+  /// to the exception, if any, and the function will return false (0).
+  ///
+  int(CEF_CALLBACK* eval)(struct _cef_v8context_t* self,
+                          const cef_string_t* code,
+                          const cef_string_t* script_url,
+                          int start_line,
+                          struct _cef_v8value_t** retval,
+                          struct _cef_v8exception_t** exception);
+} cef_v8context_t;
+#pragma endregion
 
 typedef int CEF_CALLBACK (*v8func_exec_t)(cef_v8handler_t* self, const cef_string_t* name, cef_v8value_t* object, size_t argumentsCount, cef_v8value_t* const* arguments, cef_v8value_t** retval, cef_string_t* exception);
 v8func_exec_t CEF_CALLBACK _getSpotifyModule_original;
@@ -1513,13 +1769,46 @@ v8func_exec_t CEF_CALLBACK _getSpotifyModule_original;
 typedef cef_v8value_t* CEF_EXPORT (*cef_v8value_create_function_t)(const cef_string_t* name, cef_v8handler_t* handler);
 cef_v8value_create_function_t CEF_EXPORT cef_v8value_create_function_original;
 
-int CEF_CALLBACK WindhawkCommV8Func(cef_v8handler_t* self, const cef_string_t* name, cef_v8value_t* object, size_t argumentsCount, cef_v8value_t* const* arguments, cef_v8value_t** retval, cef_string_t* exception) {
-    Wh_Log(L"WindhawkCommV8Func called with name: %s", name->str);
-    if (argumentsCount == 1) {
-        cef_string_t* arg = arguments[0]->get_string_value(arguments[0]);
-        std::wstring argStr(arg->str, arg->str + arg->length);
-        Wh_Log(L"Argument: %s", argStr.c_str());
-        SendNamedPipeMessage(argStr.c_str());
+typedef cef_v8value_t* CEF_EXPORT (*cef_v8value_create_bool_t)(int value);
+cef_v8value_create_bool_t cef_v8value_create_bool;
+
+typedef cef_v8value_t* CEF_EXPORT (*cef_v8value_create_string_t)(const cef_string_t* value);
+cef_v8value_create_string_t cef_v8value_create_string;
+
+typedef cef_v8value_t* CEF_EXPORT (*cef_v8value_create_object_t)(void* accessor, void* interceptor);
+cef_v8value_create_object_t cef_v8value_create_object;
+
+typedef cef_v8context_t* CEF_EXPORT (*cef_v8context_get_current_context_t)();
+cef_v8context_get_current_context_t cef_v8context_get_current_context;
+
+std::u16string to_u16string(int const &i) {
+  std::wstring_convert<std::codecvt_utf8_utf16<char16_t, 0x10ffff, std::little_endian>, char16_t> conv;
+  return conv.from_bytes(std::to_string(i));
+}
+
+cef_string_t* GenerateCefString(std::u16string str) {
+    cef_string_t* cefStr = (cef_string_t*)calloc(1, sizeof(cef_string_t));
+    cefStr->str = (char16_t*)calloc(str.size() + 1, sizeof(char16_t));
+    cefStr->length = str.size();
+    memcpy(cefStr->str, str.c_str(), str.size() * sizeof(char16_t));
+    return cefStr;
+}
+
+int CEF_CALLBACK WindhawkCommV8Handler(cef_v8handler_t* self, const cef_string_t* name, cef_v8value_t* object, size_t argumentsCount, cef_v8value_t* const* arguments, cef_v8value_t** retval, cef_string_t* exception) {
+    Wh_Log(L"WindhawkCommV8Handler called with name: %s", name->str);
+    std::u16string nameStr(name->str, name->length);
+    if (nameStr == u"executeCommand") {
+        if (argumentsCount == 1) {
+            cef_string_t* arg = arguments[0]->get_string_value(arguments[0]);
+            std::wstring argStr(arg->str, arg->str + arg->length);
+            Wh_Log(L"Argument: %s", argStr.c_str());
+            int res = SendNamedPipeMessage(argStr.c_str());
+            if (res != 0) {
+                *exception = *GenerateCefString(u"Error: " + to_u16string(res));
+            }
+        }
+    } else if (nameStr == u"query") {
+        *exception = *GenerateCefString(u"TODO!");
     }
     return TRUE;
 }
@@ -1532,13 +1821,25 @@ int CEF_CALLBACK _getSpotifyModule_hook(cef_v8handler_t* self, const cef_string_
             Wh_Log(L"CTEWH is being requested");
             cef_v8handler_t* ctewh = (cef_v8handler_t*)calloc(1, sizeof(cef_v8handler_t));
             ctewh->base.size = sizeof(cef_v8handler_t);
-            ctewh->execute = WindhawkCommV8Func;
-            cef_string_t* name = (cef_string_t*)calloc(1, sizeof(cef_string_t));
-            name->str = (char16_t*)calloc(12, sizeof(char16_t));
-            name->length = 11;
-            std::u16string windhawkComm = u"WindhawkComm";
-            memcpy(name->str, windhawkComm.c_str(), windhawkComm.size() * sizeof(char16_t));
-            *retval = cef_v8value_create_function_original(name, ctewh);
+            ctewh->execute = WindhawkCommV8Handler;
+            cef_v8value_t* retobj = cef_v8value_create_object(NULL, NULL);
+            cef_string_t* name = GenerateCefString(u"executeCommand");
+            retobj->set_value_bykey(retobj, name, cef_v8value_create_function_original(name, ctewh), V8_PROPERTY_ATTRIBUTE_NONE);
+            cef_string_t* name2 = GenerateCefString(u"query");
+            retobj->set_value_bykey(retobj, name2, cef_v8value_create_function_original(name2, ctewh), V8_PROPERTY_ATTRIBUTE_NONE);
+            cef_v8value_t* initialConfigObj = cef_v8value_create_object(NULL, NULL);
+            initialConfigObj->set_value_bykey(initialConfigObj, GenerateCefString(u"showframe"), cef_v8value_create_bool(cte_settings.showframe), V8_PROPERTY_ATTRIBUTE_NONE);
+            initialConfigObj->set_value_bykey(initialConfigObj, GenerateCefString(u"showframeonothers"), cef_v8value_create_bool(cte_settings.showframeonothers), V8_PROPERTY_ATTRIBUTE_NONE);
+            initialConfigObj->set_value_bykey(initialConfigObj, GenerateCefString(u"showmenu"), cef_v8value_create_bool(cte_settings.showmenu), V8_PROPERTY_ATTRIBUTE_NONE);
+            initialConfigObj->set_value_bykey(initialConfigObj, GenerateCefString(u"showcontrols"), cef_v8value_create_bool(cte_settings.showcontrols), V8_PROPERTY_ATTRIBUTE_NONE);
+            initialConfigObj->set_value_bykey(initialConfigObj, GenerateCefString(u"transparentcontrols"), cef_v8value_create_bool(cte_settings.transparentcontrols), V8_PROPERTY_ATTRIBUTE_NONE);
+            initialConfigObj->set_value_bykey(initialConfigObj, GenerateCefString(u"ignoreminsize"), cef_v8value_create_bool(cte_settings.ignoreminsize), V8_PROPERTY_ATTRIBUTE_NONE);
+            initialConfigObj->set_value_bykey(initialConfigObj, GenerateCefString(u"transparentrendering"), cef_v8value_create_bool(cte_settings.transparentrendering), V8_PROPERTY_ATTRIBUTE_NONE);
+            initialConfigObj->set_value_bykey(initialConfigObj, GenerateCefString(u"noforceddarkmode"), cef_v8value_create_bool(cte_settings.noforceddarkmode), V8_PROPERTY_ATTRIBUTE_NONE);
+            initialConfigObj->set_value_bykey(initialConfigObj, GenerateCefString(u"forceextensions"), cef_v8value_create_bool(cte_settings.forceextensions), V8_PROPERTY_ATTRIBUTE_NONE);
+            retobj->set_value_bykey(retobj, GenerateCefString(u"initialConfig"), initialConfigObj, V8_PROPERTY_ATTRIBUTE_NONE);
+            retobj->set_value_bykey(retobj, GenerateCefString(u"version"), cef_v8value_create_string(GenerateCefString(u"0.6")), V8_PROPERTY_ATTRIBUTE_NONE);
+            *retval = retobj;
             return TRUE;
         }
     }
@@ -1556,31 +1857,56 @@ cef_v8value_create_function_t CEF_EXPORT cef_v8value_create_function_hook = [](c
     return cef_v8value_create_function_original(name, handler);
 };
 
-using SetTokenInformation_t = decltype(&SetTokenInformation);
-SetTokenInformation_t SetTokenInformation_original;
-BOOL WINAPI SetTokenInformation_hook(HANDLE TokenHandle, TOKEN_INFORMATION_CLASS TokenInformationClass, LPVOID TokenInformation, DWORD TokenInformationLength) {
-    Wh_Log(L"SetTokenInformation_hook called, ignoring.");
-    return TRUE;
-}
+// using SetTokenInformation_t = decltype(&SetTokenInformation);
+// SetTokenInformation_t SetTokenInformation_original;
+// BOOL WINAPI SetTokenInformation_hook(HANDLE TokenHandle, TOKEN_INFORMATION_CLASS TokenInformationClass, LPVOID TokenInformation, DWORD TokenInformationLength) {
+//     Wh_Log(L"SetTokenInformation_hook called, ignoring.");
+//     return TRUE;
+// }
 
 BOOL InitSpotifyRendererHooks(BOOL isInitialThread, char* pbExecutable, HMODULE cefModule) {
     g_isSpotifyRenderer = TRUE;
     Wh_Log(L"Initializing Spotify renderer hooks");
 
-    Wh_SetFunctionHook((void*)SetTokenInformation, (void*)SetTokenInformation_hook,
-                       (void**)&SetTokenInformation_original);
-                       
+    // Wh_SetFunctionHook((void*)SetTokenInformation, (void*)SetTokenInformation_hook,
+    //                    (void**)&SetTokenInformation_original);
 
-    // if (isInitialThread) {
-    //     if (MarkCTEWHInJS((char*)GetModuleHandle(NULL))) {
-    //         Wh_Log(L"Marked CTEWH in JS");
-    //     }
-    // }
+    if (!isInitialThread) {
+        Wh_Log(L"Late injection is not supported on renderer processes.");
+        return FALSE;
+    }
 
-    SendNamedPipeMessage(L"/WH:Test");
+    if (wcsstr(GetCommandLineW(), L"--extension-process") != NULL) {
+        Wh_Log(L"Extension process detected, skipping.");
+        return FALSE;
+    }
+
+    wchar_t pipeName[256];
+    GetEnvironmentVariable(L"CHROME_CRASHPAD_PIPE_NAME", pipeName, 256);
+    wcscat(pipeName, L"_CTEWH");
+    Wh_Log(L"Pipe name: %s", pipeName);
+    if (ConnectToNamedPipe(pipeName) == 0) {
+        Wh_Log(L"Connected to named pipe");
+    } else {
+        Wh_Log(L"Unable to connect to named pipe");
+        return FALSE;
+    }
+
+    //SendNamedPipeMessage(L"/WH:Test");
 
     cef_v8value_create_function_t cef_v8value_create_function =
         (cef_v8value_create_function_t)GetProcAddress(cefModule, "cef_v8value_create_function");
+    cef_v8value_create_bool = (cef_v8value_create_bool_t)GetProcAddress(cefModule, "cef_v8value_create_bool");
+    cef_v8value_create_string = (cef_v8value_create_string_t)GetProcAddress(cefModule, "cef_v8value_create_string");
+    cef_v8value_create_object =
+        (cef_v8value_create_object_t)GetProcAddress(cefModule, "cef_v8value_create_object");
+    cef_v8context_get_current_context =
+        (cef_v8context_get_current_context_t)GetProcAddress(cefModule, "cef_v8context_get_current_context");
+
+    if (!cef_v8value_create_function || !cef_v8value_create_bool || !cef_v8value_create_string || !cef_v8value_create_object) {
+        Wh_Log(L"Failed to get CEF functions");
+        return FALSE;
+    }
     Wh_SetFunctionHook((void*)cef_v8value_create_function, (void*)cef_v8value_create_function_hook,
                        (void**)&cef_v8value_create_function_original);
 
@@ -1683,8 +2009,12 @@ BOOL Wh_ModInit() {
                            (void**)&SetClipboardData_original);
         Wh_SetFunctionHook((void*)GetClipboardData, (void*)GetClipboardData_hook,
                            (void**)&GetClipboardData_original);
+        Wh_SetFunctionHook((void*)SetEnvironmentVariableW, (void*)SetEnvironmentVariableW_hook,
+                           (void**)&SetEnvironmentVariableW_original);
+        Wh_SetFunctionHook((void*)CreateProcessW, (void*)CreateProcessW_hook,
+                           (void**)&CreateProcessW_original);
         Wh_SetFunctionHook((void*)CreateProcessAsUserW, (void*)CreateProcessAsUserW_hook,
-                            (void**)&CreateProcessAsUserW_original);
+                           (void**)&CreateProcessAsUserW_original);
 
         // Patch the executable in memory to enable transparent rendering, disable forced dark mode, or force enable extensions
         // (Only do this on process startup as patching after CEF initialization is pointless)
@@ -1706,10 +2036,15 @@ BOOL Wh_ModInit() {
             }
         }
 
-        g_pipeThread = std::thread([]() {
-            CreateNamedPipeServer();
-        });
-        g_pipeThread.detach();
+        // Check if CHROME_CRASHPAD_PIPE_NAME environment variable exists and create pipe if it does
+        wchar_t pipeName[256];
+        if (GetEnvironmentVariable(L"CHROME_CRASHPAD_PIPE_NAME", pipeName, ARRAYSIZE(pipeName))) {
+            wcscat(pipeName, L"_CTEWH");
+            g_pipeThread = std::thread([=]() {
+                CreateNamedPipeServer(pipeName);
+            });
+            g_pipeThread.detach();
+        }
     }
 
     EnumWindows(InitEnumWindowsProc, 1);
@@ -1720,18 +2055,24 @@ BOOL Wh_ModInit() {
 void Wh_ModUninit() {
     Wh_Log(L"Uninit");
 
+    g_shouldClosePipe = TRUE;
+
     if (g_isSpotifyRenderer) {
+        if (g_hClientPipe != INVALID_HANDLE_VALUE) {
+            CloseHandle(g_hClientPipe);
+            g_hClientPipe = INVALID_HANDLE_VALUE;
+        }
+        if (g_pipeThread.joinable()) {
+            g_pipeThread.join();
+        }
         return;
     }
-
-    g_shouldClosePipe = TRUE;
 
     if (g_hSrvPipe != INVALID_HANDLE_VALUE) {
         CancelIoEx(g_hSrvPipe, NULL);
         CloseHandle(g_hSrvPipe);
         g_hSrvPipe = INVALID_HANDLE_VALUE;
     }
-
     if (g_pipeThread.joinable()) {
         g_pipeThread.join();
     }
@@ -1749,10 +2090,10 @@ void Wh_ModUninit() {
 
 // The mod setting were changed, reload them.
 void Wh_ModSettingsChanged() {
-    if (g_isSpotifyRenderer) {
-        return;
-    }
     BOOL prev_transparentcontrols = cte_settings.transparentcontrols;
     LoadSettings();
-    EnumWindows(UpdateEnumWindowsProc, prev_transparentcontrols != cte_settings.transparentcontrols);
+    if (!g_isSpotifyRenderer) {
+        EnumWindows(UpdateEnumWindowsProc, prev_transparentcontrols != cte_settings.transparentcontrols);
+    }
+    // Note: won't be called in a sandboxed renderer process
 }
