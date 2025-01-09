@@ -35,20 +35,18 @@ const elementsRequired = [
 
 let style = 'xp';
 let titleStyle = 'spotify';
-let earlyInitDone = false;
 
-async function earlyInit() {
+function earlyInit() {
     if (!localStorage.wmpotifyShowLibX) {
         document.body.dataset.hideLibx = true;
     }
 
-    await WindhawkComm.init();
+    WindhawkComm.init();
 
-    const whStatus = await WindhawkComm.query();
+    const whStatus = WindhawkComm.query();
     if (whStatus && !localStorage.wmpotifyStyle && window.outerHeight - window.innerHeight > 0 && whStatus.isThemingEnabled) {
         if (whStatus.supportedCommands?.includes('ExtendFrame') &&
             whStatus.options?.transparentrendering &&
-            whStatus.isMainWndLoaded &&
             whStatus.isDwmEnabled) {
             style = 'aero';
         } else if (!whStatus.isDwmEnabled) {
@@ -60,16 +58,16 @@ async function earlyInit() {
     if (localStorage.wmpotifyStyle && ['xp', 'aero', 'basic'].includes(localStorage.wmpotifyStyle)) {
         style = localStorage.wmpotifyStyle;
     }
-    await WindhawkComm.setBackdrop('mica'); // win11
+    WindhawkComm.setBackdrop('mica'); // win11
     switch (style) {
         case 'xp':
-            await WindhawkComm.extendFrame(0, 0, 0, 0);
+            WindhawkComm.extendFrame(0, 0, 0, 0);
             break;
         case 'aero':
-            await WindhawkComm.extendFrame(0, 0, 0, 60);
+            WindhawkComm.extendFrame(0, 0, 0, 60);
             break;
         case 'basic':
-            await WindhawkComm.extendFrame(0, 0, 0, 0);
+            WindhawkComm.extendFrame(0, 0, 0, 0);
             if (document.hasFocus()) {
                 document.body.style.backgroundColor = '#b9d1ea';
             } else {
@@ -97,7 +95,7 @@ async function earlyInit() {
         console.log('WMPotify EarlyInit:', window.SpotEx, whStatus);
         if (window.outerHeight - window.innerHeight > 0) {
             titleStyle = 'native';
-        } else if (window.SpotEx || (whStatus?.supportedCommands?.includes('Minimize') && whStatus?.isMainWndLoaded)) {
+        } else if (window.SpotEx || (whStatus?.supportedCommands?.includes('Minimize'))) {
             if (whStatus?.options?.showmenu && !whStatus.options.showcontrols) {
                 titleStyle = 'keepmenu';
             } else {
@@ -112,8 +110,6 @@ async function earlyInit() {
         titleStyle = 'native';
     }
     document.documentElement.dataset.wmpotifyTitleStyle = titleStyle;
-
-    earlyInitDone = true;
 }
 
 earlyInit();
@@ -141,8 +137,7 @@ async function init() {
 }
 
 function isReady() {
-    return earlyInitDone &&
-        window.Spicetify &&
+    return window.Spicetify &&
         window.Spicetify.CosmosAsync &&
         window.Spicetify.Platform?.PlayerAPI &&
         window.Spicetify.AppTitle &&

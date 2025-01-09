@@ -2,7 +2,7 @@ import ControlManager from "./ControlManager";
 import WindhawkComm from "./WindhawkComm";
 
 export async function createTitlebar(mode) {
-    const whStatus = await WindhawkComm.query();
+    const whStatus = WindhawkComm.query();
 
     switch (mode) {
         case 'native':
@@ -14,7 +14,7 @@ export async function createTitlebar(mode) {
             const titleButtons = document.createElement('div');
             titleButtons.id = 'wmpotify-title-buttons';
             if (window.SpotEx ||
-                (whStatus && whStatus.supportedCommands.includes('Minimize') && whStatus.isMainWndLoaded)
+                (whStatus && whStatus.supportedCommands.includes('Minimize'))
             ) {
                 const minimizeButton = document.createElement('button');
                 minimizeButton.id = 'wmpotify-minimize-button';
@@ -48,7 +48,7 @@ export async function createTitlebar(mode) {
                             delete maximizeButton.dataset.maximized;
                         }
                     } else {
-                        if ((await WindhawkComm.query())?.isMaximized) {
+                        if (WindhawkComm.query().isMaximized) {
                             maximizeButton.dataset.maximized = true;
                         } else {
                             delete maximizeButton.dataset.maximized;
@@ -90,8 +90,8 @@ export async function createTitlebar(mode) {
 }
 
 async function closeWindow() {
-    const whStatus = await WindhawkComm.query();
-    if (whStatus?.supportedCommands?.includes('Close') && whStatus?.isMainWndLoaded) {
+    const whStatus = WindhawkComm.query();
+    if (whStatus?.supportedCommands?.includes('Close')) {
         WindhawkComm.close();
     } else {
         window.close();

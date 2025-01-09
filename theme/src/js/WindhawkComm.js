@@ -1,54 +1,50 @@
-let windhawkAvailable = false;
+let windhawkModule = null;
 let supportedCommands = [];
 
 export default WindhawkComm = {
-    async init() {
-        await testWindhawk();
+    init() {
+        testWindhawk();
     },
 
-    async query() {
-        if (windhawkAvailable) {
-            await writeClipboard("/WH:Query");
-            const clipboard = await readClipboard();
-            try {
-                return JSON.parse(clipboard);
-            } catch (e) {
-                // mod unloaded while running?
-                windhawkAvailable = false;
-                console.error(e);
+    query() {
+        if (windhawkModule) {
+            const res = windhawkModule.query();
+            if (res) {
+                res.supportedCommands = supportedCommands;
+                return res;
             }
         }
         return null;
     },
 
-    async extendFrame(left, top, right, bottom) {
-        if (windhawkAvailable && supportedCommands.includes("ExtendFrame")) {
-            await writeClipboard(`/WH:ExtendFrame:${left}:${top}:${right}:${bottom}`);
+    extendFrame(left, top, right, bottom) {
+        if (windhawkModule && supportedCommands.includes("ExtendFrame")) {
+            windhawkModule.executeCommand(`/WH:ExtendFrame:${left}:${top}:${right}:${bottom}`);
         }
     },
 
-    async minimize() {
-        if (windhawkAvailable && supportedCommands.includes("Minimize")) {
-            await writeClipboard("/WH:Minimize");
+    minimize() {
+        if (windhawkModule && supportedCommands.includes("Minimize")) {
+            windhawkModule.executeCommand("/WH:Minimize");
         }
     },
 
-    async maximizeRestore() {
-        if (windhawkAvailable && supportedCommands.includes("MaximizeRestore")) {
-            await writeClipboard("/WH:MaximizeRestore");
+    maximizeRestore() {
+        if (windhawkModule && supportedCommands.includes("MaximizeRestore")) {
+            windhawkModule.executeCommand("/WH:MaximizeRestore");
         }
     },
 
-    async close() {
-        if (windhawkAvailable && supportedCommands.includes("Close")) {
-            await writeClipboard("/WH:Close");
+    close() {
+        if (windhawkModule && supportedCommands.includes("Close")) {
+            windhawkModule.executeCommand("/WH:Close");
         }
     },
 
-    async setLayered(layered, alpha, color) {
+    setLayered(layered, alpha, color) {
         layered = layered ? 1 : 0;
         // color: RRGGBB hex
-        if (windhawkAvailable) {
+        if (windhawkModule) {
             const args = [layered];
             if (alpha) {
                 args.push(alpha);
@@ -56,30 +52,36 @@ export default WindhawkComm = {
             if (color) {
                 args.push(color);
             }
-            await writeClipboard('/WH:SetLayered:' + args.join(':'));
+            windhawkModule.executeCommand('/WH:SetLayered:' + args.join(':'));
         }
     },
 
-    async setBackdrop(backdropType) { // mica, acrylic, tabbed
-        if (windhawkAvailable) {
-            await writeClipboard(`/WH:SetBackdrop:${backdropType}`);
+    setBackdrop(backdropType) { // mica, acrylic, tabbed
+        if (windhawkModule) {
+            windhawkModule.executeCommand(`/WH:SetBackdrop:${backdropType}`);
         }
     },
 
-    async resizeTo(width, height) { // Ignores min/max size
-        if (windhawkAvailable) {
-            await writeClipboard(`/WH:ResizeTo:${width}:${height}`);
+    resizeTo(width, height) { // Ignores min/max size
+        if (windhawkModule) {
+            windhawkModule.executeCommand(`/WH:ResizeTo:${width}:${height}`);
         }
     },
 
-    async setMinSize(width, height) {
-        if (windhawkAvailable) {
-            await writeClipboard(`/WH:SetMinSize:${width}:${height}`);
+    setMinSize(width, height) {
+        if (windhawkModule) {
+            windhawkModule.executeCommand(`/WH:SetMinSize:${width}:${height}`);
+        }
+    },
+
+    setTopMost(topMost) {
+        if (windhawkModule) {
+            windhawkModule.executeCommand(`/WH:SetTopMost:${topMost ? 1 : 0}`);
         }
     },
 
     available() {
-        return windhawkAvailable;
+        return windhawkModule;
     },
 
     getSupportedCommands() {
@@ -87,70 +89,19 @@ export default WindhawkComm = {
     }
 }
 
-async function testWindhawk() {
+function testWindhawk() {
     if (!navigator.userAgent.includes("Windows")) {
         return;
     }
-    const origClipboardContent = await readClipboard();
-    await writeClipboard("/WH:Query");
     try {
-        const clipboardContent = await readClipboard();
-        const parsed = JSON.parse(clipboardContent);
-        if (parsed && parsed.type === "CTEWHQueryResponse") {
-            windhawkAvailable = true;
-            supportedCommands = parsed.supportedCommands;
-            console.log("Windhawk available");
-            return parsed;
-        } else {
-            await writeClipboard(origClipboardContent);
-        }
+        windhawkModule = window._getSpotifyModule("ctewh");
+        windhawkModule.query();
+        supportedCommands = windhawkModule.supportedCommands;
+        console.log("Windhawk available");
     } catch (e) {
-        await writeClipboard(origClipboardContent);
+        // query fails if the main browser process has unloaded the mod and thus closed the pipe
+        // Sandboxed renderer processes won't respond to the Windhawk's uninit request so it'll keep loaded and will continue hooking _getSpotifyModule
+        windhawkModule = null;
+        console.log("Windhawk not available");
     }
-    console.log("Windhawk not available");
-}
-
-async function writeClipboard(data) {
-    return new Promise((resolve, reject) => {
-        window.sendCosmosRequest({
-            request: JSON.stringify({
-                headers: {},
-                body: data,
-                method: "PUT",
-                uri: "sp://desktop/v1/clipboard"
-            }),
-            persistent: false,
-            onSuccess: () => {
-                resolve();
-            },
-            onFailure: (error) => {
-                reject(error);
-            }
-        });
-    });
-}
-
-async function readClipboard() {
-    return new Promise((resolve, reject) => {
-        window.sendCosmosRequest({
-            request: JSON.stringify({
-                headers: {},
-                body: "",
-                method: "GET",
-                uri: "sp://desktop/v1/clipboard"
-            }),
-            persistent: false,
-            onSuccess: (value) => {
-                try {
-                    const val = JSON.parse(JSON.parse(value).body).data;
-                    resolve(val);
-                } catch (e) {
-                    reject(e);
-                }
-            },
-            onFailure: (error) => {
-                reject(error);
-            }
-        });
-    });
 }
