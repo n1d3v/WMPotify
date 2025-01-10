@@ -18,6 +18,13 @@ export function setupTopbar() {
     const homeButton = document.querySelector('.main-globalNav-searchContainer > button');
     addTab(homeButton);
     const searchButton = document.querySelector('.main-globalNav-searchContainer div form button');
+    searchButton.addEventListener('click', (event) => {
+        // This button behave differently from version to version
+        // So just open the search page directly
+        window.open('spotify:search');
+        event.preventDefault();
+        event.stopPropagation();
+    });
     addTab(searchButton);
     tabs = [homeButton, searchButton];
     const customAppButtons = document.querySelectorAll('.custom-navlinks-scrollable_container div[role="presentation"] > button');

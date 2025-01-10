@@ -6,7 +6,9 @@ import { setupPlayerbar, updatePlayPauseButton } from './playerbar';
 import Config from './config';
 import { initQueuePanel } from './queue';
 import WindhawkComm from './WindhawkComm';
+import { initCustomDPiP } from './dpip/init';
 globalThis.WindhawkComm = WindhawkComm;
+globalThis.initCustomDPiP = initCustomDPiP;
 
 const elementsRequired = [
     '.Root__globalNav',
@@ -45,8 +47,8 @@ function earlyInit() {
 
     const whStatus = WindhawkComm.query();
     if (whStatus && !localStorage.wmpotifyStyle && window.outerHeight - window.innerHeight > 0 && whStatus.isThemingEnabled) {
-        if (whStatus.supportedCommands?.includes('ExtendFrame') &&
-            whStatus.options?.transparentrendering &&
+        if (whStatus.supportedCommands.includes('ExtendFrame') &&
+            whStatus.options.transparentrendering &&
             whStatus.isDwmEnabled) {
             style = 'aero';
         } else if (!whStatus.isDwmEnabled) {

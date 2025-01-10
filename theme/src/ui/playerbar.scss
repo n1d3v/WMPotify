@@ -425,6 +425,7 @@ div[data-testid='now-playing-widget'] {
     button[data-testid='fullscreen-mode-button'],
     #BeautifulLyricsFullscreenButton {
         width: 21px;
+        min-width: 0;
         height: 21px;
         border-radius: 0;
         background: var(--fullscreen) no-repeat center;
@@ -501,11 +502,14 @@ div[data-testid='now-playing-widget'] {
 }
 
 :root:not([data-wmpotify-style="xp"]) {
-    .main-nowPlayingBar-right {
+    .main-nowPlayingBar-extraControls {
+        > * {
+            margin: 0 4px;
+        }
+
         button[data-testid="control-button-npv"] {
             width: 21px;
             height: 21px;
-            margin-right: 8px;
             border-radius: 0;
             background: url('resources/playerbar/npv.png') no-repeat center;
             transform: none !important;
@@ -520,6 +524,26 @@ div[data-testid='now-playing-widget'] {
 
             &:active {
                 background-image: url('resources/playerbar/npv_pressed.png');
+            }
+        }
+
+        button[data-testid="lyrics-button"] {
+            width: 21px;
+            height: 21px;
+            border-radius: 0;
+            background: url('resources/playerbar/lyrics.png') no-repeat center;
+            transform: none !important;
+
+            svg {
+                display: none;
+            }
+
+            &:hover {
+                background-image: url('resources/playerbar/lyrics_hover.png');
+            }
+
+            &:active {
+                background-image: url('resources/playerbar/lyrics_pressed.png');
             }
         }
 
@@ -541,6 +565,27 @@ div[data-testid='now-playing-widget'] {
             &:active {
                 background-image: url('resources/playerbar/queue_pressed.png');
             }
+        }
+
+        .main-contextMenu-tippyWrapper button { /* connect button */
+            width: 21px;
+            height: 21px;
+            border-radius: 0;
+            background: url('resources/playerbar/connect.png') no-repeat center;
+            transform: none !important;
+
+            svg {
+                display: none;
+            }
+
+            &:hover {
+                background-image: url('resources/playerbar/connect_hover.png');
+            }
+
+            &:active {
+                background-image: url('resources/playerbar/connect_pressed.png');
+            }
+
         }
     }
 }

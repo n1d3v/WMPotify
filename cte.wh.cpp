@@ -53,7 +53,14 @@
     * 1.2.47: Chrome runtime is always enabled since this version
     * Try the [noControls](https://github.com/ohitstom/spicetify-extensions/tree/main/noControls) Spicetify extension to remove the space left by the custom window controls
     * Enable Chrome runtime to get a proper window icon. Use `--enable-chrome-runtime` flag or put `app.enable-chrome-runtime=true` in `%appdata%\Spotify\prefs`
-    * Spicetify extension developers: Use `window.outerHeight - window.innerHeight > 0` to detect if the window has a native title bar
+* Notes for Spicetify extension/theme developers
+    * Use `window.outerHeight - window.innerHeight > 0` to detect if the window has a native title bar
+    * This mod exposes a JavaScript API that can be used to interact with the main window and this mod
+    * The API is available with `window._getSpotifyModule('ctewh')`
+    * Use `_getSpotifyModule('ctewh').query()` to get various information about the window and the mod
+    * Use `_getSpotifyModule('ctewh').executeCommand('/WH:<command>')` to execute a command. See `HandleWindhawkComm` function below for available commands, or see [here](https://github.com/Ingan121/WMPotify/blob/master/theme/src/js/WindhawkComm.js) for a usage example
+    * This API is only available on Spotify 1.2.4 and above, and only if the mod is enabled before Spotify starts
+    * The API is disabled by default on untested CEF versions
 */
 // ==/WindhawkModReadme==
 
@@ -247,7 +254,7 @@ struct cte_queryResponse_t {
     int minHeight;
 } g_queryResponse;
 
-#pragma region CEF structs (as minimal as possible)
+#pragma region CEF structs (as minimal and cross-version compatible as possible)
 typedef struct _cef_string_utf16_t {
   char16_t* str;
   size_t length;
@@ -345,6 +352,7 @@ typedef struct _cef_v8value_t {
     struct _cef_v8value_t*(CEF_CALLBACK* get_value_byindex)(struct _cef_v8value_t* self, int index);
     int(CEF_CALLBACK* set_value_bykey)(struct _cef_v8value_t* self, const cef_string_t* key, struct _cef_v8value_t* value, cef_v8_propertyattribute_t attribute);
     int(CEF_CALLBACK* set_value_byindex)(struct _cef_v8value_t* self, int index, struct _cef_v8value_t* value);
+    // below here is updated quite recently (CEF 126), so it's avoided
 } cef_v8value_t;
 #pragma endregion
 
@@ -813,7 +821,7 @@ typedef struct _cef_v8value_t {
 // } cef_v8context_t;
 #pragma endregion
 
-#pragma region CEF V8 functions
+#pragma region CEF V8 functions + helpers
 typedef int CEF_CALLBACK (*v8func_exec_t)(cef_v8handler_t* self, const cef_string_t* name, cef_v8value_t* object, size_t argumentsCount, cef_v8value_t* const* arguments, cef_v8value_t** retval, cef_string_t* exception);
 v8func_exec_t CEF_CALLBACK _getSpotifyModule_original;
 
@@ -850,6 +858,8 @@ cef_string_t* GenerateCefString(std::u16string str) {
     return cefStr;
 }
 #pragma endregion
+
+void CreateNamedPipeServer();
 
 // Whether DwmExtendFrameIntoClientArea should be called
 // False if DWM is disabled, visual styles are disabled, or some kind of basic themer is used
@@ -974,6 +984,7 @@ BOOL CALLBACK UninitEnumWindowsProc(HWND hWnd, LPARAM lParam) {
     return TRUE;
 }
 
+#pragma region Memory patches
 // From https://windhawk.net/mods/visual-studio-anti-rich-header
 std::string ReplaceAll(std::string str, const std::string& from, const std::string& to)
 {
@@ -1097,7 +1108,9 @@ BOOL ForceEnableExtensions(char* pbExecutable) {
     std::vector<uint8_t> targetPatchBytes(targetPatch.begin(), targetPatch.end());
     return PatchMemory(pbExecutable, targetRegex, targetPatchBytes, 1, 1);
 }
+#pragma endregion
 
+#pragma region CEF hooks
 typedef int CEF_CALLBACK (*is_frameless_t)(struct _cef_window_delegate_t* self, struct _cef_window_t* window);
 int CEF_CALLBACK is_frameless_hook(struct _cef_window_delegate_t* self, struct _cef_window_t* window) {
     Wh_Log(L"is_frameless_hook");
@@ -1128,6 +1141,10 @@ _cef_window_t* CEF_EXPORT cef_window_create_top_level_hook(void* delegate) {
             }
         }
         if (g_mainHwnd == NULL) {
+            g_pipeThread = std::thread([=]() {
+                CreateNamedPipeServer();
+            });
+            g_pipeThread.detach();
             g_mainHwnd = hWnd;
         }
     } else {
@@ -1201,7 +1218,9 @@ _cef_panel_t* CEF_EXPORT cef_panel_create_hook(cef_panel_delegate_t* delegate) {
     }
     return panel;
 }
+#pragma endregion
 
+#pragma region Win32 API hooks
 using CreateWindowExW_t = decltype(&CreateWindowExW);
 CreateWindowExW_t CreateWindowExW_original;
 HWND WINAPI CreateWindowExW_hook(DWORD dwExStyle, LPCWSTR lpClassName, LPCWSTR lpWindowName, DWORD dwStyle, int X, int Y, int nWidth, int nHeight, HWND hWndParent, HMENU hMenu, HINSTANCE hInstance, LPVOID lpParam) {
@@ -1234,6 +1253,88 @@ HRESULT WINAPI SetWindowThemeAttribute_hook(HWND hwnd, enum WINDOWTHEMEATTRIBUTE
         return SetWindowThemeAttribute_original(hwnd, eAttribute, pvAttribute, cbAttribute);
     }
 }
+
+
+// renderer and gpu process spawn with this when --no-sandbox is used
+using CreateProcessW_t = decltype(&CreateProcessW);
+CreateProcessW_t CreateProcessW_original;
+BOOL WINAPI CreateProcessW_hook(
+    LPCWSTR lpApplicationName,
+    LPWSTR lpCommandLine,
+    LPSECURITY_ATTRIBUTES lpProcessAttributes,
+    LPSECURITY_ATTRIBUTES lpThreadAttributes,
+    BOOL bInheritHandles,
+    DWORD dwCreationFlags,
+    LPVOID lpEnvironment,
+    LPCWSTR lpCurrentDirectory,
+    LPSTARTUPINFOW lpStartupInfo,
+    LPPROCESS_INFORMATION lpProcessInformation
+) {
+    Wh_Log(L"CreateProcessW_hook");
+
+    BOOL result = CreateProcessW_original(
+        lpApplicationName,
+        lpCommandLine,
+        lpProcessAttributes,
+        lpThreadAttributes,
+        bInheritHandles,
+        dwCreationFlags,
+        lpEnvironment,
+        lpCurrentDirectory,
+        lpStartupInfo,
+        lpProcessInformation
+    );
+
+    if (result && lpCommandLine && wcsstr(lpCommandLine, L"--type=gpu-process")) {
+        g_hwAccelerated = TRUE;
+        Wh_Log(L"GPU process detected, hardware acceleration enabled");
+    }
+    Wh_Log(L"lpCommandLine: %s", lpCommandLine);
+
+    return result;
+}
+
+// renderer and gpu process spawn with this when sandbox is enabled
+using CreateProcessAsUserW_t = decltype(&CreateProcessAsUserW);
+CreateProcessAsUserW_t CreateProcessAsUserW_original;
+BOOL WINAPI CreateProcessAsUserW_hook(
+    HANDLE hToken,
+    LPCWSTR lpApplicationName,
+    LPWSTR lpCommandLine,
+    LPSECURITY_ATTRIBUTES lpProcessAttributes,
+    LPSECURITY_ATTRIBUTES lpThreadAttributes,
+    BOOL bInheritHandles,
+    DWORD dwCreationFlags,
+    LPVOID lpEnvironment,
+    LPCWSTR lpCurrentDirectory,
+    LPSTARTUPINFOW lpStartupInfo,
+    LPPROCESS_INFORMATION lpProcessInformation
+) {
+    Wh_Log(L"CreateProcessAsUserW_hook");
+
+    BOOL result = CreateProcessAsUserW_original(
+        hToken,
+        lpApplicationName,
+        lpCommandLine,
+        lpProcessAttributes,
+        lpThreadAttributes,
+        bInheritHandles,
+        dwCreationFlags,
+        lpEnvironment,
+        lpCurrentDirectory,
+        lpStartupInfo,
+        lpProcessInformation
+    );
+
+    if (result && lpCommandLine && wcsstr(lpCommandLine, L"--type=gpu-process")) {
+        g_hwAccelerated = TRUE;
+        Wh_Log(L"GPU process detected, hardware acceleration enabled");
+    }
+    Wh_Log(L"lpCommandLine: %s", lpCommandLine);
+
+    return result;
+}
+#pragma endregion
 
 #pragma region Renderer JS API injection + IPC
 void HandleWindhawkComm(LPCWSTR clipText) {
@@ -1467,86 +1568,6 @@ void CreateNamedPipeServer() {
     }
 
     LocalFree(pSecurityDescriptor);
-}
-
-// renderer and gpu process spawn with this when --no-sandbox is used
-using CreateProcessW_t = decltype(&CreateProcessW);
-CreateProcessW_t CreateProcessW_original;
-BOOL WINAPI CreateProcessW_hook(
-    LPCWSTR lpApplicationName,
-    LPWSTR lpCommandLine,
-    LPSECURITY_ATTRIBUTES lpProcessAttributes,
-    LPSECURITY_ATTRIBUTES lpThreadAttributes,
-    BOOL bInheritHandles,
-    DWORD dwCreationFlags,
-    LPVOID lpEnvironment,
-    LPCWSTR lpCurrentDirectory,
-    LPSTARTUPINFOW lpStartupInfo,
-    LPPROCESS_INFORMATION lpProcessInformation
-) {
-    Wh_Log(L"CreateProcessW_hook");
-
-    BOOL result = CreateProcessW_original(
-        lpApplicationName,
-        lpCommandLine,
-        lpProcessAttributes,
-        lpThreadAttributes,
-        bInheritHandles,
-        dwCreationFlags,
-        lpEnvironment,
-        lpCurrentDirectory,
-        lpStartupInfo,
-        lpProcessInformation
-    );
-
-    if (result && lpCommandLine && wcsstr(lpCommandLine, L"--type=gpu-process")) {
-        g_hwAccelerated = TRUE;
-        Wh_Log(L"GPU process detected, hardware acceleration enabled");
-    }
-    Wh_Log(L"lpCommandLine: %s", lpCommandLine);
-
-    return result;
-}
-
-// renderer and gpu process spawn with this when sandbox is enabled
-using CreateProcessAsUserW_t = decltype(&CreateProcessAsUserW);
-CreateProcessAsUserW_t CreateProcessAsUserW_original;
-BOOL WINAPI CreateProcessAsUserW_hook(
-    HANDLE hToken,
-    LPCWSTR lpApplicationName,
-    LPWSTR lpCommandLine,
-    LPSECURITY_ATTRIBUTES lpProcessAttributes,
-    LPSECURITY_ATTRIBUTES lpThreadAttributes,
-    BOOL bInheritHandles,
-    DWORD dwCreationFlags,
-    LPVOID lpEnvironment,
-    LPCWSTR lpCurrentDirectory,
-    LPSTARTUPINFOW lpStartupInfo,
-    LPPROCESS_INFORMATION lpProcessInformation
-) {
-    Wh_Log(L"CreateProcessAsUserW_hook");
-
-    BOOL result = CreateProcessAsUserW_original(
-        hToken,
-        lpApplicationName,
-        lpCommandLine,
-        lpProcessAttributes,
-        lpThreadAttributes,
-        bInheritHandles,
-        dwCreationFlags,
-        lpEnvironment,
-        lpCurrentDirectory,
-        lpStartupInfo,
-        lpProcessInformation
-    );
-
-    if (result && lpCommandLine && wcsstr(lpCommandLine, L"--type=gpu-process")) {
-        g_hwAccelerated = TRUE;
-        Wh_Log(L"GPU process detected, hardware acceleration enabled");
-    }
-    Wh_Log(L"lpCommandLine: %s", lpCommandLine);
-
-    return result;
 }
 
 int ConnectToNamedPipe(LPCWSTR pipeName) {
@@ -1906,18 +1927,8 @@ BOOL Wh_ModInit() {
         cef_version_info(7)
     );
 
-    // Get appropriate offsets for current CEF version
-    is_frameless_offset = FindOffset(major, minor, is_frameless_offsets, ARRAYSIZE(is_frameless_offsets));
-    Wh_Log(L"is_frameless offset: %#x", is_frameless_offset);
     get_window_handle_offset = FindOffset(major, minor, get_window_handle_offsets, ARRAYSIZE(get_window_handle_offsets), cte_settings.allowuntested);
     Wh_Log(L"get_window_handle offset: %#x", get_window_handle_offset);
-
-    if (isSpotify) {
-        add_child_view_offset = FindOffset(major, minor, add_child_view_offsets, ARRAYSIZE(add_child_view_offsets));
-        Wh_Log(L"add_child_view offset: %#x", add_child_view_offset);
-        set_background_color_offset = FindOffset(major, minor, set_background_color_offsets, ARRAYSIZE(set_background_color_offsets));
-        Wh_Log(L"set_background_color offset: %#x", set_background_color_offset);
-    }
 
     // Check if this process is auxilliary process by checking if the arguments contain --type=
     LPWSTR args = GetCommandLineW();
@@ -1931,6 +1942,16 @@ BOOL Wh_ModInit() {
         }
         Wh_Log(L"Auxilliary process detected, skipping.");
         return FALSE;
+    }
+
+    // Get appropriate offsets for current CEF version
+    is_frameless_offset = FindOffset(major, minor, is_frameless_offsets, ARRAYSIZE(is_frameless_offsets));
+    Wh_Log(L"is_frameless offset: %#x", is_frameless_offset);
+    if (isSpotify) {
+        add_child_view_offset = FindOffset(major, minor, add_child_view_offsets, ARRAYSIZE(add_child_view_offsets));
+        Wh_Log(L"add_child_view offset: %#x", add_child_view_offset);
+        set_background_color_offset = FindOffset(major, minor, set_background_color_offsets, ARRAYSIZE(set_background_color_offsets));
+        Wh_Log(L"set_background_color offset: %#x", set_background_color_offset);
     }
 
     cef_window_create_top_level_t cef_window_create_top_level = (cef_window_create_top_level_t)GetProcAddress(cefModule, "cef_window_create_top_level");
@@ -1970,11 +1991,6 @@ BOOL Wh_ModInit() {
                     Wh_Log(L"Enabled extensions");
                 }
             }
-
-            g_pipeThread = std::thread([=]() {
-                CreateNamedPipeServer();
-            });
-            g_pipeThread.detach();
         }
     }
 

@@ -3,7 +3,7 @@ let supportedCommands = [];
 
 export default WindhawkComm = {
     init() {
-        testWindhawk();
+        return testWindhawk();
     },
 
     query() {
@@ -97,11 +97,13 @@ function testWindhawk() {
         windhawkModule = window._getSpotifyModule("ctewh");
         windhawkModule.query();
         supportedCommands = windhawkModule.supportedCommands;
-        console.log("Windhawk available");
+        const { version, initialOptions } = windhawkModule;
+        console.log(`CEF/Spotify Tweaks Windhawk mod available, Version: ${version}`);
+        return { version, initialOptions, supportedCommands };
     } catch (e) {
         // query fails if the main browser process has unloaded the mod and thus closed the pipe
         // Sandboxed renderer processes won't respond to the Windhawk's uninit request so it'll keep loaded and will continue hooking _getSpotifyModule
         windhawkModule = null;
-        console.log("Windhawk not available");
+        console.log("Windhawk mod not available");
     }
 }

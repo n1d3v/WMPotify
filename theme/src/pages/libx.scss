@@ -1,0 +1,94 @@
+.main-view-container__scroll-node-child:has(.main-yourLibraryX-libraryContainer) {
+    height: 100%;
+    padding-bottom: 0;
+    > main {
+        height: 100%;
+        > section {
+            height: 100%;
+            .betterLibBox {
+                height: 100%;
+                > .main-yourLibraryX-libraryContainer {
+                    height: 100%;
+                }
+            }
+        }
+    }
+}
+
+.main-yourLibraryX-libraryContainer {
+    > div {
+        box-shadow: none;
+    }
+
+    .main-yourLibraryX-filterArea {
+        position: relative;
+        width: 100%;
+        height: 29px;
+        border-bottom: solid 1px var(--wmp11-separator-shadow);
+        outline: solid 1px var(--wmp11-separator-light);
+        overflow: hidden;
+        margin: 0;
+
+        [role="search"] {
+            margin: 2px;
+            width: 225px;
+            height: 24px;
+            border: solid 1px #f4f7fc;
+            background: linear-gradient(to bottom, #5e5f61, #c0c3c6);
+            margin-top: -1px;
+
+            .x-filterBox-filterInput {
+                position: absolute;
+                top: 0;
+                margin: 1px;
+                width: calc(100% - 2px);
+                height: 20px;
+                border: solid 1px white;
+                background-color: #f6f9fc;
+                font-size: 12px;
+                border-radius: 0;
+                min-height: 0;
+                padding-inline: 4px;
+                box-shadow: none;
+                opacity: 1;
+            }
+
+            .x-filterBox-overlay {
+                opacity: 1;
+            }
+
+            .x-filterBox-expandButton {
+                display: none;
+            }
+
+            span, svg, input {
+                color: var(--text-subdued);
+            }
+            input::placeholder {
+                color: var(--gray-text);
+            }
+        }
+    }
+
+    li[role="listitem"] div[data-encore-id="listRow"] {   
+        border: solid 1px transparent;
+        border-radius: 4px;
+
+        &:hover {
+            background: var(--item-hover-background);
+            border-color: var(--item-hover-border);
+        }
+
+        &::after {
+            display: none;
+        }
+    }
+}
+
+#sort-and-view-picker {
+    button:has(svg:not(:first-child)) {
+        svg:first-child {
+            display: none;
+        }
+    }
+}

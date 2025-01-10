@@ -68,6 +68,10 @@
 
       > [role="menuitem"],
       .main-contextMenu-menuItem {
+        &:has(> span) {
+          display: none;
+        }
+
         .main-contextMenu-menuItemButton {
           height: 24px;
 
@@ -155,6 +159,16 @@
           }
           margin-top: 0 !important;
           margin-bottom: 9px;
+        }
+      }
+
+      &:has(+ [role="menu"]) {
+        border-bottom: 0;
+
+        + [role="menu"] {
+          border-top: 0;
+          padding-top: 0;
+          margin-top: -2px;
         }
       }
     }
