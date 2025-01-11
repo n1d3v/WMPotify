@@ -1,4 +1,6 @@
-const body = `
+import { init as initWMPVis } from "../../../../CustomApps/wmpvis/src/wmpvis";
+
+export const body = `
 <div id="topbar">
     <div id="topbar-right">
         <button id="lyrics-button" class="topbar-button"></button>
@@ -28,17 +30,6 @@ const body = `
 </div>
 `;
 
-export function initCorporateSkin(dpipWin) {
-    dpipWin.document.title = "Spotify";
-    dpipWin.document.body.innerHTML = body;
-
-    const favicon = dpipWin.document.createElement("link");
-    favicon.rel = "icon";
-    favicon.href = getComputedStyle(document.documentElement).getPropertyValue('--logo-16').slice(5, -2);
-    dpipWin.document.head.appendChild(favicon);
-
-    const style = document.querySelector('link.userCSS[href*="user.css"]');
-    if (style) {
-        dpipWin.document.head.appendChild(style.cloneNode());
-    }
+export function init(dpipWin) {
+    dpipWin.document.body.id = "wmpotify-dpip-corporate";
 }

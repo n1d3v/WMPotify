@@ -28,7 +28,7 @@
 * Ignore the minimum window size set by Spotify
 * Enable transparent rendering to make the transparent parts of the web contents transparent
 * Disable forced dark mode to prevent Spotify from forcing dark mode on the CEF UI & web contents
-* Force enable Chrome extensions support
+* Force enable Chrome extension support
 * Use the settings tab on the mod details page to configure the features
 ## Important Notes (for now - Windhawk 1.5.1 and below)
 * Replace `%PROGRAMDATA%` with `%ProgramData%` in `C:\Program Files\Windhawk\windhawk.ini` and `C:\Program Files\Windhawk\Engine\<version>\engine.ini` then restart Windhawk to get the renderer hook working
@@ -58,7 +58,7 @@
     * This mod exposes a JavaScript API that can be used to interact with the main window and this mod
     * The API is available with `window._getSpotifyModule('ctewh')`
     * Use `_getSpotifyModule('ctewh').query()` to get various information about the window and the mod
-    * Use `_getSpotifyModule('ctewh').executeCommand('/WH:<command>')` to execute a command. See `HandleWindhawkComm` function below for available commands, or see [here](https://github.com/Ingan121/WMPotify/blob/master/theme/src/js/WindhawkComm.js) for a usage example
+    * Use `_getSpotifyModule('ctewh').executeCommand('/WH:<command>')` to execute a command. See the `HandleWindhawkComm` function of this mod for available commands, or see [here](https://github.com/Ingan121/WMPotify/blob/master/theme/src/js/WindhawkComm.js) for a usage example
     * This API is only available on Spotify 1.2.4 and above, and only if the mod is enabled before Spotify starts
     * The API is disabled by default on untested CEF versions
 */
@@ -87,7 +87,7 @@
   $description: Prevents Spotify from forcing dark mode on the CEF UI & web contents
 - forceextensions: true
   $name: Force enable Chrome extensions
-  $description: Always enable Chrome extensions support, regardless of the DevTools status
+  $description: Always enable Chrome extension support, regardless of the DevTools status
 - ignoreminsize: false
   $name: Ignore minimum window size
   $description: Allows resizing the window below the minimum size set by Spotify
@@ -227,8 +227,8 @@ int set_background_color_offset = NULL;
 BOOL g_isSpotifyRenderer = FALSE;
 
 HWND g_mainHwnd = NULL;
-int g_minWidth = 0;
-int g_minHeight = 0;
+int g_minWidth = -1;
+int g_minHeight = -1;
 BOOL g_hwAccelerated = FALSE;
 BOOL g_dwmBackdropEnabled = FALSE;
 
@@ -356,475 +356,7 @@ typedef struct _cef_v8value_t {
 } cef_v8value_t;
 #pragma endregion
 
-#pragma region "full cef_v8value_t in case it's needed later"
-// typedef struct _cef_v8value_t {
-//   ///
-//   /// Base structure.
-//   ///
-//   cef_base_ref_counted_t base;
-
-//   ///
-//   /// Returns true (1) if the underlying handle is valid and it can be accessed
-//   /// on the current thread. Do not call any other functions if this function
-//   /// returns false (0).
-//   ///
-//   int(CEF_CALLBACK* is_valid)(struct _cef_v8value_t* self);
-
-//   ///
-//   /// True if the value type is undefined.
-//   ///
-//   int(CEF_CALLBACK* is_undefined)(struct _cef_v8value_t* self);
-
-//   ///
-//   /// True if the value type is null.
-//   ///
-//   int(CEF_CALLBACK* is_null)(struct _cef_v8value_t* self);
-
-//   ///
-//   /// True if the value type is bool.
-//   ///
-//   int(CEF_CALLBACK* is_bool)(struct _cef_v8value_t* self);
-
-//   ///
-//   /// True if the value type is int.
-//   ///
-//   int(CEF_CALLBACK* is_int)(struct _cef_v8value_t* self);
-
-//   ///
-//   /// True if the value type is unsigned int.
-//   ///
-//   int(CEF_CALLBACK* is_uint)(struct _cef_v8value_t* self);
-
-//   ///
-//   /// True if the value type is double.
-//   ///
-//   int(CEF_CALLBACK* is_double)(struct _cef_v8value_t* self);
-
-//   ///
-//   /// True if the value type is Date.
-//   ///
-//   int(CEF_CALLBACK* is_date)(struct _cef_v8value_t* self);
-
-//   ///
-//   /// True if the value type is string.
-//   ///
-//   int(CEF_CALLBACK* is_string)(struct _cef_v8value_t* self);
-
-//   ///
-//   /// True if the value type is object.
-//   ///
-//   int(CEF_CALLBACK* is_object)(struct _cef_v8value_t* self);
-
-//   ///
-//   /// True if the value type is array.
-//   ///
-//   int(CEF_CALLBACK* is_array)(struct _cef_v8value_t* self);
-
-//   ///
-//   /// True if the value type is an ArrayBuffer.
-//   ///
-//   int(CEF_CALLBACK* is_array_buffer)(struct _cef_v8value_t* self);
-
-//   ///
-//   /// True if the value type is function.
-//   ///
-//   int(CEF_CALLBACK* is_function)(struct _cef_v8value_t* self);
-
-//   ///
-//   /// True if the value type is a Promise.
-//   ///
-//   int(CEF_CALLBACK* is_promise)(struct _cef_v8value_t* self);
-
-//   ///
-//   /// Returns true (1) if this object is pointing to the same handle as |that|
-//   /// object.
-//   ///
-//   int(CEF_CALLBACK* is_same)(struct _cef_v8value_t* self,
-//                              struct _cef_v8value_t* that);
-
-//   ///
-//   /// Return a bool value.
-//   ///
-//   int(CEF_CALLBACK* get_bool_value)(struct _cef_v8value_t* self);
-
-//   ///
-//   /// Return an int value.
-//   ///
-//   int32_t(CEF_CALLBACK* get_int_value)(struct _cef_v8value_t* self);
-
-//   ///
-//   /// Return an unsigned int value.
-//   ///
-//   uint32_t(CEF_CALLBACK* get_uint_value)(struct _cef_v8value_t* self);
-
-//   ///
-//   /// Return a double value.
-//   ///
-//   double(CEF_CALLBACK* get_double_value)(struct _cef_v8value_t* self);
-
-//   ///
-//   /// Return a Date value.
-//   ///
-//   cef_basetime_t(CEF_CALLBACK* get_date_value)(struct _cef_v8value_t* self);
-
-//   ///
-//   /// Return a string value.
-//   ///
-//   // The resulting string must be freed by calling cef_string_userfree_free().
-//   cef_string_userfree_t(CEF_CALLBACK* get_string_value)(
-//       struct _cef_v8value_t* self);
-
-//   ///
-//   /// Returns true (1) if this is a user created object.
-//   ///
-//   int(CEF_CALLBACK* is_user_created)(struct _cef_v8value_t* self);
-
-//   ///
-//   /// Returns true (1) if the last function call resulted in an exception. This
-//   /// attribute exists only in the scope of the current CEF value object.
-//   ///
-//   int(CEF_CALLBACK* has_exception)(struct _cef_v8value_t* self);
-
-//   ///
-//   /// Returns the exception resulting from the last function call. This
-//   /// attribute exists only in the scope of the current CEF value object.
-//   ///
-//   struct _cef_v8exception_t*(CEF_CALLBACK* get_exception)(
-//       struct _cef_v8value_t* self);
-
-//   ///
-//   /// Clears the last exception and returns true (1) on success.
-//   ///
-//   int(CEF_CALLBACK* clear_exception)(struct _cef_v8value_t* self);
-
-//   ///
-//   /// Returns true (1) if this object will re-throw future exceptions. This
-//   /// attribute exists only in the scope of the current CEF value object.
-//   ///
-//   int(CEF_CALLBACK* will_rethrow_exceptions)(struct _cef_v8value_t* self);
-
-//   ///
-//   /// Set whether this object will re-throw future exceptions. By default
-//   /// exceptions are not re-thrown. If a exception is re-thrown the current
-//   /// context should not be accessed again until after the exception has been
-//   /// caught and not re-thrown. Returns true (1) on success. This attribute
-//   /// exists only in the scope of the current CEF value object.
-//   ///
-//   int(CEF_CALLBACK* set_rethrow_exceptions)(struct _cef_v8value_t* self,
-//                                             int rethrow);
-
-//   ///
-//   /// Returns true (1) if the object has a value with the specified identifier.
-//   ///
-//   int(CEF_CALLBACK* has_value_bykey)(struct _cef_v8value_t* self,
-//                                      const cef_string_t* key);
-
-//   ///
-//   /// Returns true (1) if the object has a value with the specified identifier.
-//   ///
-//   int(CEF_CALLBACK* has_value_byindex)(struct _cef_v8value_t* self, int index);
-
-//   ///
-//   /// Deletes the value with the specified identifier and returns true (1) on
-//   /// success. Returns false (0) if this function is called incorrectly or an
-//   /// exception is thrown. For read-only and don't-delete values this function
-//   /// will return true (1) even though deletion failed.
-//   ///
-//   int(CEF_CALLBACK* delete_value_bykey)(struct _cef_v8value_t* self,
-//                                         const cef_string_t* key);
-
-//   ///
-//   /// Deletes the value with the specified identifier and returns true (1) on
-//   /// success. Returns false (0) if this function is called incorrectly,
-//   /// deletion fails or an exception is thrown. For read-only and don't-delete
-//   /// values this function will return true (1) even though deletion failed.
-//   ///
-//   int(CEF_CALLBACK* delete_value_byindex)(struct _cef_v8value_t* self,
-//                                           int index);
-
-//   ///
-//   /// Returns the value with the specified identifier on success. Returns NULL
-//   /// if this function is called incorrectly or an exception is thrown.
-//   ///
-//   struct _cef_v8value_t*(CEF_CALLBACK* get_value_bykey)(
-//       struct _cef_v8value_t* self,
-//       const cef_string_t* key);
-
-//   ///
-//   /// Returns the value with the specified identifier on success. Returns NULL
-//   /// if this function is called incorrectly or an exception is thrown.
-//   ///
-//   struct _cef_v8value_t*(
-//       CEF_CALLBACK* get_value_byindex)(struct _cef_v8value_t* self, int index);
-
-//   ///
-//   /// Associates a value with the specified identifier and returns true (1) on
-//   /// success. Returns false (0) if this function is called incorrectly or an
-//   /// exception is thrown. For read-only values this function will return true
-//   /// (1) even though assignment failed.
-//   ///
-//   int(CEF_CALLBACK* set_value_bykey)(struct _cef_v8value_t* self,
-//                                      const cef_string_t* key,
-//                                      struct _cef_v8value_t* value,
-//                                      cef_v8_propertyattribute_t attribute);
-
-//   ///
-//   /// Associates a value with the specified identifier and returns true (1) on
-//   /// success. Returns false (0) if this function is called incorrectly or an
-//   /// exception is thrown. For read-only values this function will return true
-//   /// (1) even though assignment failed.
-//   ///
-//   int(CEF_CALLBACK* set_value_byindex)(struct _cef_v8value_t* self,
-//                                        int index,
-//                                        struct _cef_v8value_t* value);
-
-//   ///
-//   /// Registers an identifier and returns true (1) on success. Access to the
-//   /// identifier will be forwarded to the cef_v8accessor_t instance passed to
-//   /// cef_v8value_t::cef_v8value_create_object(). Returns false (0) if this
-//   /// function is called incorrectly or an exception is thrown. For read-only
-//   /// values this function will return true (1) even though assignment failed.
-//   ///
-//   int(CEF_CALLBACK* set_value_byaccessor)(struct _cef_v8value_t* self,
-//                                           const cef_string_t* key,
-//                                           cef_v8_propertyattribute_t attribute);
-
-//   ///
-//   /// Read the keys for the object's values into the specified vector. Integer-
-//   /// based keys will also be returned as strings.
-//   ///
-//   int(CEF_CALLBACK* get_keys)(struct _cef_v8value_t* self,
-//                               cef_string_list_t keys);
-
-//   ///
-//   /// Sets the user data for this object and returns true (1) on success.
-//   /// Returns false (0) if this function is called incorrectly. This function
-//   /// can only be called on user created objects.
-//   ///
-//   int(CEF_CALLBACK* set_user_data)(struct _cef_v8value_t* self,
-//                                    struct _cef_base_ref_counted_t* user_data);
-
-//   ///
-//   /// Returns the user data, if any, assigned to this object.
-//   ///
-//   struct _cef_base_ref_counted_t*(CEF_CALLBACK* get_user_data)(
-//       struct _cef_v8value_t* self);
-
-//   ///
-//   /// Returns the amount of externally allocated memory registered for the
-//   /// object.
-//   ///
-//   int(CEF_CALLBACK* get_externally_allocated_memory)(
-//       struct _cef_v8value_t* self);
-
-//   ///
-//   /// Adjusts the amount of registered external memory for the object. Used to
-//   /// give V8 an indication of the amount of externally allocated memory that is
-//   /// kept alive by JavaScript objects. V8 uses this information to decide when
-//   /// to perform global garbage collection. Each cef_v8value_t tracks the amount
-//   /// of external memory associated with it and automatically decreases the
-//   /// global total by the appropriate amount on its destruction.
-//   /// |change_in_bytes| specifies the number of bytes to adjust by. This
-//   /// function returns the number of bytes associated with the object after the
-//   /// adjustment. This function can only be called on user created objects.
-//   ///
-//   int(CEF_CALLBACK* adjust_externally_allocated_memory)(
-//       struct _cef_v8value_t* self,
-//       int change_in_bytes);
-
-//   ///
-//   /// Returns the number of elements in the array.
-//   ///
-//   int(CEF_CALLBACK* get_array_length)(struct _cef_v8value_t* self);
-
-//   ///
-//   /// Returns the ReleaseCallback object associated with the ArrayBuffer or NULL
-//   /// if the ArrayBuffer was not created with CreateArrayBuffer.
-//   ///
-//   struct _cef_v8array_buffer_release_callback_t*(
-//       CEF_CALLBACK* get_array_buffer_release_callback)(
-//       struct _cef_v8value_t* self);
-
-//   ///
-//   /// Prevent the ArrayBuffer from using it's memory block by setting the length
-//   /// to zero. This operation cannot be undone. If the ArrayBuffer was created
-//   /// with CreateArrayBuffer then
-//   /// cef_v8array_buffer_release_callback_t::ReleaseBuffer will be called to
-//   /// release the underlying buffer.
-//   ///
-//   int(CEF_CALLBACK* neuter_array_buffer)(struct _cef_v8value_t* self);
-
-//   ///
-//   /// Returns the length (in bytes) of the ArrayBuffer.
-//   ///
-//   size_t(CEF_CALLBACK* get_array_buffer_byte_length)(
-//       struct _cef_v8value_t* self);
-
-//   ///
-//   /// Returns a pointer to the beginning of the memory block for this
-//   /// ArrayBuffer backing store. The returned pointer is valid as long as the
-//   /// cef_v8value_t is alive.
-//   ///
-//   void*(CEF_CALLBACK* get_array_buffer_data)(struct _cef_v8value_t* self);
-
-//   ///
-//   /// Returns the function name.
-//   ///
-//   // The resulting string must be freed by calling cef_string_userfree_free().
-//   cef_string_userfree_t(CEF_CALLBACK* get_function_name)(
-//       struct _cef_v8value_t* self);
-
-//   ///
-//   /// Returns the function handler or NULL if not a CEF-created function.
-//   ///
-//   struct _cef_v8handler_t*(CEF_CALLBACK* get_function_handler)(
-//       struct _cef_v8value_t* self);
-
-//   ///
-//   /// Execute the function using the current V8 context. This function should
-//   /// only be called from within the scope of a cef_v8handler_t or
-//   /// cef_v8accessor_t callback, or in combination with calling enter() and
-//   /// exit() on a stored cef_v8context_t reference. |object| is the receiver
-//   /// ('this' object) of the function. If |object| is NULL the current context's
-//   /// global object will be used. |arguments| is the list of arguments that will
-//   /// be passed to the function. Returns the function return value on success.
-//   /// Returns NULL if this function is called incorrectly or an exception is
-//   /// thrown.
-//   ///
-//   struct _cef_v8value_t*(CEF_CALLBACK* execute_function)(
-//       struct _cef_v8value_t* self,
-//       struct _cef_v8value_t* object,
-//       size_t argumentsCount,
-//       struct _cef_v8value_t* const* arguments);
-
-//   ///
-//   /// Execute the function using the specified V8 context. |object| is the
-//   /// receiver ('this' object) of the function. If |object| is NULL the
-//   /// specified context's global object will be used. |arguments| is the list of
-//   /// arguments that will be passed to the function. Returns the function return
-//   /// value on success. Returns NULL if this function is called incorrectly or
-//   /// an exception is thrown.
-//   ///
-//   struct _cef_v8value_t*(CEF_CALLBACK* execute_function_with_context)(
-//       struct _cef_v8value_t* self,
-//       struct _cef_v8context_t* context,
-//       struct _cef_v8value_t* object,
-//       size_t argumentsCount,
-//       struct _cef_v8value_t* const* arguments);
-
-//   ///
-//   /// Resolve the Promise using the current V8 context. This function should
-//   /// only be called from within the scope of a cef_v8handler_t or
-//   /// cef_v8accessor_t callback, or in combination with calling enter() and
-//   /// exit() on a stored cef_v8context_t reference. |arg| is the argument passed
-//   /// to the resolved promise. Returns true (1) on success. Returns false (0) if
-//   /// this function is called incorrectly or an exception is thrown.
-//   ///
-//   int(CEF_CALLBACK* resolve_promise)(struct _cef_v8value_t* self,
-//                                      struct _cef_v8value_t* arg);
-
-//   ///
-//   /// Reject the Promise using the current V8 context. This function should only
-//   /// be called from within the scope of a cef_v8handler_t or cef_v8accessor_t
-//   /// callback, or in combination with calling enter() and exit() on a stored
-//   /// cef_v8context_t reference. Returns true (1) on success. Returns false (0)
-//   /// if this function is called incorrectly or an exception is thrown.
-//   ///
-//   int(CEF_CALLBACK* reject_promise)(struct _cef_v8value_t* self,
-//                                     const cef_string_t* errorMsg);
-// } cef_v8value_t;
-
-// ///
-// /// Structure representing a V8 context handle. V8 handles can only be accessed
-// /// from the thread on which they are created. Valid threads for creating a V8
-// /// handle include the render process main thread (TID_RENDERER) and WebWorker
-// /// threads. A task runner for posting tasks on the associated thread can be
-// /// retrieved via the cef_v8context_t::get_task_runner() function.
-// ///
-// typedef struct _cef_v8context_t {
-//   ///
-//   /// Base structure.
-//   ///
-//   cef_base_ref_counted_t base;
-
-//   ///
-//   /// Returns the task runner associated with this context. V8 handles can only
-//   /// be accessed from the thread on which they are created. This function can
-//   /// be called on any render process thread.
-//   ///
-//   struct _cef_task_runner_t*(CEF_CALLBACK* get_task_runner)(
-//       struct _cef_v8context_t* self);
-
-//   ///
-//   /// Returns true (1) if the underlying handle is valid and it can be accessed
-//   /// on the current thread. Do not call any other functions if this function
-//   /// returns false (0).
-//   ///
-//   int(CEF_CALLBACK* is_valid)(struct _cef_v8context_t* self);
-
-//   ///
-//   /// Returns the browser for this context. This function will return an NULL
-//   /// reference for WebWorker contexts.
-//   ///
-//   struct _cef_browser_t*(CEF_CALLBACK* get_browser)(
-//       struct _cef_v8context_t* self);
-
-//   ///
-//   /// Returns the frame for this context. This function will return an NULL
-//   /// reference for WebWorker contexts.
-//   ///
-//   struct _cef_frame_t*(CEF_CALLBACK* get_frame)(struct _cef_v8context_t* self);
-
-//   ///
-//   /// Returns the global object for this context. The context must be entered
-//   /// before calling this function.
-//   ///
-//   struct _cef_v8value_t*(CEF_CALLBACK* get_global)(
-//       struct _cef_v8context_t* self);
-
-//   ///
-//   /// Enter this context. A context must be explicitly entered before creating a
-//   /// V8 Object, Array, Function or Date asynchronously. exit() must be called
-//   /// the same number of times as enter() before releasing this context. V8
-//   /// objects belong to the context in which they are created. Returns true (1)
-//   /// if the scope was entered successfully.
-//   ///
-//   int(CEF_CALLBACK* enter)(struct _cef_v8context_t* self);
-
-//   ///
-//   /// Exit this context. Call this function only after calling enter(). Returns
-//   /// true (1) if the scope was exited successfully.
-//   ///
-//   int(CEF_CALLBACK* exit)(struct _cef_v8context_t* self);
-
-//   ///
-//   /// Returns true (1) if this object is pointing to the same handle as |that|
-//   /// object.
-//   ///
-//   int(CEF_CALLBACK* is_same)(struct _cef_v8context_t* self,
-//                              struct _cef_v8context_t* that);
-
-//   ///
-//   /// Execute a string of JavaScript code in this V8 context. The |script_url|
-//   /// parameter is the URL where the script in question can be found, if any.
-//   /// The |start_line| parameter is the base line number to use for error
-//   /// reporting. On success |retval| will be set to the return value, if any,
-//   /// and the function will return true (1). On failure |exception| will be set
-//   /// to the exception, if any, and the function will return false (0).
-//   ///
-//   int(CEF_CALLBACK* eval)(struct _cef_v8context_t* self,
-//                           const cef_string_t* code,
-//                           const cef_string_t* script_url,
-//                           int start_line,
-//                           struct _cef_v8value_t** retval,
-//                           struct _cef_v8exception_t** exception);
-// } cef_v8context_t;
-#pragma endregion
-
 #pragma region CEF V8 functions + helpers
-typedef int CEF_CALLBACK (*v8func_exec_t)(cef_v8handler_t* self, const cef_string_t* name, cef_v8value_t* object, size_t argumentsCount, cef_v8value_t* const* arguments, cef_v8value_t** retval, cef_string_t* exception);
-v8func_exec_t CEF_CALLBACK _getSpotifyModule_original;
-
 typedef cef_v8value_t* CEF_EXPORT (*cef_v8value_create_function_t)(const cef_string_t* name, cef_v8handler_t* handler);
 cef_v8value_create_function_t CEF_EXPORT cef_v8value_create_function_original;
 
@@ -912,10 +444,15 @@ LRESULT CALLBACK SubclassProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam
             }
             break;
         case WM_GETMINMAXINFO:
-            if (cte_settings.ignoreminsize == TRUE) {
+            if (g_minWidth != -1 && g_minHeight != -1) {
                 MINMAXINFO* mmi = (MINMAXINFO*)lParam;
                 mmi->ptMinTrackSize.x = g_minWidth;
                 mmi->ptMinTrackSize.y = g_minHeight;
+                return 0;
+            } else if (cte_settings.ignoreminsize == TRUE) {
+                MINMAXINFO* mmi = (MINMAXINFO*)lParam;
+                mmi->ptMinTrackSize.x = 0;
+                mmi->ptMinTrackSize.y = 0;
                 return 0;
             }
             break;
@@ -1254,7 +791,6 @@ HRESULT WINAPI SetWindowThemeAttribute_hook(HWND hwnd, enum WINDOWTHEMEATTRIBUTE
     }
 }
 
-
 // renderer and gpu process spawn with this when --no-sandbox is used
 using CreateProcessW_t = decltype(&CreateProcessW);
 CreateProcessW_t CreateProcessW_original;
@@ -1570,11 +1106,9 @@ void CreateNamedPipeServer() {
     LocalFree(pSecurityDescriptor);
 }
 
-int ConnectToNamedPipe(LPCWSTR pipeName) {
-    Wh_Log(L"Pipe name: %s", pipeName);
-
+int ConnectToNamedPipe() {
     g_hClientPipe = CreateFile(
-        pipeName,
+        PIPE_NAME,
         GENERIC_READ | GENERIC_WRITE,
         0,
         NULL,
@@ -1627,13 +1161,13 @@ int ConnectToNamedPipe(LPCWSTR pipeName) {
                                 g_queryResponse.hwAccelerated = hwAccelerated;
                                 g_queryResponse.minWidth = minWidth;
                                 g_queryResponse.minHeight = minHeight;
-                                // Notify the condition variable
-                                {
-                                    std::lock_guard<std::mutex> lock(g_queryResponseMutex);
-                                    g_queryResponseReceived = true;
-                                }
-                                g_queryResponseCv.notify_one();
                             }
+                            // Notify the condition variable
+                            {
+                                std::lock_guard<std::mutex> lock(g_queryResponseMutex);
+                                g_queryResponseReceived = true;
+                            }
+                            g_queryResponseCv.notify_one();
                         }
                     }
                 }
@@ -1720,7 +1254,7 @@ int CEF_CALLBACK WindhawkCommV8Handler(cef_v8handler_t* self, const cef_string_t
     } else if (nameStr == u"query") {
         int res = SendNamedPipeMessage(L"/WH:Query");
         if (res != 0) {
-            *exception = *GenerateCefString(u"Error: " + to_u16string(res));
+            *exception = *GenerateCefString(u"IPC Error: " + to_u16string(res));
         }
         if (g_queryResponse.success) {
             cef_v8value_t* retobj = cef_v8value_create_object(NULL, NULL);
@@ -1754,6 +1288,8 @@ int CEF_CALLBACK WindhawkCommV8Handler(cef_v8handler_t* self, const cef_string_t
     return TRUE;
 }
 
+typedef int CEF_CALLBACK (*v8func_exec_t)(cef_v8handler_t* self, const cef_string_t* name, cef_v8value_t* object, size_t argumentsCount, cef_v8value_t* const* arguments, cef_v8value_t** retval, cef_string_t* exception);
+v8func_exec_t CEF_CALLBACK _getSpotifyModule_original;
 int CEF_CALLBACK _getSpotifyModule_hook(cef_v8handler_t* self, const cef_string_t* name, cef_v8value_t* object, size_t argumentsCount, cef_v8value_t* const* arguments, cef_v8value_t** retval, cef_string_t* exception) {
     Wh_Log(L"_getSpotifyModule_hook called with name: %s", name->str);
     if (argumentsCount == 1) {
@@ -1813,7 +1349,7 @@ BOOL InitSpotifyRendererHooks(HMODULE cefModule) {
     g_isSpotifyRenderer = TRUE;
     Wh_Log(L"Initializing Spotify renderer hooks");
 
-    if (ConnectToNamedPipe(PIPE_NAME) == 0) {
+    if (ConnectToNamedPipe() == 0) {
         Wh_Log(L"Connected to named pipe");
     } else {
         Wh_Log(L"Unable to connect to named pipe");
@@ -1827,7 +1363,7 @@ BOOL InitSpotifyRendererHooks(HMODULE cefModule) {
     cef_v8value_create_object = (cef_v8value_create_object_t)GetProcAddress(cefModule, "cef_v8value_create_object");
     cef_v8value_create_array = (cef_v8value_create_array_t)GetProcAddress(cefModule, "cef_v8value_create_array");
 
-    if (!cef_v8value_create_function || !cef_v8value_create_bool || !cef_v8value_create_string || !cef_v8value_create_object) {
+    if (!cef_v8value_create_function || !cef_v8value_create_bool || !cef_v8value_create_int || !cef_v8value_create_string || !cef_v8value_create_object || !cef_v8value_create_array) {
         Wh_Log(L"Failed to get CEF functions");
         return FALSE;
     }
@@ -2005,7 +1541,7 @@ void Wh_ModUninit() {
     g_shouldClosePipe = TRUE;
 
     if (g_isSpotifyRenderer) {
-        // Note: sandboxed renderers won't even respond to the uninit request
+        // Note: sandboxed renderers won't even respond to the uninit request and keep loaded until the renderer exits
         if (g_hClientPipe != INVALID_HANDLE_VALUE) {
             CloseHandle(g_hClientPipe);
             g_hClientPipe = INVALID_HANDLE_VALUE;
@@ -2040,7 +1576,7 @@ void Wh_ModUninit() {
 void Wh_ModSettingsChanged() {
     if (g_isSpotifyRenderer) {
         // Won't work in a sandboxed renderer process
-        // Our pipe server will handle the settings change instead
+        // Up-to-date settings will be fetched through this mod's custom IPC
         return;
     }
     BOOL prev_transparentcontrols = cte_settings.transparentcontrols;
