@@ -1,7 +1,7 @@
 // ==WindhawkMod==
 // @id              cef-titlebar-enabler-universal
 // @name            CEF/Spotify Tweaks
-// @description     Force native frames and title bars for CEF apps
+// @description     Various tweaks for Spotify, including native frames, transparent window, and more
 // @version         0.6
 // @author          Ingan121
 // @github          https://github.com/Ingan121
@@ -231,6 +231,7 @@ int g_minWidth = -1;
 int g_minHeight = -1;
 BOOL g_hwAccelerated = FALSE;
 BOOL g_dwmBackdropEnabled = FALSE;
+BOOL g_titleLocked = FALSE;
 
 HANDLE g_hSrvPipe = INVALID_HANDLE_VALUE;
 HANDLE g_hClientPipe = INVALID_HANDLE_VALUE;
@@ -252,6 +253,7 @@ struct cte_queryResponse_t {
     BOOL hwAccelerated;
     int minWidth;
     int minHeight;
+    BOOL titleLocked;
 } g_queryResponse;
 
 #pragma region CEF structs (as minimal and cross-version compatible as possible)
@@ -791,6 +793,16 @@ HRESULT WINAPI SetWindowThemeAttribute_hook(HWND hwnd, enum WINDOWTHEMEATTRIBUTE
     }
 }
 
+using SetWindowTextW_t = decltype(&SetWindowTextW);
+SetWindowTextW_t SetWindowTextW_original;
+BOOL WINAPI SetWindowTextW_hook(HWND hWnd, LPCWSTR lpString) {
+    Wh_Log(L"SetWindowTextW_hook");
+    if (g_titleLocked && hWnd == g_mainHwnd) {
+        return TRUE;
+    }
+    return SetWindowTextW_original(hWnd, lpString);
+}
+
 // renderer and gpu process spawn with this when --no-sandbox is used
 using CreateProcessW_t = decltype(&CreateProcessW);
 CreateProcessW_t CreateProcessW_original;
@@ -965,15 +977,31 @@ void HandleWindhawkComm(LPCWSTR clipText) {
         } else {
             SetWindowPos(g_mainHwnd, GetWindowLong(g_mainHwnd, GWL_EXSTYLE) & WS_EX_TOPMOST ? HWND_NOTOPMOST : HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
         }
+    // /WH:SetTitle:<title>
+    // Set the window title (ignores title lock)
+    } else if (wcsncmp(clipText, L"/WH:SetTitle:", 13) == 0) {
+        SetWindowTextW_original(g_mainHwnd, clipText + 13);
+    // /WH:LockTitle:<lock (1/0), toggle if absent>
+    // Prevent Spotify from changing the window title
+    } else if (wcsncmp(clipText, L"/WH:LockTitle:", 14) == 0) {
+        int lock;
+        if (swscanf(clipText + 14, L"%d", &lock) == 1) {
+            g_titleLocked = lock;
+        } else {
+            g_titleLocked = !g_titleLocked;
+        }
+    // /WH:OpenSpotifyMenu
+    // Open the Spotify menu (Alt, won't work if the menu button is hidden in the mod options)
+    } else if (wcscmp(clipText, L"/WH:OpenSpotifyMenu") == 0) {
+        PostMessage(g_mainHwnd, WM_SYSCOMMAND, SC_KEYMENU, 0);
     // /WH:Query
-    // Following clipboard read will be responded with the settings JSON
     } else if (wcscmp(clipText, L"/WH:Query") == 0) {
         if (g_hSrvPipe == INVALID_HANDLE_VALUE) {
             return;
         }
         wchar_t queryResponse[256];
-        // <showframe:showframeonothers:showmenu:showcontrols:transparentcontrols:transparentrendering:ignoreminsize:isMaximized:isTopMost:isLayered:isThemingEnabled:isDwmEnabled:dwmBackdropEnabled:hwAccelerated:minWidth:minHeight>
-        swprintf(queryResponse, 256, L"/WH:QueryResponse:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d",
+        // <showframe:showframeonothers:showmenu:showcontrols:transparentcontrols:transparentrendering:ignoreminsize:isMaximized:isTopMost:isLayered:isThemingEnabled:isDwmEnabled:dwmBackdropEnabled:hwAccelerated:minWidth:minHeight:titleLocked>
+        swprintf(queryResponse, 256, L"/WH:QueryResponse:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d",
             cte_settings.showframe,
             cte_settings.showframeonothers,
             cte_settings.showmenu,
@@ -989,7 +1017,8 @@ void HandleWindhawkComm(LPCWSTR clipText) {
             g_dwmBackdropEnabled,
             g_hwAccelerated,
             g_minWidth,
-            g_minHeight
+            g_minHeight,
+            g_titleLocked
         );
         DWORD bytesWritten;
         WriteFile(g_hSrvPipe, queryResponse, wcslen(queryResponse) * sizeof(wchar_t), &bytesWritten, NULL);
@@ -1142,25 +1171,26 @@ int ConnectToNamedPipe() {
                         buffer[bytesRead / sizeof(wchar_t)] = L'\0';
                         Wh_Log(L"Received message: %s", buffer);
                         if (wcsncmp(buffer, L"/WH:QueryResponse:", 18) == 0) {
-                            int showframe, showframeonothers, showmenu, showcontrols, transparentcontrols, transparentrendering, ignoreminsize, isMaximized, isTopMost, isLayered, isThemingEnabled, isDwmEnabled, dwmBackdropEnabled, hwAccelerated, minWidth, minHeight;
-                            if (swscanf(buffer + 18, L"%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d", &showframe, &showframeonothers, &showmenu, &showcontrols, &transparentcontrols, &transparentrendering, &ignoreminsize, &isMaximized, &isTopMost, &isLayered, &isThemingEnabled, &isDwmEnabled, &dwmBackdropEnabled, &hwAccelerated, &minWidth, &minHeight) == 16) {
-                                cte_settings.showframe = showframe;
-                                cte_settings.showframeonothers = showframeonothers;
-                                cte_settings.showmenu = showmenu;
-                                cte_settings.showcontrols = showcontrols;
-                                cte_settings.transparentcontrols = transparentcontrols;
-                                cte_settings.transparentrendering = transparentrendering;
-                                cte_settings.ignoreminsize = ignoreminsize;
+                            if (swscanf(buffer + 18, L"%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d",
+                                &cte_settings.showframe,
+                                &cte_settings.showframeonothers,
+                                &cte_settings.showmenu,
+                                &cte_settings.showcontrols,
+                                &cte_settings.transparentcontrols,
+                                &cte_settings.transparentrendering,
+                                &cte_settings.ignoreminsize,
+                                &g_queryResponse.isMaximized,
+                                &g_queryResponse.isTopMost,
+                                &g_queryResponse.isLayered,
+                                &g_queryResponse.isThemingEnabled,
+                                &g_queryResponse.isDwmEnabled,
+                                &g_queryResponse.dwmBackdropEnabled,
+                                &g_queryResponse.hwAccelerated,
+                                &g_queryResponse.minWidth,
+                                &g_queryResponse.minHeight,
+                                &g_queryResponse.titleLocked) == 17
+                            ) {
                                 g_queryResponse.success = TRUE;
-                                g_queryResponse.isMaximized = isMaximized;
-                                g_queryResponse.isTopMost = isTopMost;
-                                g_queryResponse.isLayered = isLayered;
-                                g_queryResponse.isThemingEnabled = isThemingEnabled;
-                                g_queryResponse.isDwmEnabled = isDwmEnabled;
-                                g_queryResponse.dwmBackdropEnabled = dwmBackdropEnabled;
-                                g_queryResponse.hwAccelerated = hwAccelerated;
-                                g_queryResponse.minWidth = minWidth;
-                                g_queryResponse.minHeight = minHeight;
                             }
                             // Notify the condition variable
                             {
@@ -1279,6 +1309,7 @@ int CEF_CALLBACK WindhawkCommV8Handler(cef_v8handler_t* self, const cef_string_t
             retobj->set_value_bykey(retobj, GenerateCefString(u"hwAccelerated"), cef_v8value_create_bool(g_queryResponse.hwAccelerated), V8_PROPERTY_ATTRIBUTE_NONE);
             retobj->set_value_bykey(retobj, GenerateCefString(u"minWidth"), cef_v8value_create_int(g_queryResponse.minWidth), V8_PROPERTY_ATTRIBUTE_NONE);
             retobj->set_value_bykey(retobj, GenerateCefString(u"minHeight"), cef_v8value_create_int(g_queryResponse.minHeight), V8_PROPERTY_ATTRIBUTE_NONE);
+            retobj->set_value_bykey(retobj, GenerateCefString(u"titleLocked"), cef_v8value_create_bool(g_queryResponse.titleLocked), V8_PROPERTY_ATTRIBUTE_NONE);
             *retval = retobj;
             g_queryResponse.success = FALSE;
         } else {
@@ -1315,7 +1346,7 @@ int CEF_CALLBACK _getSpotifyModule_hook(cef_v8handler_t* self, const cef_string_
             initialConfigObj->set_value_bykey(initialConfigObj, GenerateCefString(u"noforceddarkmode"), cef_v8value_create_bool(cte_settings.noforceddarkmode), V8_PROPERTY_ATTRIBUTE_NONE);
             initialConfigObj->set_value_bykey(initialConfigObj, GenerateCefString(u"forceextensions"), cef_v8value_create_bool(cte_settings.forceextensions), V8_PROPERTY_ATTRIBUTE_NONE);
             retobj->set_value_bykey(retobj, GenerateCefString(u"initialOptions"), initialConfigObj, V8_PROPERTY_ATTRIBUTE_NONE);
-            cef_v8value_t* supportedCommandsArr = cef_v8value_create_array(9);
+            cef_v8value_t* supportedCommandsArr = cef_v8value_create_array(12);
             supportedCommandsArr->set_value_byindex(supportedCommandsArr, 0, cef_v8value_create_string(GenerateCefString(u"ExtendFrame")));
             supportedCommandsArr->set_value_byindex(supportedCommandsArr, 1, cef_v8value_create_string(GenerateCefString(u"Minimize")));
             supportedCommandsArr->set_value_byindex(supportedCommandsArr, 2, cef_v8value_create_string(GenerateCefString(u"MaximizeRestore")));
@@ -1325,6 +1356,9 @@ int CEF_CALLBACK _getSpotifyModule_hook(cef_v8handler_t* self, const cef_string_
             supportedCommandsArr->set_value_byindex(supportedCommandsArr, 6, cef_v8value_create_string(GenerateCefString(u"ResizeTo")));
             supportedCommandsArr->set_value_byindex(supportedCommandsArr, 7, cef_v8value_create_string(GenerateCefString(u"SetMinSize")));
             supportedCommandsArr->set_value_byindex(supportedCommandsArr, 8, cef_v8value_create_string(GenerateCefString(u"SetTopMost")));
+            supportedCommandsArr->set_value_byindex(supportedCommandsArr, 9, cef_v8value_create_string(GenerateCefString(u"SetTitle")));
+            supportedCommandsArr->set_value_byindex(supportedCommandsArr, 10, cef_v8value_create_string(GenerateCefString(u"LockTitle")));
+            supportedCommandsArr->set_value_byindex(supportedCommandsArr, 11, cef_v8value_create_string(GenerateCefString(u"OpenSpotifyMenu")));
             retobj->set_value_bykey(retobj, GenerateCefString(u"supportedCommands"), supportedCommandsArr, V8_PROPERTY_ATTRIBUTE_NONE);
             retobj->set_value_bykey(retobj, GenerateCefString(u"version"), cef_v8value_create_string(GenerateCefString(u"0.6")), V8_PROPERTY_ATTRIBUTE_NONE);
             *retval = retobj;
@@ -1504,6 +1538,8 @@ BOOL Wh_ModInit() {
                            (void**)&cef_panel_create_original);
         Wh_SetFunctionHook((void*)SetWindowThemeAttribute, (void*)SetWindowThemeAttribute_hook,
                            (void**)&SetWindowThemeAttribute_original);
+        Wh_SetFunctionHook((void*)SetWindowTextW, (void*)SetWindowTextW_hook,
+                           (void**)&SetWindowTextW_original);
         Wh_SetFunctionHook((void*)CreateProcessW, (void*)CreateProcessW_hook,
                            (void**)&CreateProcessW_original);
         Wh_SetFunctionHook((void*)CreateProcessAsUserW, (void*)CreateProcessAsUserW_hook,

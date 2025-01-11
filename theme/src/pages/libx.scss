@@ -55,6 +55,42 @@
 
             .x-filterBox-overlay {
                 opacity: 1;
+
+                .x-filterBox-searchIconContainer {
+                    position: absolute;
+                    top: 1px;
+                    right: 0px;
+                    width: 26px;
+                    height: 20px;
+                    border: none;
+                    background: url('resources/topbar/search.png') no-repeat;
+                }
+
+                &:has(.x-filterBox-clearButton) .x-filterBox-searchIconContainer {
+                    display: none;
+                }
+
+                .x-filterBox-clearButton {
+                    position: absolute;
+                    top: 1px;
+                    right: 0px;
+                    width: 26px;
+                    height: 20px;
+                    border: none;
+                    background: url('resources/topbar/clear.png') no-repeat;
+
+                    &:hover {
+                        background: url('resources/topbar/clear_hover.png') no-repeat;
+                    }
+
+                    &:active {
+                        background: url('resources/topbar/clear_pressed.png') no-repeat;
+                    }
+                }
+
+                svg {
+                    display: none;
+                }
             }
 
             .x-filterBox-expandButton {
@@ -66,6 +102,96 @@
             }
             input::placeholder {
                 color: var(--gray-text);
+                font-style: italic;
+            }
+        }
+
+        [role="presentation"] {
+            order: -1;
+
+            [role="combobox"] {
+                top: -3px;
+                min-height: 0;
+                color: black;
+                padding: 0;
+                opacity: 1 !important;
+                transform: none !important;
+
+                .encore-text {
+                    order: 1;
+                    font-size: 12px;
+                }
+
+                span:nth-child(2) {
+                    width: 16px;
+                    height: 16px;
+                    margin-top: 1px;
+                    margin-left: 2px;
+                    margin-right: 3px;
+                    background: url('resources/icon/list.png') no-repeat;
+
+                    svg {
+                        display: none;
+                    }
+                }
+
+                &::after {
+                    content: '⏷';
+                    font-size: 12px;
+                    color: black;
+                    margin-top: -2px;
+                    margin-left: 4px;
+                    margin-right: -2px;
+                    order: 2;
+                    inline-size: unset;
+                }
+            }
+        }
+    }
+
+    /* listview header */
+    .main-yourLibraryX-filterArea + div {
+        background: none !important;
+        border-image: url('resources/ui/listview_header.png') 0 0 1 2 fill stretch;
+        border-image-width: 0 0 1px 2px;
+        box-shadow: var(--wmp11-separator-light) 0 -1px 0 0, var(--wmp11-separator-shadow) 0 -2px 0 0;
+        height: 25px;
+        grid-gap: 0;
+        grid-template-columns: 0.74fr;
+        margin: 0;
+
+        > span {
+            height: 25px;
+            border-image: url('resources/ui/listview_header.png') 0 2 1 2 fill stretch;
+            border-image-width: 0 2px 1px 2px;
+            padding-left: 5px;
+            color: #77797d;
+            line-height: 2;
+            font-size: 12px;
+            font-weight: normal;
+
+            &:last-child {
+                margin-right: 100px;
+            }
+        }
+    }
+
+    &:has(.main-rootlist-wrapper[style*="row-height: 32"]) {
+        .main-yourLibraryX-filterArea {
+            [role="combobox"] {
+                span:nth-child(2) {
+                    background-image: url('resources/icon/compact.png');
+                }
+            }
+        }
+    }
+
+    &:has(ul[role="treegrid"]) {
+        .main-yourLibraryX-filterArea {
+            [role="combobox"] {
+                span:nth-child(2) {
+                    background-image: url('resources/icon/grid.png');
+                }
             }
         }
     }

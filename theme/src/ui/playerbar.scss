@@ -230,25 +230,25 @@ div[data-testid='now-playing-widget'] {
     }
 }
 
+.wmpotify-time-text-container {
+    position: absolute;
+    left: 0;
+    bottom: 11px;
+    width: calc((100vw - 438px) / 2);
+    text-align: right;
+    padding: 6px;
+    font-size: 12px;
+    pointer-events: none;
+}
+
+.wmpotify-time-text {
+    pointer-events: auto;
+}
+
 .player-controls__left {
-    .wmpotify-time-text-container {
-        position: absolute;
-        left: 0;
-        bottom: 11px;
-        width: calc((100vw - 438px) / 2);
-        text-align: right;
-        padding: 6px;
-        font-size: 12px;
-        pointer-events: none;
-    }
-
-    .wmpotify-time-text {
-        pointer-events: auto;
-    }
-
     /* Shuffle button, wrapped in a div only if it's enabled */
-    > div:nth-child(2) button,
-    > button:nth-child(2) {
+    > div:first-child button,
+    > button:first-child {
         width: 25px;
         height: 25px;
         border-radius: 0;
@@ -372,8 +372,8 @@ div[data-testid='now-playing-widget'] {
     }
 }
 
-.player-controls__left > div:nth-child(2) button:hover::before,
-.player-controls__left > button:nth-child(2):hover::before,
+.player-controls__left > div:first-child button:hover::before,
+.player-controls__left > button:first-child:hover::before,
 .player-controls__buttons button[data-testid='control-button-repeat']:hover::after,
 #wmpotify-stop-button:hover::before,
 .volume-bar__icon-button:hover::before {
@@ -386,8 +386,8 @@ div[data-testid='now-playing-widget'] {
     z-index: -1;
 }
 
-.player-controls__left > div:nth-child(2) button:active::before,
-.player-controls__left > button:nth-child(2):active::before,
+.player-controls__left > div:first-child button:active::before,
+.player-controls__left > button:first-child:active::before,
 .player-controls__buttons button[data-testid='control-button-repeat']:active::after,
 #wmpotify-stop-button:active::before,
 .volume-bar__icon-button:active::before {

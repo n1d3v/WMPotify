@@ -91,11 +91,127 @@
     }
 
     .playlist-playlist-searchBoxContainer {
+        [role="search"] {
+            margin: 2px;
+            width: 225px;
+            height: 24px;
+            border: solid 1px #f4f7fc;
+            background: linear-gradient(to bottom, #5e5f61, #c0c3c6);
+            margin-top: -1px;
+
+            .x-filterBox-filterInput {
+                position: absolute;
+                top: 0;
+                margin: 1px;
+                width: calc(100% - 2px);
+                height: 20px;
+                border: solid 1px white;
+                background-color: #f6f9fc;
+                font-size: 12px;
+                border-radius: 0;
+                min-height: 0;
+                padding-inline: 4px;
+                box-shadow: none;
+                opacity: 1;
+            }
+
+            .x-filterBox-overlay {
+                opacity: 1;
+
+                .x-filterBox-searchIconContainer {
+                    position: absolute;
+                    top: 1px;
+                    right: 0px;
+                    width: 26px;
+                    height: 20px;
+                    border: none;
+                    background: url('resources/topbar/search.png') no-repeat;
+                }
+
+                &:has(.x-filterBox-clearButton) .x-filterBox-searchIconContainer {
+                    display: none;
+                }
+
+                .x-filterBox-clearButton {
+                    position: absolute;
+                    top: 1px;
+                    right: 0px;
+                    width: 26px;
+                    height: 20px;
+                    border: none;
+                    background: url('resources/topbar/clear.png') no-repeat;
+
+                    &:hover {
+                        background: url('resources/topbar/clear_hover.png') no-repeat;
+                    }
+
+                    &:active {
+                        background: url('resources/topbar/clear_pressed.png') no-repeat;
+                    }
+                }
+
+                svg {
+                    display: none;
+                }
+            }
+
+            .x-filterBox-expandButton {
+                display: none;
+            }
+        }
+
+        button.x-sortBox-sortDropdown {
+            color: black;
+            padding: 0;
+            gap: 0;
+            order: -1;
+
+            .encore-text {
+                order: 1;
+                font-size: 12px;
+            }
+
+            &::before {
+                content: '';
+                display: block;
+                width: 16px;
+                height: 16px;
+                margin-top: 1px;
+                margin-left: 2px;
+                margin-right: 3px;
+                background: url('resources/icon/list.png') no-repeat;
+            }
+
+            svg {
+                display: none;
+            }
+
+            &::after {
+                content: '⏷';
+                font-size: 12px;
+                color: black;
+                margin-top: -2px;
+                margin-left: 4px;
+                margin-right: -2px;
+                order: 2;
+                inline-size: unset;
+            }
+        }
+
         span, svg, input {
             color: var(--text-subdued);
         }
         input::placeholder {
             color: var(--gray-text);
+            font-style: italic;
+        }
+    }
+
+    &:has(.main-rootlist-wrapper[style*="row-height: 32"]) {
+        .playlist-playlist-searchBoxContainer {
+            button.x-sortBox-sortDropdown::before {
+                background-image: url('resources/icon/compact.png');
+            }
         }
     }
 
@@ -175,6 +291,21 @@
 
         &:active {
             background-image: url('resources/playerbar/pause_pressed.png') !important;
+        }
+    }
+}
+
+/* Sort and view picker in playlist page */
+ul[id*="sortboxlist-"] {
+    li:last-child {
+        button {
+            margin-top: 0 !important;
+        }
+    }
+
+    button:has(svg:not(:first-child)) {
+        svg:first-child {
+            display: none;
         }
     }
 }

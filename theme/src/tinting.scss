@@ -9,7 +9,11 @@
 .Root__globalNav,
 .Root__now-playing-bar::before,
 .Root__now-playing-bar::after,
+.main-nowPlayingBar-nowPlayingBar.tinted .player-controls__buttons,
+.main-nowPlayingBar-nowPlayingBar.tinted .playback-bar,
+.main-nowPlayingBar-nowPlayingBar.tinted .main-nowPlayingBar-right,
 .main-trackList-trackListHeader,
+.main-yourLibraryX-filterArea + div,
 .wmpotify-tintable {
     filter: hue-rotate(var(--wmpotify-tint-hue)) saturate(var(--wmpotify-tint-sat));
 }

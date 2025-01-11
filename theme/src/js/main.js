@@ -20,6 +20,7 @@ const elementsRequired = [
     '.main-topBar-topbarContentRight > button:last-child',
     '.Root__main-view',
     '.main-view-container__scroll-node-child main',
+    '.main-nowPlayingBar-nowPlayingBar',
     '.player-controls__left',
     '.player-controls__buttons button[data-testid="control-button-skip-back"]',
     '.player-controls__buttons button[data-testid="control-button-repeat"]',
@@ -118,8 +119,8 @@ async function init() {
     await createTitlebar(titleStyle);
 
     if (localStorage.wmpotifyTintColor) {
-        const [hue, sat] = localStorage.wmpotifyTintColor.split(',');
-        setTintColor(hue, sat);
+        const [hue, sat, tintPb] = localStorage.wmpotifyTintColor.split(',');
+        setTintColor(hue, sat, tintPb);
     }
 
     ControlManager.init();

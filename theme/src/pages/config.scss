@@ -119,6 +119,30 @@
         background: url('resources/config/sat.png') no-repeat;
     }
 
+    label[for="wmpotify-config-tint-playerbar"] {
+        position: absolute;
+        top: 100px;
+        left: 400px;
+    }
+
+    #wmpotify-about-logo {
+        width: 32px;
+        height: 32px;
+        background: var(--logo-32) no-repeat;
+        float: left;
+        margin-top: -5px;
+    }
+
+    #wmpotify-about-title {
+        font-size: 20px;
+        font-weight: bold;
+        font-family: sans-serif;
+        text-align: left;
+        margin-left: 38px;
+        margin-top: 5px;
+        margin-bottom: -8px;
+    }
+
     a {
         color: #abd5fd !important;
         text-decoration: underline;

@@ -30,6 +30,8 @@ function init() {
             <input type="range" id="wmpotify-config-hue" class="wmpotify-aero no-track" min="0" max="360" step="1" value="180"><br>
             <label>Saturation</label><br>
             <input type="range" id="wmpotify-config-sat" class="wmpotify-aero no-track" min="0" max="354" step="1" value="121"><br>
+            <input type="checkbox" id="wmpotify-config-tint-playerbar" class="wmpotify-aero">
+            <label for="wmpotify-config-tint-playerbar">Apply color to the now playing bar buttons</label>
         </section>
         <section class="wmpotify-config-tab-content" data-tab-title="General">
             <label for="wmpotify-config-style">Style</label>
@@ -52,7 +54,11 @@ function init() {
             <button id="wmpotify-config-apply" class="wmpotify-aero">Apply</button>
         </section>
         <section class="wmpotify-config-tab-content" data-tab-title="About">
-            <span style="color: lightgray;">WMPotify for Spicetify by Ingan121</span><br>
+            <div id="wmpotify-about-logo"></div>
+            <p id="wmpotify-about-title">WMPotify</p><br>
+            <p>A Windows Media Player 11 inspired Spicetify theme for Spotify</p>
+            <p>Version: Pre-alpha</p>
+            <p>Made by Ingan121 - <a href="https://www.ingan121.com/" target="_blank">www.ingan121.com</a></p>
             <a href="https://github.com/Ingan121/WMPotify" target="_blank">GitHub</a>
         </section>
     `;
@@ -63,8 +69,10 @@ function init() {
     elements.title = configWindow.querySelector('#wmpotify-config-title');
     elements.hue = configWindow.querySelector('#wmpotify-config-hue');
     elements.sat = configWindow.querySelector('#wmpotify-config-sat');
+    elements.tintPb = configWindow.querySelector('#wmpotify-config-tint-playerbar');
     elements.hue.addEventListener('input', onColorChange);
     elements.sat.addEventListener('input', onColorChange);
+    elements.tintPb.addEventListener('change', onColorChange);
     configWindow.querySelector('#wmpotify-config-color-reset').addEventListener('click', resetColor);
     configWindow.querySelector('#wmpotify-config-prev').addEventListener('click', prevTab);
     configWindow.querySelector('#wmpotify-config-next').addEventListener('click', nextTab);
@@ -99,9 +107,12 @@ function open() {
     }
     configWindow.style.display = 'block';
     if (localStorage.wmpotifyTintColor) {
-        const [hue, sat] = localStorage.wmpotifyTintColor.split(',');
+        const [hue, sat, tintPb] = localStorage.wmpotifyTintColor.split(',');
         elements.hue.value = parseInt(hue) + 180;
         elements.sat.value = parseInt(sat) * 121 / 100;
+        if (tintPb) {
+            elements.tintPb.checked = true;
+        }
     }
 }
 
@@ -132,8 +143,8 @@ function nextTab() {
 function onColorChange() {
     const hue = elements.hue.value - 180;
     const sat = elements.sat.value * 100 / 121;
-    setTintColor(hue, sat);
-    localStorage.wmpotifyTintColor = hue + ',' + sat;
+    setTintColor(hue, sat, elements.tintPb.checked);
+    localStorage.wmpotifyTintColor = hue + ',' + sat + ',' + (elements.tintPb.checked ? '1' : '');
 }
 
 function resetColor() {

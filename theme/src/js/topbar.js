@@ -1,4 +1,5 @@
 import { MadMenu, createMadMenu } from './MadMenu';
+import WindhawkComm from './WindhawkComm';
 
 let tabsContainer;
 let tabs = [];
@@ -79,6 +80,12 @@ export function setupTopbar() {
     searchBarWrapper.appendChild(searchClearButton);
     searchContainer.appendChild(searchBarWrapper);
     topbar.appendChild(searchContainer);
+
+    topbar.addEventListener('pointerdown', (event) => {
+        if (event.button === 2 && !event.target.closest('input')) {
+            WindhawkComm.openSpotifyMenu();
+        }
+    });
 }
 
 function addTab(btn) {

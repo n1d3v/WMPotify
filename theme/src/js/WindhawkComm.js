@@ -80,8 +80,26 @@ export default WindhawkComm = {
         }
     },
 
+    setTitle(title) {
+        if (windhawkModule) {
+            windhawkModule.executeCommand(`/WH:SetTitle:${title}`);
+        }
+    },
+
+    lockTitle(lock) {
+        if (windhawkModule) {
+            windhawkModule.executeCommand(`/WH:LockTitle:${lock ? 1 : 0}`);
+        }
+    },
+
+    openSpotifyMenu() {
+        if (windhawkModule) {
+            windhawkModule.executeCommand("/WH:OpenSpotifyMenu");
+        }
+    },
+
     available() {
-        return windhawkModule;
+        return !!windhawkModule;
     },
 
     getSupportedCommands() {

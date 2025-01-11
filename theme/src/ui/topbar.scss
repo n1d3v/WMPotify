@@ -217,6 +217,10 @@
             padding-inline: 4px;
             padding-block: unset;
             box-shadow: none;
+
+            &::placeholder {
+                font-style: italic;
+            }
         }
 
         #wmpotify-search-clear-button {

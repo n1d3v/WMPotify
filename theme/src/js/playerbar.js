@@ -3,6 +3,8 @@ import { formatTime } from './functions';
 let playPauseButton, volumeButton, volumeBarProgress, timeTexts, timeTextMode, timeText;
 
 export function setupPlayerbar() {
+    const playerBar = document.querySelector('.main-nowPlayingBar-nowPlayingBar');
+
     playPauseButton = document.querySelector(".player-controls__buttons button[data-testid='control-button-playpause']");
     Spicetify.Player.addEventListener("onplaypause", updatePlayPauseButton);
     new MutationObserver(updatePlayPauseButton).observe(playPauseButton, { attributes: true, attributeFilter: ['aria-label'] });
@@ -46,7 +48,7 @@ export function setupPlayerbar() {
         localStorage.wmpotifyTimeTextMode = timeTextMode;
     });
     timeTextContainer.appendChild(timeText);
-    playerControlsLeft.insertAdjacentElement('afterbegin', timeTextContainer);
+    playerBar.insertAdjacentElement('afterbegin', timeTextContainer);
     Spicetify.Player.addEventListener("onprogress", updateTimeText);
 
     // Shuffle button is often removed and re-added, so we need this to keep it in place
