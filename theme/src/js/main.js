@@ -6,9 +6,7 @@ import { setupPlayerbar, updatePlayPauseButton } from './playerbar';
 import Config from './config';
 import { initQueuePanel } from './queue';
 import WindhawkComm from './WindhawkComm';
-import { initCustomDPiP } from './dpip/init';
 globalThis.WindhawkComm = WindhawkComm;
-globalThis.initCustomDPiP = initCustomDPiP;
 
 const elementsRequired = [
     '.Root__globalNav',
