@@ -23,7 +23,6 @@ spicetify config current_theme WMPotify
 spicetify apply
 echo.
 ```
-* It's recommended to also install the modified betterLibrary mod in `CustomApps/betterLibrary` to access your library
 * For Windows, install the `CEF/Spotify Tweaks` [Windhawk](https://windhawk.net/) mod [in this repository](https://github.com/Ingan121/WMPotify/tree/master/cte.wh.cpp) to use the Aero/Basic style properly. (Paste the contents of the `cte.wh.cpp` file in the WH mod editor and compile it; it wasn't uploaded to the WH mod repository yet) Disable the `CEF/Spotify Titlebar Enabler` mod if you have it installed. (It's older version of the WH mod in this repository)
 * Make sure to check for new commits and update the theme (+CustomApps+WH mod) accordingly if you installed this WIP theme
 
