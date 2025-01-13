@@ -45,7 +45,36 @@ function earlyInit() {
     WindhawkComm.init();
 
     const whStatus = WindhawkComm.query();
-    if (whStatus && !localStorage.wmpotifyStyle && window.outerHeight - window.innerHeight > 0 && whStatus.isThemingEnabled) {
+
+    // Supported: native, custom, spotify, keepmenu
+    // native: Use the native title bar (requires Linux or Windows with my Windhawk mod) Assumes native title bar is available and removes any custom title bar in the client area
+    // custom: Use custom title bar implemented by this theme, install Spotify API Extender (SpotEx) or Windhawk mod for minimize/maximize buttons
+    // spotify: Use Spotify's window controls (default on unmodded Spotify client on Windows/macOS, unavailable on Linux)
+    // keepmenu: Use custom window controls but keep the space for Spotify's menu (useful when only controls are hidden with the WH mod, Windows only)
+    // Default: native if native title bar is available, custom if SpotEx or WH mod is available, spotify otherwise
+    if (localStorage.wmpotifyTitleStyle && ['native', 'custom', 'spotify', 'keepmenu'].includes(localStorage.wmpotifyTitleStyle)) {
+        titleStyle = localStorage.wmpotifyTitleStyle;
+    } else {
+        console.log('WMPotify EarlyInit:', window.SpotEx, whStatus);
+        if (window.outerHeight - window.innerHeight > 0 || whStatus?.options?.showframe) {
+            titleStyle = 'native';
+        } else if (window.SpotEx || (whStatus?.supportedCommands?.includes('Minimize'))) {
+            if (whStatus?.options?.showmenu && !whStatus.options.showcontrols) {
+                titleStyle = 'keepmenu';
+            } else {
+                titleStyle = 'custom';
+            }
+        }
+    }
+    if (titleStyle === 'keepmenu' && !navigator.userAgent.includes('Windows')) {
+        titleStyle = 'spotify';
+    }
+    if (titleStyle === 'spotify' && navigator.userAgent.includes('Linux')) {
+        titleStyle = 'native';
+    }
+    document.documentElement.dataset.wmpotifyTitleStyle = titleStyle;
+
+    if (whStatus && !localStorage.wmpotifyStyle && titleStyle === 'native' && whStatus.isThemingEnabled) {
         if (whStatus.supportedCommands.includes('ExtendFrame') &&
             whStatus.options.transparentrendering &&
             whStatus.isDwmEnabled) {
@@ -66,6 +95,9 @@ function earlyInit() {
             break;
         case 'aero':
             WindhawkComm.extendFrame(0, 0, 0, 60);
+            window.addEventListener('resize', () => {
+                WindhawkComm.extendFrame(0, 0, 0, 60);
+            });
             break;
         case 'basic':
             WindhawkComm.extendFrame(0, 0, 0, 0);
@@ -83,34 +115,6 @@ function earlyInit() {
             break;
     }
     document.documentElement.dataset.wmpotifyStyle = style;
-
-    // Supported: native, custom, spotify, keepmenu
-    // native: Use the native title bar (requires Linux or Windows with my Windhawk mod) Assumes native title bar is available and removes any custom title bar in the client area
-    // custom: Use custom title bar implemented by this theme, install Spotify API Extender (SpotEx) or Windhawk mod for minimize/maximize buttons
-    // spotify: Use Spotify's window controls (default on unmodded Spotify client on Windows/macOS, unavailable on Linux)
-    // keepmenu: Use custom window controls but keep the space for Spotify's menu (useful when only controls are hidden with the WH mod, Windows only)
-    // Default: native if native title bar is available, custom if SpotEx or WH mod is available, spotify otherwise
-    if (localStorage.wmpotifyTitleStyle && ['native', 'custom', 'spotify', 'keepmenu'].includes(localStorage.wmpotifyTitleStyle)) {
-        titleStyle = localStorage.wmpotifyTitleStyle;
-    } else {
-        console.log('WMPotify EarlyInit:', window.SpotEx, whStatus);
-        if (window.outerHeight - window.innerHeight > 0) {
-            titleStyle = 'native';
-        } else if (window.SpotEx || (whStatus?.supportedCommands?.includes('Minimize'))) {
-            if (whStatus?.options?.showmenu && !whStatus.options.showcontrols) {
-                titleStyle = 'keepmenu';
-            } else {
-                titleStyle = 'custom';
-            }
-        }
-    }
-    if (titleStyle === 'keepmenu' && !navigator.userAgent.includes('Windows')) {
-        titleStyle = 'spotify';
-    }
-    if (titleStyle === 'spotify' && navigator.userAgent.includes('Linux')) {
-        titleStyle = 'native';
-    }
-    document.documentElement.dataset.wmpotifyTitleStyle = titleStyle;
 }
 
 earlyInit();
@@ -160,7 +164,7 @@ window.addEventListener('load', () => {
             }
             console.log('WMPotify: Theme loaded');
         } else if (cnt++ > 80) {
-            (Spicetify.showNotification || window.alert)('[WMPotify] Theme loading failed. Please refresh the page to try again. Please make sure you have compatible Spoitfy version and have global navbar enabled.');
+            (Spicetify.showNotification || window.alert)('[WMPotify] Theme loading failed. Please refresh the page to try again. Please make sure you have compatible Spoitfy version.');
             clearInterval(interval);
             const missing = [];
             for (const selector of elementsRequired) {

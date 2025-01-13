@@ -254,6 +254,7 @@ struct cte_queryResponse_t {
     int minWidth;
     int minHeight;
     BOOL titleLocked;
+    int dpi;
 } g_queryResponse;
 
 #pragma region CEF structs (as minimal and cross-version compatible as possible)
@@ -885,49 +886,60 @@ BOOL WINAPI CreateProcessAsUserW_hook(
 #pragma endregion
 
 #pragma region Renderer JS API injection + IPC
-void HandleWindhawkComm(LPCWSTR clipText) {
+void HandleWindhawkComm(LPCWSTR command) {
     if (g_mainHwnd == NULL) {
         return;
     }
-    Wh_Log(L"HandleWindhawkComm: %s, len: %d, size: %d", clipText, wcslen(clipText), sizeof(clipText));
+
+    std::lock_guard<std::mutex> lock(g_queryResponseMutex); // Protect shared resources
+
+    int len = wcslen(command);
+    Wh_Log(L"HandleWindhawkComm: %s, len: %d, size: %d", command, len, sizeof(command));
+
+    // Validate command length
+    if (len >= 270) { // "/WH:SetTitle:" + max title length (255) + null terminator
+        Wh_Log(L"Command too long");
+        return;
+    }
+
     // /WH:ExtendFrame:<left>:<right>:<top>:<bottom>
     // Set DWM margins to extend frame into client area
-    if (wcsncmp(clipText, L"/WH:ExtendFrame:", 16) == 0) {
+    if (wcsncmp(command, L"/WH:ExtendFrame:", 16) == 0) {
         if (!IsDwmEnabled()) {
             return;
         }
         int left, right, top, bottom;
-        if (swscanf(clipText + 16, L"%d:%d:%d:%d", &left, &right, &top, &bottom) == 4) {
+        if (swscanf(command + 16, L"%d:%d:%d:%d", &left, &right, &top, &bottom) == 4) {
             MARGINS margins = {left, right, top, bottom};
             DwmExtendFrameIntoClientArea(g_mainHwnd, &margins);
         }
     // /WH:Minimize, /WH:MaximizeRestore, /WH:Close
     // Send respective window messages to the main window
-    } else if (wcscmp(clipText, L"/WH:Minimize") == 0) {
+    } else if (wcscmp(command, L"/WH:Minimize") == 0) {
         ShowWindow(g_mainHwnd, SW_MINIMIZE);
-    } else if (wcscmp(clipText, L"/WH:MaximizeRestore") == 0) {
+    } else if (wcscmp(command, L"/WH:MaximizeRestore") == 0) {
         ShowWindow(g_mainHwnd, IsZoomed(g_mainHwnd) ? SW_RESTORE : SW_MAXIMIZE);
-    } else if (wcscmp(clipText, L"/WH:Close") == 0) {
+    } else if (wcscmp(command, L"/WH:Close") == 0) {
         PostMessage(g_mainHwnd, WM_CLOSE, 0, 0);
     // /WH:SetLayered:<layered (1/0)>:<alpha>:<optional-transparentColor>
     // Make the window layered with optional transparent color key
-    } else if (wcsncmp(clipText, L"/WH:SetLayered:", 15) == 0) {
+    } else if (wcsncmp(command, L"/WH:SetLayered:", 15) == 0) {
         int layered, alpha, color;
-        if (swscanf(clipText + 15, L"%d:%d:%x", &layered, &alpha, &color) == 3) {
+        if (swscanf(command + 15, L"%d:%d:%x", &layered, &alpha, &color) == 3) {
             if (layered) {
                 SetWindowLong(g_mainHwnd, GWL_EXSTYLE, GetWindowLong(g_mainHwnd, GWL_EXSTYLE) | WS_EX_LAYERED);
                 SetLayeredWindowAttributes(g_mainHwnd, color, alpha, LWA_COLORKEY | LWA_ALPHA);
             } else {
                 SetWindowLong(g_mainHwnd, GWL_EXSTYLE, GetWindowLong(g_mainHwnd, GWL_EXSTYLE) & ~WS_EX_LAYERED);
             }
-        } else if (swscanf(clipText + 15, L"%d:%d", &layered, &alpha) == 2) {
+        } else if (swscanf(command + 15, L"%d:%d", &layered, &alpha) == 2) {
             if (layered) {
                 SetWindowLong(g_mainHwnd, GWL_EXSTYLE, GetWindowLong(g_mainHwnd, GWL_EXSTYLE) | WS_EX_LAYERED);
                 SetLayeredWindowAttributes(g_mainHwnd, 0, alpha, LWA_ALPHA);
             } else {
                 SetWindowLong(g_mainHwnd, GWL_EXSTYLE, GetWindowLong(g_mainHwnd, GWL_EXSTYLE) & ~WS_EX_LAYERED);
             }
-        } else if (swscanf(clipText + 15, L"%d", &layered) == 1) {
+        } else if (swscanf(command + 15, L"%d", &layered) == 1) {
             if (layered) {
                 SetWindowLong(g_mainHwnd, GWL_EXSTYLE, GetWindowLong(g_mainHwnd, GWL_EXSTYLE) | WS_EX_LAYERED);
             } else {
@@ -936,20 +948,20 @@ void HandleWindhawkComm(LPCWSTR clipText) {
         }
     // /WH:SetBackdrop:<mica|acrylic|tabbed>
     // Set the window backdrop type (Windows 11 only)
-    } else if (wcsncmp(clipText, L"/WH:SetBackdrop:", 16) == 0) {
-        if (wcscmp(clipText + 16, L"mica") == 0) {
+    } else if (wcsncmp(command, L"/WH:SetBackdrop:", 16) == 0) {
+        if (wcscmp(command + 16, L"mica") == 0) {
             BOOL value = TRUE;
             DwmSetWindowAttribute(g_mainHwnd, DWMWA_USE_HOSTBACKDROPBRUSH, &value, sizeof(value));
             DWM_SYSTEMBACKDROP_TYPE backdrop_type = DWMSBT_MAINWINDOW;
             DwmSetWindowAttribute(g_mainHwnd, DWMWA_SYSTEMBACKDROP_TYPE, &backdrop_type, sizeof(backdrop_type));
             g_dwmBackdropEnabled = TRUE;
-        } else if (wcscmp(clipText + 16, L"acrylic") == 0) {
+        } else if (wcscmp(command + 16, L"acrylic") == 0) {
             BOOL value = TRUE;
             DwmSetWindowAttribute(g_mainHwnd, DWMWA_USE_HOSTBACKDROPBRUSH, &value, sizeof(value));
             DWM_SYSTEMBACKDROP_TYPE backdrop_type = DWMSBT_TRANSIENTWINDOW;
             DwmSetWindowAttribute(g_mainHwnd, DWMWA_SYSTEMBACKDROP_TYPE, &backdrop_type, sizeof(backdrop_type));
             g_dwmBackdropEnabled = TRUE;
-        } else if (wcscmp(clipText + 16, L"tabbed") == 0) {
+        } else if (wcscmp(command + 16, L"tabbed") == 0) {
             BOOL value = TRUE;
             DwmSetWindowAttribute(g_mainHwnd, DWMWA_USE_HOSTBACKDROPBRUSH, &value, sizeof(value));
             DWM_SYSTEMBACKDROP_TYPE backdrop_type = DWMSBT_TABBEDWINDOW;
@@ -957,51 +969,51 @@ void HandleWindhawkComm(LPCWSTR clipText) {
             g_dwmBackdropEnabled = TRUE;
         }
     // /WH:ResizeTo:<width>:<height>
-    } else if (wcsncmp(clipText, L"/WH:ResizeTo:", 13) == 0) {
+    } else if (wcsncmp(command, L"/WH:ResizeTo:", 13) == 0) {
         int width, height;
-        if (swscanf(clipText + 13, L"%d:%d", &width, &height) == 2) {
+        if (swscanf(command + 13, L"%d:%d", &width, &height) == 2) {
             SetWindowPos(g_mainHwnd, NULL, 0, 0, width, height, SWP_NOMOVE | SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOACTIVATE);
         }
     // /WH:SetMinSize:<width>:<height>
-    } else if (wcsncmp(clipText, L"/WH:SetMinSize:", 15) == 0) {
+    } else if (wcsncmp(command, L"/WH:SetMinSize:", 15) == 0) {
         int width, height;
-        if (swscanf(clipText + 15, L"%d:%d", &width, &height) == 2) {
+        if (swscanf(command + 15, L"%d:%d", &width, &height) == 2) {
             g_minWidth = width;
             g_minHeight = height;
         }
     // /WH:SetTopMost:<topmost (1/0), toggle if absent>
-    } else if (wcsncmp(clipText, L"/WH:SetTopMost:", 15) == 0) {
+    } else if (wcsncmp(command, L"/WH:SetTopMost:", 15) == 0) {
         int topmost;
-        if (swscanf(clipText + 15, L"%d", &topmost) == 1) {
+        if (swscanf(command + 15, L"%d", &topmost) == 1) {
             SetWindowPos(g_mainHwnd, topmost ? HWND_TOPMOST : HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
         } else {
             SetWindowPos(g_mainHwnd, GetWindowLong(g_mainHwnd, GWL_EXSTYLE) & WS_EX_TOPMOST ? HWND_NOTOPMOST : HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
         }
     // /WH:SetTitle:<title>
     // Set the window title (ignores title lock)
-    } else if (wcsncmp(clipText, L"/WH:SetTitle:", 13) == 0) {
-        SetWindowTextW_original(g_mainHwnd, clipText + 13);
+    } else if (wcsncmp(command, L"/WH:SetTitle:", 13) == 0) {
+        SetWindowTextW_original(g_mainHwnd, command + 13);
     // /WH:LockTitle:<lock (1/0), toggle if absent>
     // Prevent Spotify from changing the window title
-    } else if (wcsncmp(clipText, L"/WH:LockTitle:", 14) == 0) {
+    } else if (wcsncmp(command, L"/WH:LockTitle:", 14) == 0) {
         int lock;
-        if (swscanf(clipText + 14, L"%d", &lock) == 1) {
+        if (swscanf(command + 14, L"%d", &lock) == 1) {
             g_titleLocked = lock;
         } else {
             g_titleLocked = !g_titleLocked;
         }
     // /WH:OpenSpotifyMenu
     // Open the Spotify menu (Alt, won't work if the menu button is hidden in the mod options)
-    } else if (wcscmp(clipText, L"/WH:OpenSpotifyMenu") == 0) {
+    } else if (wcscmp(command, L"/WH:OpenSpotifyMenu") == 0) {
         PostMessage(g_mainHwnd, WM_SYSCOMMAND, SC_KEYMENU, 0);
     // /WH:Query
-    } else if (wcscmp(clipText, L"/WH:Query") == 0) {
+    } else if (wcscmp(command, L"/WH:Query") == 0) {
         if (g_hSrvPipe == INVALID_HANDLE_VALUE) {
             return;
         }
         wchar_t queryResponse[256];
-        // <showframe:showframeonothers:showmenu:showcontrols:transparentcontrols:transparentrendering:ignoreminsize:isMaximized:isTopMost:isLayered:isThemingEnabled:isDwmEnabled:dwmBackdropEnabled:hwAccelerated:minWidth:minHeight:titleLocked>
-        swprintf(queryResponse, 256, L"/WH:QueryResponse:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d",
+        // <showframe:showframeonothers:showmenu:showcontrols:transparentcontrols:transparentrendering:ignoreminsize:isMaximized:isTopMost:isLayered:isThemingEnabled:isDwmEnabled:dwmBackdropEnabled:hwAccelerated:minWidth:minHeight:titleLocked:dpi>
+        swprintf(queryResponse, 256, L"/WH:QueryResponse:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d",
             cte_settings.showframe,
             cte_settings.showframeonothers,
             cte_settings.showmenu,
@@ -1018,7 +1030,8 @@ void HandleWindhawkComm(LPCWSTR clipText) {
             g_hwAccelerated,
             g_minWidth,
             g_minHeight,
-            g_titleLocked
+            g_titleLocked,
+            GetDpiForWindow(g_mainHwnd)
         );
         DWORD bytesWritten;
         WriteFile(g_hSrvPipe, queryResponse, wcslen(queryResponse) * sizeof(wchar_t), &bytesWritten, NULL);
@@ -1118,9 +1131,19 @@ void CreateNamedPipeServer() {
             while (!g_shouldClosePipe) {
                 BOOL result = ReadFile(g_hSrvPipe, buffer, sizeof(buffer) - sizeof(wchar_t), &bytesRead, NULL);
                 if (result) {
+                    if (bytesRead >= sizeof(buffer) - sizeof(wchar_t)) {
+                        Wh_Log(L"Buffer overflow detected");
+                        continue;
+                    }
                     buffer[bytesRead / sizeof(wchar_t)] = L'\0';
                     Wh_Log(L"Received message: %s", buffer);
                     HandleWindhawkComm(buffer);
+                } else {
+                    DWORD error = GetLastError();
+                    if (error == ERROR_BROKEN_PIPE || error == ERROR_PIPE_NOT_CONNECTED) {
+                        Wh_Log(L"Client disconnected, GLE=%d", error);
+                        break;
+                    }
                 }
             }
         } else {
@@ -1171,7 +1194,7 @@ int ConnectToNamedPipe() {
                         buffer[bytesRead / sizeof(wchar_t)] = L'\0';
                         Wh_Log(L"Received message: %s", buffer);
                         if (wcsncmp(buffer, L"/WH:QueryResponse:", 18) == 0) {
-                            if (swscanf(buffer + 18, L"%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d",
+                            if (swscanf(buffer + 18, L"%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d",
                                 &cte_settings.showframe,
                                 &cte_settings.showframeonothers,
                                 &cte_settings.showmenu,
@@ -1188,7 +1211,8 @@ int ConnectToNamedPipe() {
                                 &g_queryResponse.hwAccelerated,
                                 &g_queryResponse.minWidth,
                                 &g_queryResponse.minHeight,
-                                &g_queryResponse.titleLocked) == 17
+                                &g_queryResponse.titleLocked,
+                                &g_queryResponse.dpi) == 18
                             ) {
                                 g_queryResponse.success = TRUE;
                             }
@@ -1198,6 +1222,12 @@ int ConnectToNamedPipe() {
                                 g_queryResponseReceived = true;
                             }
                             g_queryResponseCv.notify_one();
+                        }
+                    } else {
+                        DWORD error = GetLastError();
+                        if (error == ERROR_BROKEN_PIPE || error == ERROR_PIPE_NOT_CONNECTED) {
+                            Wh_Log(L"Server disconnected, GLE=%d", error);
+                            break;
                         }
                     }
                 }
@@ -1271,6 +1301,10 @@ int SendNamedPipeMessage(LPCWSTR message) {
 int CEF_CALLBACK WindhawkCommV8Handler(cef_v8handler_t* self, const cef_string_t* name, cef_v8value_t* object, size_t argumentsCount, cef_v8value_t* const* arguments, cef_v8value_t** retval, cef_string_t* exception) {
     Wh_Log(L"WindhawkCommV8Handler called with name: %s", name->str);
     std::u16string nameStr(name->str, name->length);
+    if (g_hClientPipe == INVALID_HANDLE_VALUE) {
+        *exception = *GenerateCefString(u"Disconnected from the Windhawk mod running in the main process. Is the mod unloaded?");
+        return TRUE;
+    }
     if (nameStr == u"executeCommand") {
         if (argumentsCount == 1) {
             cef_string_t* arg = arguments[0]->get_string_value(arguments[0]);
@@ -1310,6 +1344,7 @@ int CEF_CALLBACK WindhawkCommV8Handler(cef_v8handler_t* self, const cef_string_t
             retobj->set_value_bykey(retobj, GenerateCefString(u"minWidth"), cef_v8value_create_int(g_queryResponse.minWidth), V8_PROPERTY_ATTRIBUTE_NONE);
             retobj->set_value_bykey(retobj, GenerateCefString(u"minHeight"), cef_v8value_create_int(g_queryResponse.minHeight), V8_PROPERTY_ATTRIBUTE_NONE);
             retobj->set_value_bykey(retobj, GenerateCefString(u"titleLocked"), cef_v8value_create_bool(g_queryResponse.titleLocked), V8_PROPERTY_ATTRIBUTE_NONE);
+            retobj->set_value_bykey(retobj, GenerateCefString(u"dpi"), cef_v8value_create_int(g_queryResponse.dpi), V8_PROPERTY_ATTRIBUTE_NONE);
             *retval = retobj;
             g_queryResponse.success = FALSE;
         } else {

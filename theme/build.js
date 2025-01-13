@@ -37,6 +37,7 @@ async function buildJS() {
     bundle: true,
     minify: true,
     outfile: "dist/theme.js",
+    platform: "browser",
   });
 }
 

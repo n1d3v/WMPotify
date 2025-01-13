@@ -1,5 +1,6 @@
 let windhawkModule = null;
 let supportedCommands = [];
+let lastDpi = 1;
 
 export default WindhawkComm = {
     init() {
@@ -19,6 +20,11 @@ export default WindhawkComm = {
 
     extendFrame(left, top, right, bottom) {
         if (windhawkModule && supportedCommands.includes("ExtendFrame")) {
+            [left, top, right, bottom] = [left, top, right, bottom].map(v => Math.round(v * window.devicePixelRatio));
+            if (lastDpi > 1) { // Fix for Windows DPI scaling
+                [left, top] = [left && left - 1, top && top - 1];
+                [right, bottom] = [right && right - 1, bottom && bottom - 1];
+            }
             windhawkModule.executeCommand(`/WH:ExtendFrame:${left}:${top}:${right}:${bottom}`);
         }
     },
@@ -113,10 +119,13 @@ function testWindhawk() {
     }
     try {
         windhawkModule = window._getSpotifyModule("ctewh");
-        windhawkModule.query();
+        lastDpi = windhawkModule.query().dpi / 96;
         supportedCommands = windhawkModule.supportedCommands;
         const { version, initialOptions } = windhawkModule;
         console.log(`CEF/Spotify Tweaks Windhawk mod available, Version: ${version}`);
+        window.addEventListener("resize", () => {
+            lastDpi = windhawkModule.query().dpi / 96;
+        });
         return { version, initialOptions, supportedCommands };
     } catch (e) {
         // query fails if the main browser process has unloaded the mod and thus closed the pipe
