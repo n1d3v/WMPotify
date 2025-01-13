@@ -86,17 +86,20 @@
 
     > button:not(#wmpotify-tabs-overflow-button) {
         min-width: 99px;
+        width: auto;
         height: 36px;
         min-height: 0;
         background: none !important;
         border: 6px solid transparent;
-        border-image: 6 3 2 3 fill stretch;
-        border-image-width: 6px 3px 2px 3px;
+        border-image: 6 4 2 4 fill stretch;
+        border-image-width: 6px 4px 2px 4px;
         border-radius: 0 !important;
         color: white !important;
         font-weight: normal !important;
         display: block !important;
         transform: none !important;
+        padding-block: 0;
+        padding-inline: 0;
 
         &[data-hidden] {
             display: none !important;
@@ -107,8 +110,8 @@
         }
 
         .wmpotify-tab-label {
-            position: absolute;
-            top: 2px;
+            position: relative;
+            top: 0;
             left: 0;
             width: 100%;
             text-align: center;
