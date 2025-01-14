@@ -47,17 +47,27 @@ body[data-hide-libx] {
 .Root__main-view {
     border-radius: 0 !important;
 
-    &:not(:has(section[data-testid="playlist-page"])) {
-        .main-topBar-container {
-            position: relative;
-            width: 100%;
-            height: 28px;
-            border-bottom: solid 1px var(--wmp11-separator-shadow);
-            outline: solid 1px var(--wmp11-separator-light);
-            overflow: hidden;
+    .main-topBar-container {
+        position: relative;
+        width: 100%;
+        height: 28px;
+        border-bottom: solid 1px var(--wmp11-separator-shadow);
+        outline: solid 1px var(--wmp11-separator-light);
+        overflow: hidden;
 
-            &:has(.main-topBar-topbarContentWrapper:empty) {
-                display: none;
+        &:has(.main-topBar-topbarContentWrapper:empty) {
+            display: none;
+        }
+
+        &:has(.main-topBar-topbarContent > div:first-child > button:first-child[data-encore-id="buttonPrimary"]) {
+            &:has(span.main-entityHeader-topbarTitle) {
+                position: absolute;
+                width: auto;
+                outline: none;
+
+                &:not(:has(.main-entityHeader-topbarContentFadeIn)) {
+                    display: none;
+                }
             }
         }
     }
@@ -98,6 +108,13 @@ body[data-hide-libx] {
     }
 }
 
+.Root {
+    --main-area-right: 0;
+    &:has(.Root__right-sidebar aside) {
+        --main-area-right: calc(var(--panel-width) * 1px + 3px);
+    }
+}
+
 :root[data-wmpotify-style="xp"] {
     /* Add panel gaps again to show frames there */
     /* And extra 8px on the left if LibX is shown */
@@ -106,8 +123,15 @@ body[data-hide-libx] {
         width: 100%;
     }
 
-    #main:has(.Root__right-sidebar aside) .Root__main-view {
-        width: calc(100% + var(--panel-gap) - 3px);
+    .Root {
+        --main-area-right: var(--panel-gap);
+        &:has(.Root__right-sidebar aside) {
+            --main-area-right: calc(var(--panel-width) * 1px + var(--panel-gap) + 3px);
+
+            .Root__main-view {
+                width: calc(100% + var(--panel-gap) - 3px);
+            }
+        }
     }
 
     .Root__globalNav {

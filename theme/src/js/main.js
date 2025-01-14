@@ -56,9 +56,9 @@ function earlyInit() {
         titleStyle = localStorage.wmpotifyTitleStyle;
     } else {
         console.log('WMPotify EarlyInit:', window.SpotEx, whStatus);
-        if (window.outerHeight - window.innerHeight > 0 || whStatus?.options?.showframe) {
+        if (window.outerHeight - window.innerHeight > 0 || whStatus?.options?.showframe || navigator.userAgent.includes('Linux')) {
             titleStyle = 'native';
-        } else if (window.SpotEx || (whStatus?.supportedCommands?.includes('Minimize'))) {
+        } else if (window.SpotEx || whStatus) {
             if (whStatus?.options?.showmenu && !whStatus.options.showcontrols) {
                 titleStyle = 'keepmenu';
             } else {
@@ -75,8 +75,7 @@ function earlyInit() {
     document.documentElement.dataset.wmpotifyTitleStyle = titleStyle;
 
     if (whStatus && !localStorage.wmpotifyStyle && titleStyle === 'native' && whStatus.isThemingEnabled) {
-        if (whStatus.supportedCommands.includes('ExtendFrame') &&
-            whStatus.options.transparentrendering &&
+        if (whStatus.options.transparentrendering &&
             whStatus.isDwmEnabled) {
             style = 'aero';
         } else if (!whStatus.isDwmEnabled) {

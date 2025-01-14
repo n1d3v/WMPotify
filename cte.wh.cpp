@@ -58,7 +58,8 @@
     * This mod exposes a JavaScript API that can be used to interact with the main window and this mod
     * The API is available with `window._getSpotifyModule('ctewh')`
     * Use `_getSpotifyModule('ctewh').query()` to get various information about the window and the mod
-    * Use `_getSpotifyModule('ctewh').executeCommand('/WH:<command>')` to execute a command. See the `HandleWindhawkComm` function of this mod for available commands, or see [here](https://github.com/Ingan121/WMPotify/blob/master/theme/src/js/WindhawkComm.js) for a usage example
+    * Various functions are available in the object returned by `_getSpotifyModule('ctewh')`
+    * See [here](https://github.com/Ingan121/WMPotify/blob/master/theme/src/js/WindhawkComm.js) for a simple example of how to use the functions
     * This API is only available on Spotify 1.2.4 and above, and only if the mod is enabled before Spotify starts
     * The API is disabled by default on untested CEF versions
 */
@@ -137,15 +138,19 @@
 #include <windhawk_utils.h>
 #include <codecvt>
 #include <condition_variable>
+#include <cstdint>
 #include <thread>
 #include <mutex>
-#include <vector>
 #include <regex>
+#include <string_view>
+#include <vector>
 #include <aclapi.h>
 #include <dwmapi.h>
 #include <sddl.h>
 #include <uxtheme.h>
 #include <windows.h>
+
+using namespace std::string_view_literals;
 
 #define CEF_CALLBACK __stdcall
 #define CEF_EXPORT __cdecl
@@ -232,6 +237,8 @@ int g_minHeight = -1;
 BOOL g_hwAccelerated = FALSE;
 BOOL g_dwmBackdropEnabled = FALSE;
 BOOL g_titleLocked = FALSE;
+double g_playbackSpeed = 1.0;
+BOOL g_speedModSupported = FALSE;
 
 HANDLE g_hSrvPipe = INVALID_HANDLE_VALUE;
 HANDLE g_hClientPipe = INVALID_HANDLE_VALUE;
@@ -255,9 +262,40 @@ struct cte_queryResponse_t {
     int minHeight;
     BOOL titleLocked;
     int dpi;
+    BOOL speedModSupported;
+    double playbackSpeed;
 } g_queryResponse;
 
 #pragma region CEF structs (as minimal and cross-version compatible as possible)
+// Copyright (c) 2024 Marshall A. Greenblatt. All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are
+// met:
+//
+//    * Redistributions of source code must retain the above copyright
+// notice, this list of conditions and the following disclaimer.
+//    * Redistributions in binary form must reproduce the above
+// copyright notice, this list of conditions and the following disclaimer
+// in the documentation and/or other materials provided with the
+// distribution.
+//    * Neither the name of Google Inc. nor the name Chromium Embedded
+// Framework nor the names of its contributors may be used to endorse
+// or promote products derived from this software without specific prior
+// written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 typedef struct _cef_string_utf16_t {
   char16_t* str;
   size_t length;
@@ -369,6 +407,9 @@ cef_v8value_create_bool_t cef_v8value_create_bool;
 typedef cef_v8value_t* CEF_EXPORT (*cef_v8value_create_int_t)(int value);
 cef_v8value_create_int_t cef_v8value_create_int;
 
+typedef cef_v8value_t* CEF_EXPORT (*cef_v8value_create_double_t)(double value);
+cef_v8value_create_double_t cef_v8value_create_double;
+
 typedef cef_v8value_t* CEF_EXPORT (*cef_v8value_create_string_t)(const cef_string_t* value);
 cef_v8value_create_string_t cef_v8value_create_string;
 
@@ -391,6 +432,14 @@ cef_string_t* GenerateCefString(std::u16string str) {
     cefStr->length = str.size();
     memcpy(cefStr->str, str.c_str(), str.size() * sizeof(char16_t));
     return cefStr;
+}
+
+int AddFunctionToObj(cef_v8value_t* obj, std::u16string name, cef_v8handler_t* handler) {
+    cef_string_t* cefName = GenerateCefString(name);
+    cef_v8value_t* func = cef_v8value_create_function_original(cefName, handler);
+    int result = obj->set_value_bykey(obj, cefName, func, V8_PROPERTY_ATTRIBUTE_NONE);
+    free(cefName);
+    return result;
 }
 #pragma endregion
 
@@ -650,6 +699,159 @@ BOOL ForceEnableExtensions(char* pbExecutable) {
 }
 #pragma endregion
 
+#pragma region Spotify.exe hooks (non-exported functions)
+#ifdef _WIN64
+// From https://windhawk.net/mods/chrome-ui-tweaks
+typedef struct {
+    std::string_view search; // instructions to search for
+    std::string_view prologue; // prologue of the function to be hooked (instructions at entry point)
+    const size_t instr_offset; // estimated location of the searched instructions relative to the entry point
+} function_search;
+
+// Wrapper for string_view::find, that checks the needle is unique within the haystack.
+const char* unique_search(std::string_view haystack, std::string_view needle, LPCWSTR symbol_name) {
+    size_t index1 = haystack.find(needle);
+    if (index1 == std::string_view::npos) {
+        Wh_Log(L"Error: Couldn't find instructions for symbol %s", symbol_name);
+        return NULL;
+    }
+    // Can we find the same sequence again in the rest of the haystack?
+    size_t index2 = haystack.find(needle, index1 + 1);
+    if (index2 != std::string_view::npos) {
+        Wh_Log(L"Error: Found multiple matches for %s: at %p and at %p", symbol_name, haystack.begin()+index1, haystack.begin()+index2);
+        // log_hexdump((unsigned char*)haystack.begin() + index1 - 0x50, 6);
+        // Wh_Log(L"----------------");
+        // log_hexdump((unsigned char*)haystack.begin() + index2 - 0x50, 6);
+        return NULL;
+    }
+    return haystack.begin() + index1;
+}
+
+// get address and size of code section via PE header info  (expect around 200 MB)
+// TODO is this actually correct? (does it include superfluous sections of the DLL?)
+// https://learn.microsoft.com/en-us/windows/win32/debug/pe-format
+// https://learn.microsoft.com/en-us/archive/msdn-magazine/2002/february/inside-windows-win32-portable-executable-file-format-in-detail
+std::string_view getCodeSection(HMODULE chromeModule) {
+    if (chromeModule == NULL) return ""sv;
+    IMAGE_DOS_HEADER* dos_header = (IMAGE_DOS_HEADER*) chromeModule;
+    IMAGE_NT_HEADERS* pe_header = (IMAGE_NT_HEADERS*)(((char*)dos_header) + dos_header->e_lfanew);
+    if (pe_header->FileHeader.Machine != 0x8664 || pe_header->OptionalHeader.Magic != 0x20b) {
+        Wh_Log(L"Mod only implemented for 64-bit windows/chrome - machine was 0x%04x and magic was 0x%04x",
+        pe_header->FileHeader.Machine, pe_header->OptionalHeader.Magic);
+        return ""sv;
+    }
+    return std::string_view{
+        ((char*)dos_header) + pe_header->OptionalHeader.BaseOfCode,
+        pe_header->OptionalHeader.SizeOfCode
+    };
+}
+
+// Find a function address by scanning for specific instruction patterns.
+// We search the entire code section once per function,
+// to ensure we aren't hooking the wrong location.
+// Better safe than sorry, and it shouldn't cause noticeable delay on startup.
+const char* search_function_instructions(std::string_view code_section, function_search fsearch, LPCWSTR symbol_name) {
+    if (code_section.size()==0) return 0;
+    Wh_Log(L"Searching for function %s", symbol_name);
+    const char* addr = unique_search(code_section, fsearch.search, symbol_name);
+    if (addr == NULL) {
+        Wh_Log(L"Could not find function %s; is the mod up to date?", symbol_name);
+        return NULL;
+    }
+    Wh_Log(L"Instructions were found at address: %p", addr);
+    int offset = fsearch.instr_offset;
+    const char* entry = addr - offset;
+    // verify the prologue is what we expect; otherwise search for it
+    // and verify it is preceded by 0xcc INT3 or 0xc3 RET (or ?? JMP)
+    auto prologue = fsearch.prologue;
+    if (prologue != std::string_view{entry, prologue.size()}) {
+        Wh_Log(L"Prologue not found where expected, searching...");
+        // maybe function length changed due to different compilation
+        auto search_space = std::string_view{entry - 0x40, addr};
+        size_t new_offset = search_space.rfind(prologue);
+        if (new_offset != std::string_view::npos) {
+            entry = (char*)search_space.begin() + new_offset;
+        } else {
+            entry = NULL;
+        }
+    }
+    if (entry) {
+        entry -= 3; // there are extra three bytes before the string prologue
+        Wh_Log(L"Found entrypoint for function %s at addr %p", symbol_name, entry);
+        if (entry[-1]!=(char)0xcc && entry[-1]!=(char)0xc3) {
+            Wh_Log(L"Warn: prologue not preceded by INT3 or RET");
+        }
+        return entry;
+    } else {
+        Wh_Log(L"Err: Couldn't locate function entry point for symbol %s", symbol_name);
+        // log_hexdump(addr - 0x40, 0x5);
+        return NULL;
+    }
+}
+
+typedef uint64_t* (*CreateTrackPlayer_t)(
+    int64_t a1,
+    void* a2,
+    void* a3,
+    double speed,
+    unsigned int a5,
+    unsigned int a6,
+    int a7,
+    int64_t a8,
+    unsigned int a9,
+    int64_t a10,
+    int64_t a11,
+    int64_t a12
+);
+CreateTrackPlayer_t CreateTrackPlayer_original;
+uint64_t* __fastcall CreateTrackPlayer_hook(
+    int64_t a1,
+    uint64_t* a2,
+    uint64_t* a3,
+    double speed,
+    unsigned int a5,
+    unsigned int a6,
+    int a7,
+    int64_t a8,
+    unsigned int a9,
+    int64_t a10,
+    int64_t a11,
+    int64_t a12
+) {
+    Wh_Log(L"CreateTrackPlayer_hook");
+    return CreateTrackPlayer_original(a1, a2, a3, g_playbackSpeed, a5, a6, a7, a8, a9, a10, a11, a12);
+}
+
+const std::string_view CreateTrackPlayer_instructions =
+    "\x01"sv // just a single byte before the instructions below, to distinguish from another match
+    "\x49\x8B\x0F"sv // mov rcx, [r15]
+    "\x48\x8B\x01"sv // mov rax, [rcx]
+    "\xFF\x50\x38"sv // call qword ptr [rax+38h]
+    "\x48\x8D"sv; // lea rdx, (followed by address of "yes" in .rdata)
+const std::string_view CreateTrackPlayer_prologue = "USVWATAUAVAWH"sv;
+
+// Only works on Spotify x64 1.2.36 and newer
+// No plans to support x86 or older versions
+BOOL HookCreateTrackPlayer(char* pbExecutable) {
+    std::string_view code_section = getCodeSection((HMODULE)pbExecutable);
+    if (code_section.size() == 0) return FALSE;
+    const char* addr = search_function_instructions(
+        code_section,
+        {
+            .search = CreateTrackPlayer_instructions,
+            .prologue = CreateTrackPlayer_prologue,
+            .instr_offset = 0xBA0
+        },
+        L"CreateTrackPlayer"
+    );
+    if (addr == NULL) return FALSE;
+    Wh_Log(L"Hooking CreateTrackPlayer at %p", addr);
+    Wh_SetFunctionHook((void*)addr, (void*)CreateTrackPlayer_hook, (void**)&CreateTrackPlayer_original);
+    return TRUE;
+}
+#endif
+#pragma endregion
+
 #pragma region CEF hooks
 typedef int CEF_CALLBACK (*is_frameless_t)(struct _cef_window_delegate_t* self, struct _cef_window_t* window);
 int CEF_CALLBACK is_frameless_hook(struct _cef_window_delegate_t* self, struct _cef_window_t* window) {
@@ -897,7 +1099,7 @@ void HandleWindhawkComm(LPCWSTR command) {
     Wh_Log(L"HandleWindhawkComm: %s, len: %d, size: %d", command, len, sizeof(command));
 
     // Validate command length
-    if (len >= 270) { // "/WH:SetTitle:" + max title length (255) + null terminator
+    if (len >= 269) { // "/WH:SetTitle:" + max title length (255) + null terminator
         Wh_Log(L"Command too long");
         return;
     }
@@ -918,7 +1120,11 @@ void HandleWindhawkComm(LPCWSTR command) {
     } else if (wcscmp(command, L"/WH:Minimize") == 0) {
         ShowWindow(g_mainHwnd, SW_MINIMIZE);
     } else if (wcscmp(command, L"/WH:MaximizeRestore") == 0) {
-        ShowWindow(g_mainHwnd, IsZoomed(g_mainHwnd) ? SW_RESTORE : SW_MAXIMIZE);
+        if (IsIconic(g_mainHwnd)) {
+            ShowWindow(g_mainHwnd, SW_RESTORE);
+        } else {
+            ShowWindow(g_mainHwnd, IsZoomed(g_mainHwnd) ? SW_RESTORE : SW_MAXIMIZE);
+        }
     } else if (wcscmp(command, L"/WH:Close") == 0) {
         PostMessage(g_mainHwnd, WM_CLOSE, 0, 0);
     // /WH:SetLayered:<layered (1/0)>:<alpha>:<optional-transparentColor>
@@ -1006,14 +1212,22 @@ void HandleWindhawkComm(LPCWSTR command) {
     // Open the Spotify menu (Alt, won't work if the menu button is hidden in the mod options)
     } else if (wcscmp(command, L"/WH:OpenSpotifyMenu") == 0) {
         PostMessage(g_mainHwnd, WM_SYSCOMMAND, SC_KEYMENU, 0);
+    // /WH:SetPlaybackSpeed:<speed> (64-bit only)
+    #ifdef _WIN64
+    } else if (wcsncmp(command, L"/WH:SetPlaybackSpeed:", 21) == 0) {
+        double speed;
+        if (swscanf(command + 21, L"%lf", &speed) == 1) {
+            g_playbackSpeed = speed;
+        }
+    #endif
     // /WH:Query
     } else if (wcscmp(command, L"/WH:Query") == 0) {
         if (g_hSrvPipe == INVALID_HANDLE_VALUE) {
             return;
         }
         wchar_t queryResponse[256];
-        // <showframe:showframeonothers:showmenu:showcontrols:transparentcontrols:transparentrendering:ignoreminsize:isMaximized:isTopMost:isLayered:isThemingEnabled:isDwmEnabled:dwmBackdropEnabled:hwAccelerated:minWidth:minHeight:titleLocked:dpi>
-        swprintf(queryResponse, 256, L"/WH:QueryResponse:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d",
+        // <showframe:showframeonothers:showmenu:showcontrols:transparentcontrols:transparentrendering:ignoreminsize:isMaximized:isTopMost:isLayered:isThemingEnabled:isDwmEnabled:dwmBackdropEnabled:hwAccelerated:minWidth:minHeight:titleLocked:dpi:speedModSupported:playbackSpeed>
+        swprintf(queryResponse, 256, L"/WH:QueryResponse:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%lf",
             cte_settings.showframe,
             cte_settings.showframeonothers,
             cte_settings.showmenu,
@@ -1031,7 +1245,9 @@ void HandleWindhawkComm(LPCWSTR command) {
             g_minWidth,
             g_minHeight,
             g_titleLocked,
-            GetDpiForWindow(g_mainHwnd)
+            GetDpiForWindow(g_mainHwnd),
+            g_speedModSupported,
+            g_playbackSpeed
         );
         DWORD bytesWritten;
         WriteFile(g_hSrvPipe, queryResponse, wcslen(queryResponse) * sizeof(wchar_t), &bytesWritten, NULL);
@@ -1194,7 +1410,7 @@ int ConnectToNamedPipe() {
                         buffer[bytesRead / sizeof(wchar_t)] = L'\0';
                         Wh_Log(L"Received message: %s", buffer);
                         if (wcsncmp(buffer, L"/WH:QueryResponse:", 18) == 0) {
-                            if (swscanf(buffer + 18, L"%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d",
+                            if (swscanf(buffer + 18, L"%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%lf",
                                 &cte_settings.showframe,
                                 &cte_settings.showframeonothers,
                                 &cte_settings.showmenu,
@@ -1212,7 +1428,9 @@ int ConnectToNamedPipe() {
                                 &g_queryResponse.minWidth,
                                 &g_queryResponse.minHeight,
                                 &g_queryResponse.titleLocked,
-                                &g_queryResponse.dpi) == 18
+                                &g_queryResponse.dpi,
+                                &g_queryResponse.speedModSupported,
+                                &g_queryResponse.playbackSpeed) == 20
                             ) {
                                 g_queryResponse.success = TRUE;
                             }
@@ -1305,21 +1523,145 @@ int CEF_CALLBACK WindhawkCommV8Handler(cef_v8handler_t* self, const cef_string_t
         *exception = *GenerateCefString(u"Disconnected from the Windhawk mod running in the main process. Is the mod unloaded?");
         return TRUE;
     }
-    if (nameStr == u"executeCommand") {
-        if (argumentsCount == 1) {
-            cef_string_t* arg = arguments[0]->get_string_value(arguments[0]);
-            std::wstring argStr(arg->str, arg->str + arg->length);
-            Wh_Log(L"Argument: %s", argStr.c_str());
-            int res = SendNamedPipeMessage(argStr.c_str());
-            if (res != 0) {
-                *exception = *GenerateCefString(u"Error: " + to_u16string(res));
+
+    int ipcRes = -1;
+    if (nameStr == u"extendFrame") {
+        if (argumentsCount == 4 && arguments[0]->is_int(arguments[0]) && arguments[1]->is_int(arguments[1]) && arguments[2]->is_int(arguments[2]) && arguments[3]->is_int(arguments[3])) {
+            int left = arguments[0]->get_int_value(arguments[0]);
+            int right = arguments[1]->get_int_value(arguments[1]);
+            int top = arguments[2]->get_int_value(arguments[2]);
+            int bottom = arguments[3]->get_int_value(arguments[3]);
+            ipcRes = SendNamedPipeMessage((L"/WH:ExtendFrame:" + std::to_wstring(left) + L":" + std::to_wstring(right) + L":" + std::to_wstring(top) + L":" + std::to_wstring(bottom)).c_str());
+        } else {
+            *exception = *GenerateCefString(u"Invalid argument types, expected (int, int, int, int)");
+            return TRUE;
+        }
+    } else if (nameStr == u"minimize") {
+        ipcRes = SendNamedPipeMessage(L"/WH:Minimize");
+    } else if (nameStr == u"maximizeRestore") {
+        ipcRes = SendNamedPipeMessage(L"/WH:MaximizeRestore");
+    } else if (nameStr == u"close") {
+        ipcRes = SendNamedPipeMessage(L"/WH:Close");
+    } else if (nameStr == u"setLayered") {
+        if (argumentsCount >= 1 && arguments[0]->is_bool(arguments[0])) {
+            bool layered = arguments[0]->get_bool_value(arguments[0]);
+            if (argumentsCount >= 2) {
+                if (!arguments[1]->is_int(arguments[1])) {
+                    *exception = *GenerateCefString(u"Invalid argument types, expected (bool, optional int, optional string)");
+                    return TRUE;
+                }
+                int alpha = arguments[1]->get_int_value(arguments[1]);
+                if (argumentsCount >= 3) {
+                    if (!arguments[2]->is_string(arguments[2])) {
+                        *exception = *GenerateCefString(u"Invalid argument types, expected (bool, optional int, optional string)");
+                        return TRUE;
+                    }
+                    cef_string_t* colorArg = arguments[2]->get_string_value(arguments[2]);
+                    std::wstring colorStr(colorArg->str, colorArg->str + colorArg->length);
+                    int color = 0; // only for format validation
+                    if (swscanf(colorStr.c_str(), L"%6x", &color) == 1) {
+                        ipcRes = SendNamedPipeMessage((L"/WH:SetLayered:" + std::to_wstring(layered) + L":" + std::to_wstring(alpha) + L":" + colorStr).c_str());
+                    } else {
+                        *exception = *GenerateCefString(u"Invalid color format, expected six-digit hex string");
+                        return TRUE;
+                    }
+                } else {
+                    ipcRes = SendNamedPipeMessage((L"/WH:SetLayered:" + std::to_wstring(layered) + L":" + std::to_wstring(alpha)).c_str());
+                }
+            } else {
+                ipcRes = SendNamedPipeMessage((L"/WH:SetLayered:" + std::to_wstring(layered)).c_str());
             }
+        } else {
+            *exception = *GenerateCefString(u"Invalid argument types, expected (bool, optional int, optional string)");
+            return TRUE;
         }
+    } else if (nameStr == u"setBackdrop") {
+        if (argumentsCount == 1 && arguments[0]->is_string(arguments[0])) {
+            cef_string_t* backdropArg = arguments[0]->get_string_value(arguments[0]);
+            std::wstring backdropStr(backdropArg->str, backdropArg->str + backdropArg->length);
+            if (backdropStr == L"mica" || backdropStr == L"acrylic" || backdropStr == L"tabbed") {
+                ipcRes = SendNamedPipeMessage((L"/WH:SetBackdrop:" + backdropStr).c_str());
+            } else {
+                *exception = *GenerateCefString(u"Invalid backdrop type, expected 'mica', 'acrylic', or 'tabbed'");
+                return TRUE;
+            }
+        } else {
+            *exception = *GenerateCefString(u"Invalid argument types, expected (string)");
+            return TRUE;
+        }
+    } else if (nameStr == u"resizeTo") {
+        if (argumentsCount == 2 && arguments[0]->is_int(arguments[0]) && arguments[1]->is_int(arguments[1])) {
+            int width = arguments[0]->get_int_value(arguments[0]);
+            int height = arguments[1]->get_int_value(arguments[1]);
+            ipcRes = SendNamedPipeMessage((L"/WH:ResizeTo:" + std::to_wstring(width) + L":" + std::to_wstring(height)).c_str());
+        } else {
+            *exception = *GenerateCefString(u"Invalid argument types, expected (int, int)");
+            return TRUE;
+        }
+    } else if (nameStr == u"setMinSize") {
+        if (argumentsCount == 2 && arguments[0]->is_int(arguments[0]) && arguments[1]->is_int(arguments[1])) {
+            int width = arguments[0]->get_int_value(arguments[0]);
+            int height = arguments[1]->get_int_value(arguments[1]);
+            ipcRes = SendNamedPipeMessage((L"/WH:SetMinSize:" + std::to_wstring(width) + L":" + std::to_wstring(height)).c_str());
+        } else {
+            *exception = *GenerateCefString(u"Invalid argument types, expected (int, int)");
+            return TRUE;
+        }
+    } else if (nameStr == u"setTopMost") {
+        if (argumentsCount >= 1 && arguments[0]->is_bool(arguments[0])) {
+            bool topmost = arguments[0]->get_bool_value(arguments[0]);
+            ipcRes = SendNamedPipeMessage((L"/WH:SetTopMost:" + std::to_wstring(topmost)).c_str());
+        } else {
+            *exception = *GenerateCefString(u"Invalid argument types, expected (bool)");
+            return TRUE;
+        }
+    } else if (nameStr == u"setTitle") {
+        if (argumentsCount == 1 && arguments[0]->is_string(arguments[0])) {
+            cef_string_t* titleArg = arguments[0]->get_string_value(arguments[0]);
+            std::wstring titleStr(titleArg->str, titleArg->str + titleArg->length);
+            if (titleStr.length() > 255) {
+                *exception = *GenerateCefString(u"Title is too long, max 255 characters");
+                return TRUE;
+            }
+            ipcRes = SendNamedPipeMessage((L"/WH:SetTitle:" + titleStr).c_str());
+        } else {
+            *exception = *GenerateCefString(u"Invalid argument types, expected (string)");
+            return TRUE;
+        }
+    } else if (nameStr == u"lockTitle") {
+        if (argumentsCount >= 1 && arguments[0]->is_bool(arguments[0])) {
+            bool lock = arguments[0]->get_bool_value(arguments[0]);
+            ipcRes = SendNamedPipeMessage((L"/WH:LockTitle:" + std::to_wstring(lock)).c_str());
+        } else {
+            *exception = *GenerateCefString(u"Invalid argument types, expected (bool)");
+            return TRUE;
+        }
+    } else if (nameStr == u"openSpotifyMenu") {
+        ipcRes = SendNamedPipeMessage(L"/WH:OpenSpotifyMenu");
+    #ifdef _WIN64
+    } else if (nameStr == u"setPlaybackSpeed") {
+        if (argumentsCount == 1 && arguments[0]->is_double(arguments[0])) {
+            double speed = arguments[0]->get_double_value(arguments[0]);
+            if (speed < 0.5 || speed > 5.0) {
+                // Prevent potential ban risk by limiting the playback speed
+                *exception = *GenerateCefString(u"Playback speed must be between 0.5 and 2.0");
+                return TRUE;
+            }
+            ipcRes = SendNamedPipeMessage((L"/WH:SetPlaybackSpeed:" + std::to_wstring(speed)).c_str());
+        } else {
+            *exception = *GenerateCefString(u"Invalid argument types, expected (double)");
+            return TRUE;
+        }
+    #endif
+    // } else if (nameStr == u"executeCommand") {
+    //     if (argumentsCount == 1) {
+    //         cef_string_t* arg = arguments[0]->get_string_value(arguments[0]);
+    //         std::wstring argStr(arg->str, arg->str + arg->length);
+    //         Wh_Log(L"Argument: %s", argStr.c_str());
+    //         ipcRes = SendNamedPipeMessage(argStr.c_str());
+    //     }
     } else if (nameStr == u"query") {
-        int res = SendNamedPipeMessage(L"/WH:Query");
-        if (res != 0) {
-            *exception = *GenerateCefString(u"IPC Error: " + to_u16string(res));
-        }
+        ipcRes = SendNamedPipeMessage(L"/WH:Query");
         if (g_queryResponse.success) {
             cef_v8value_t* retobj = cef_v8value_create_object(NULL, NULL);
             cef_v8value_t* configObj = cef_v8value_create_object(NULL, NULL);
@@ -1345,11 +1687,20 @@ int CEF_CALLBACK WindhawkCommV8Handler(cef_v8handler_t* self, const cef_string_t
             retobj->set_value_bykey(retobj, GenerateCefString(u"minHeight"), cef_v8value_create_int(g_queryResponse.minHeight), V8_PROPERTY_ATTRIBUTE_NONE);
             retobj->set_value_bykey(retobj, GenerateCefString(u"titleLocked"), cef_v8value_create_bool(g_queryResponse.titleLocked), V8_PROPERTY_ATTRIBUTE_NONE);
             retobj->set_value_bykey(retobj, GenerateCefString(u"dpi"), cef_v8value_create_int(g_queryResponse.dpi), V8_PROPERTY_ATTRIBUTE_NONE);
+            retobj->set_value_bykey(retobj, GenerateCefString(u"speedModSupported"), cef_v8value_create_bool(g_queryResponse.speedModSupported), V8_PROPERTY_ATTRIBUTE_NONE);
+            #ifdef _WIN64
+            retobj->set_value_bykey(retobj, GenerateCefString(u"playbackSpeed"), cef_v8value_create_double(g_queryResponse.playbackSpeed), V8_PROPERTY_ATTRIBUTE_NONE);
+            #endif
             *retval = retobj;
             g_queryResponse.success = FALSE;
         } else {
             *exception = *GenerateCefString(u"Error: Query response not received");
+            return TRUE;
         }
+    }
+
+    if (ipcRes != 0) {
+        *exception = *GenerateCefString(u"IPC Error: " + to_u16string(ipcRes));
     }
     return TRUE;
 }
@@ -1366,10 +1717,23 @@ int CEF_CALLBACK _getSpotifyModule_hook(cef_v8handler_t* self, const cef_string_
             ctewh->base.size = sizeof(cef_v8handler_t);
             ctewh->execute = WindhawkCommV8Handler;
             cef_v8value_t* retobj = cef_v8value_create_object(NULL, NULL);
-            cef_string_t* name = GenerateCefString(u"executeCommand");
-            retobj->set_value_bykey(retobj, name, cef_v8value_create_function_original(name, ctewh), V8_PROPERTY_ATTRIBUTE_NONE);
-            cef_string_t* name2 = GenerateCefString(u"query");
-            retobj->set_value_bykey(retobj, name2, cef_v8value_create_function_original(name2, ctewh), V8_PROPERTY_ATTRIBUTE_NONE);
+            //AddFunctionToObj(retobj, u"executeCommand", ctewh);
+            AddFunctionToObj(retobj, u"query", ctewh);
+            AddFunctionToObj(retobj, u"extendFrame", ctewh);
+            AddFunctionToObj(retobj, u"minimize", ctewh);
+            AddFunctionToObj(retobj, u"maximizeRestore", ctewh);
+            AddFunctionToObj(retobj, u"close", ctewh);
+            AddFunctionToObj(retobj, u"setLayered", ctewh);
+            AddFunctionToObj(retobj, u"setBackdrop", ctewh);
+            AddFunctionToObj(retobj, u"resizeTo", ctewh);
+            AddFunctionToObj(retobj, u"setMinSize", ctewh);
+            AddFunctionToObj(retobj, u"setTopMost", ctewh);
+            AddFunctionToObj(retobj, u"setTitle", ctewh);
+            AddFunctionToObj(retobj, u"lockTitle", ctewh);
+            AddFunctionToObj(retobj, u"openSpotifyMenu", ctewh);
+            #ifdef _WIN64
+            AddFunctionToObj(retobj, u"setPlaybackSpeed", ctewh);
+            #endif
             cef_v8value_t* initialConfigObj = cef_v8value_create_object(NULL, NULL);
             initialConfigObj->set_value_bykey(initialConfigObj, GenerateCefString(u"showframe"), cef_v8value_create_bool(cte_settings.showframe), V8_PROPERTY_ATTRIBUTE_NONE);
             initialConfigObj->set_value_bykey(initialConfigObj, GenerateCefString(u"showframeonothers"), cef_v8value_create_bool(cte_settings.showframeonothers), V8_PROPERTY_ATTRIBUTE_NONE);
@@ -1381,20 +1745,6 @@ int CEF_CALLBACK _getSpotifyModule_hook(cef_v8handler_t* self, const cef_string_
             initialConfigObj->set_value_bykey(initialConfigObj, GenerateCefString(u"noforceddarkmode"), cef_v8value_create_bool(cte_settings.noforceddarkmode), V8_PROPERTY_ATTRIBUTE_NONE);
             initialConfigObj->set_value_bykey(initialConfigObj, GenerateCefString(u"forceextensions"), cef_v8value_create_bool(cte_settings.forceextensions), V8_PROPERTY_ATTRIBUTE_NONE);
             retobj->set_value_bykey(retobj, GenerateCefString(u"initialOptions"), initialConfigObj, V8_PROPERTY_ATTRIBUTE_NONE);
-            cef_v8value_t* supportedCommandsArr = cef_v8value_create_array(12);
-            supportedCommandsArr->set_value_byindex(supportedCommandsArr, 0, cef_v8value_create_string(GenerateCefString(u"ExtendFrame")));
-            supportedCommandsArr->set_value_byindex(supportedCommandsArr, 1, cef_v8value_create_string(GenerateCefString(u"Minimize")));
-            supportedCommandsArr->set_value_byindex(supportedCommandsArr, 2, cef_v8value_create_string(GenerateCefString(u"MaximizeRestore")));
-            supportedCommandsArr->set_value_byindex(supportedCommandsArr, 3, cef_v8value_create_string(GenerateCefString(u"Close")));
-            supportedCommandsArr->set_value_byindex(supportedCommandsArr, 4, cef_v8value_create_string(GenerateCefString(u"SetLayered")));
-            supportedCommandsArr->set_value_byindex(supportedCommandsArr, 5, cef_v8value_create_string(GenerateCefString(u"SetBackdrop")));
-            supportedCommandsArr->set_value_byindex(supportedCommandsArr, 6, cef_v8value_create_string(GenerateCefString(u"ResizeTo")));
-            supportedCommandsArr->set_value_byindex(supportedCommandsArr, 7, cef_v8value_create_string(GenerateCefString(u"SetMinSize")));
-            supportedCommandsArr->set_value_byindex(supportedCommandsArr, 8, cef_v8value_create_string(GenerateCefString(u"SetTopMost")));
-            supportedCommandsArr->set_value_byindex(supportedCommandsArr, 9, cef_v8value_create_string(GenerateCefString(u"SetTitle")));
-            supportedCommandsArr->set_value_byindex(supportedCommandsArr, 10, cef_v8value_create_string(GenerateCefString(u"LockTitle")));
-            supportedCommandsArr->set_value_byindex(supportedCommandsArr, 11, cef_v8value_create_string(GenerateCefString(u"OpenSpotifyMenu")));
-            retobj->set_value_bykey(retobj, GenerateCefString(u"supportedCommands"), supportedCommandsArr, V8_PROPERTY_ATTRIBUTE_NONE);
             retobj->set_value_bykey(retobj, GenerateCefString(u"version"), cef_v8value_create_string(GenerateCefString(u"0.6")), V8_PROPERTY_ATTRIBUTE_NONE);
             *retval = retobj;
             return TRUE;
@@ -1428,11 +1778,12 @@ BOOL InitSpotifyRendererHooks(HMODULE cefModule) {
     cef_v8value_create_function_t cef_v8value_create_function = (cef_v8value_create_function_t)GetProcAddress(cefModule, "cef_v8value_create_function");
     cef_v8value_create_bool = (cef_v8value_create_bool_t)GetProcAddress(cefModule, "cef_v8value_create_bool");
     cef_v8value_create_int = (cef_v8value_create_int_t)GetProcAddress(cefModule, "cef_v8value_create_int");
+    cef_v8value_create_double = (cef_v8value_create_double_t)GetProcAddress(cefModule, "cef_v8value_create_double");
     cef_v8value_create_string = (cef_v8value_create_string_t)GetProcAddress(cefModule, "cef_v8value_create_string");
     cef_v8value_create_object = (cef_v8value_create_object_t)GetProcAddress(cefModule, "cef_v8value_create_object");
     cef_v8value_create_array = (cef_v8value_create_array_t)GetProcAddress(cefModule, "cef_v8value_create_array");
 
-    if (!cef_v8value_create_function || !cef_v8value_create_bool || !cef_v8value_create_int || !cef_v8value_create_string || !cef_v8value_create_object || !cef_v8value_create_array) {
+    if (!cef_v8value_create_function || !cef_v8value_create_bool || !cef_v8value_create_int || !cef_v8value_create_double || !cef_v8value_create_string || !cef_v8value_create_object || !cef_v8value_create_array) {
         Wh_Log(L"Failed to get CEF functions");
         return FALSE;
     }
@@ -1568,7 +1919,6 @@ BOOL Wh_ModInit() {
     Wh_SetFunctionHook((void*)CreateWindowExW, (void*)CreateWindowExW_hook,
                        (void**)&CreateWindowExW_original);
     if (isSpotify) {
-        Wh_Log(L"Hooking Spotify functions");
         Wh_SetFunctionHook((void*)cef_panel_create, (void*)cef_panel_create_hook,
                            (void**)&cef_panel_create_original);
         Wh_SetFunctionHook((void*)SetWindowThemeAttribute, (void*)SetWindowThemeAttribute_hook,
@@ -1598,6 +1948,10 @@ BOOL Wh_ModInit() {
                     Wh_Log(L"Enabled extensions");
                 }
             }
+
+            #ifdef _WIN64
+                g_speedModSupported = HookCreateTrackPlayer(pbExecutable);
+            #endif
         }
     }
 

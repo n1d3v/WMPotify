@@ -174,13 +174,19 @@
         li {
             height: var(--queue-item-height);
 
-            &:hover div[data-encore-id="listRow"]::after {
-                border-radius: 0;
-                height: var(--queue-item-height);
+            &:hover {
                 background-color: #d7dbe1;
             }
 
-            &:not(:hover) div[data-encore-id="listRow"]::after {
+            &:focus-within {
+                background-color: var(--hilight);
+
+                * {
+                    color: var(--hilight-text) !important;
+                }
+            }
+
+            div[data-encore-id="listRow"]::after {
                 display: none;
             }
 

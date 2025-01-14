@@ -1,5 +1,4 @@
 let windhawkModule = null;
-let supportedCommands = [];
 let lastDpi = 1;
 
 export default WindhawkComm = {
@@ -9,98 +8,115 @@ export default WindhawkComm = {
 
     query() {
         if (windhawkModule) {
-            const res = windhawkModule.query();
-            if (res) {
-                res.supportedCommands = supportedCommands;
-                return res;
-            }
+            return windhawkModule.query();
         }
         return null;
     },
 
+    // (int, int, int, int)
     extendFrame(left, top, right, bottom) {
-        if (windhawkModule && supportedCommands.includes("ExtendFrame")) {
+        if (windhawkModule?.extendFrame) {
             [left, top, right, bottom] = [left, top, right, bottom].map(v => Math.round(v * window.devicePixelRatio));
             if (lastDpi > 1) { // Fix for Windows DPI scaling
                 [left, top] = [left && left - 1, top && top - 1];
                 [right, bottom] = [right && right - 1, bottom && bottom - 1];
             }
-            windhawkModule.executeCommand(`/WH:ExtendFrame:${left}:${top}:${right}:${bottom}`);
+            windhawkModule.extendFrame(left, top, right, bottom);
         }
     },
 
     minimize() {
-        if (windhawkModule && supportedCommands.includes("Minimize")) {
-            windhawkModule.executeCommand("/WH:Minimize");
+        if (windhawkModule?.minimize) {
+            windhawkModule.minimize();
         }
     },
 
     maximizeRestore() {
-        if (windhawkModule && supportedCommands.includes("MaximizeRestore")) {
-            windhawkModule.executeCommand("/WH:MaximizeRestore");
+        if (windhawkModule?.maximizeRestore) {
+            windhawkModule.maximizeRestore();
         }
     },
 
     close() {
-        if (windhawkModule && supportedCommands.includes("Close")) {
-            windhawkModule.executeCommand("/WH:Close");
+        if (windhawkModule?.close) {
+            windhawkModule.close();
         }
     },
 
+    // (bool, optional int 0-255, optional string)
+    // color: RRGGBB hex
     setLayered(layered, alpha, color) {
-        layered = layered ? 1 : 0;
-        // color: RRGGBB hex
-        if (windhawkModule) {
-            const args = [layered];
-            if (alpha) {
-                args.push(alpha);
-            }
-            if (color) {
-                args.push(color);
-            }
-            windhawkModule.executeCommand('/WH:SetLayered:' + args.join(':'));
+        if (windhawkModule?.setLayered) {
+            windhawkModule.setLayered(layered, alpha, color);
         }
     },
 
-    setBackdrop(backdropType) { // mica, acrylic, tabbed
-        if (windhawkModule) {
-            windhawkModule.executeCommand(`/WH:SetBackdrop:${backdropType}`);
+    // (string - mica, acrylic, tabbed)
+    setBackdrop(backdropType) {
+        if (windhawkModule?.setBackdrop) {
+            windhawkModule.setBackdrop(backdropType);
         }
     },
 
-    resizeTo(width, height) { // Ignores min/max size
-        if (windhawkModule) {
-            windhawkModule.executeCommand(`/WH:ResizeTo:${width}:${height}`);
+    // (int, int)
+    // Ignores min/max size
+    resizeTo(width, height) {
+        if (windhawkModule?.resizeTo) {
+            windhawkModule.resizeTo(width, height);
         }
     },
 
+    // (int, int)
     setMinSize(width, height) {
-        if (windhawkModule) {
-            windhawkModule.executeCommand(`/WH:SetMinSize:${width}:${height}`);
+        if (windhawkModule?.setMinSize) {
+            windhawkModule.setMinSize(width, height);
         }
     },
 
+    // (bool)
     setTopMost(topMost) {
-        if (windhawkModule) {
-            windhawkModule.executeCommand(`/WH:SetTopMost:${topMost ? 1 : 0}`);
+        if (windhawkModule?.setTopMost) {
+            windhawkModule.setTopMost(topMost);
         }
     },
 
+    // (string - max 255 characters)
     setTitle(title) {
-        if (windhawkModule) {
-            windhawkModule.executeCommand(`/WH:SetTitle:${title}`);
+        if (windhawkModule?.setTitle) {
+            windhawkModule.setTitle(title);
         }
     },
 
+    // (bool)
     lockTitle(lock) {
-        if (windhawkModule) {
-            windhawkModule.executeCommand(`/WH:LockTitle:${lock ? 1 : 0}`);
+        if (windhawkModule?.lockTitle) {
+            windhawkModule.lockTitle(lock);
         }
     },
 
     openSpotifyMenu() {
-        if (windhawkModule) {
-            windhawkModule.executeCommand("/WH:OpenSpotifyMenu");
+        if (windhawkModule?.openSpotifyMenu) {
+            windhawkModule.openSpotifyMenu();
+        }
+    },
+
+    // (double - 1.0 is normal speed)
+    // Win64 only
+    async setPlaybackSpeed(speed) {
+        if (windhawkModule?.setPlaybackSpeed) {
+            windhawkModule.setPlaybackSpeed(parseFloat(speed));
+            const playerAPI = window.Spicetify?.Platform?.PlayerAPI;
+            if (playerAPI) {
+                const state = playerAPI.getState();
+                const position = (Date.now() - state.timestamp) * state.speed + state.positionAsOfTimestamp;
+
+                await playerAPI.skipToNext();
+                await playerAPI.skipToPrevious();
+                await playerAPI.seekTo(position);
+                if (state.isPaused) {
+                    await playerAPI.pause();
+                }
+            }
         }
     },
 
@@ -108,8 +124,8 @@ export default WindhawkComm = {
         return !!windhawkModule;
     },
 
-    getSupportedCommands() {
-        return supportedCommands;
+    getModule() {
+        return windhawkModule;
     }
 }
 
@@ -120,13 +136,12 @@ function testWindhawk() {
     try {
         windhawkModule = window._getSpotifyModule("ctewh");
         lastDpi = windhawkModule.query().dpi / 96;
-        supportedCommands = windhawkModule.supportedCommands;
         const { version, initialOptions } = windhawkModule;
         console.log(`CEF/Spotify Tweaks Windhawk mod available, Version: ${version}`);
         window.addEventListener("resize", () => {
             lastDpi = windhawkModule.query().dpi / 96;
         });
-        return { version, initialOptions, supportedCommands };
+        return { version, initialOptions };
     } catch (e) {
         // query fails if the main browser process has unloaded the mod and thus closed the pipe
         // Sandboxed renderer processes won't respond to the Windhawk's uninit request so it'll keep loaded and will continue hooking _getSpotifyModule

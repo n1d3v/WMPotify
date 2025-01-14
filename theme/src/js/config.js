@@ -1,8 +1,10 @@
 import { setTintColor } from "./tinting";
+import WindhawkComm from "./WindhawkComm";
 
 const configWindow = document.createElement('div');
 let tabs = null;
 let currentTab = 0;
+let speedApplyTimer = null;
 
 const elements = {
     title: null,
@@ -53,6 +55,13 @@ function init() {
             <label for="wmpotify-config-show-libx">Show Your Library X on the left sidebar</label><br>
             <button id="wmpotify-config-apply" class="wmpotify-aero">Apply</button>
         </section>
+        <section class="wmpotify-config-tab-content" data-tab-title="Play speed settings" data-wh-speedmod-required="true">
+            <a href="#" id="wmpotify-config-speed-slow">Slow</a>
+            <a href="#" id="wmpotify-config-speed-normal">Normal</a>
+            <a href="#" id="wmpotify-config-speed-fast">Fast</a><br>
+            <input type="range" id="wmpotify-config-speed" class="wmpotify-aero" min="0.5" max="2.0" step="0.1" value="1"><br>
+            Play speed: <span id="wmpotify-config-speed-value">1.0</span>
+        </section>
         <section class="wmpotify-config-tab-content" data-tab-title="About">
             <div id="wmpotify-about-logo"></div>
             <p id="wmpotify-about-title">WMPotify</p><br>
@@ -65,6 +74,21 @@ function init() {
 
     configWindow.querySelector('#wmpotify-config-close').addEventListener('click', close);
     configWindow.querySelector('#wmpotify-config-apply').addEventListener('click', apply);
+    if (!WindhawkComm.query()?.speedModSupported) {
+        configWindow.querySelector('[data-wh-speedmod-required=true]').remove();
+    } else {
+        elements.speed = configWindow.querySelector('#wmpotify-config-speed');
+        elements.speedValue = configWindow.querySelector('#wmpotify-config-speed-value');
+        elements.speed.addEventListener('pointerup', onSpeedChange);
+        configWindow.querySelector('#wmpotify-config-speed-slow').addEventListener('click', setSpeed.bind(null, 0.5));
+        configWindow.querySelector('#wmpotify-config-speed-normal').addEventListener('click', setSpeed.bind(null, 1));
+        configWindow.querySelector('#wmpotify-config-speed-fast').addEventListener('click', setSpeed.bind(null, 1.4));
+        const playbackSpeed = WindhawkComm.query()?.playbackSpeed || 1;
+        elements.speedValue.textContent = Number.isInteger(playbackSpeed) ? playbackSpeed + '.0' : playbackSpeed;
+        elements.speedValue.addEventListener('click', () => {
+            setSpeed(parseFloat(prompt('Enter a playback speed (0.5 - 5.0)', playbackSpeed)));
+        });
+    }
     tabs = configWindow.querySelectorAll('.wmpotify-config-tab-content');
     elements.title = configWindow.querySelector('#wmpotify-config-title');
     elements.hue = configWindow.querySelector('#wmpotify-config-hue');
@@ -152,6 +176,28 @@ function resetColor() {
     elements.sat.value = 121;
     setTintColor();
     delete localStorage.wmpotifyTintColor;
+}
+
+function onSpeedChange() {
+    elements.speedValue.textContent = Number.isInteger(parseFloat(elements.speed.value)) ? elements.speed.value + '.0' : elements.speed.value;
+    if (speedApplyTimer) {
+        clearTimeout(speedApplyTimer);
+    }
+    speedApplyTimer = setTimeout(() => {
+        setSpeed(elements.speed.value);
+        speedApplyTimer = null;
+    }, 500);
+}
+
+function setSpeed(speed) {
+    speed = parseFloat(speed);
+    const prevSpeed = WindhawkComm.query().playbackSpeed || 1;
+    if (speed === prevSpeed) {
+        return;
+    }
+    elements.speed.value = speed;
+    elements.speedValue.textContent = Number.isInteger(speed) ? speed + '.0' : speed;
+    WindhawkComm.setPlaybackSpeed(speed);
 }
 
 function apply() {

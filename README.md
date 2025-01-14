@@ -54,4 +54,7 @@ echo.
 * Some codes are from my previous [ModernActiveDesktop](https://github.com/Ingan121/ModernActiveDesktop) project
 * For the CEF/Spotify Tweaks mod:
     * [Windhawk](https://windhawk.net/)
+    * [Visual Studio Anti-Rich-Header](https://windhawk.net/mods/visual-studio-anti-rich-header) by m417z
+    * [Chrome UI Tweaks](https://windhawk.net/mods/chrome-ui-tweaks) by Vasher
     * [Chromium Embedded Framework](https://bitbucket.org/chromiumembedded/cef)
+    * [Chromium](https://www.chromium.org/)

@@ -125,6 +125,24 @@
         left: 400px;
     }
 
+    &-speed {
+        position: relative;
+        width: 192px;
+        height: 3px;
+        margin-top: 11px;
+
+        &::before {
+            content: '';
+            display: block;
+            position: absolute;
+            top: -11px;
+            left: 5px;
+            width: 182px;
+            height: 25px;
+            background: url('resources/config/speed.png') no-repeat;
+        }
+    }
+
     #wmpotify-about-logo {
         width: 32px;
         height: 32px;

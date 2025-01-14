@@ -13,9 +13,7 @@ export async function createTitlebar(mode) {
         case 'keepmenu':
             const titleButtons = document.createElement('div');
             titleButtons.id = 'wmpotify-title-buttons';
-            if (window.SpotEx ||
-                (whStatus && whStatus.supportedCommands.includes('Minimize'))
-            ) {
+            if (window.SpotEx || whStatus) {
                 const minimizeButton = document.createElement('button');
                 minimizeButton.id = 'wmpotify-minimize-button';
                 minimizeButton.addEventListener('click', () => {
@@ -90,8 +88,7 @@ export async function createTitlebar(mode) {
 }
 
 async function closeWindow() {
-    const whStatus = WindhawkComm.query();
-    if (whStatus?.supportedCommands?.includes('Close')) {
+    if (WindhawkComm.available()) {
         WindhawkComm.close();
     } else {
         window.close();

@@ -54,7 +54,7 @@
         }
     }
 
-    .main-nowPlayingView-aboutArtistV2ImageContainer .main-nowPlayingView-sectionHeaderText {
+    .main-nowPlayingView-aboutArtistV2ImageContainer[style*="i.scdn.co"] .main-nowPlayingView-sectionHeaderText {
         color: white !important;
     }
 }
