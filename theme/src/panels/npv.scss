@@ -7,10 +7,6 @@
         color: black;
     }
 
-    .main-nowPlayingView-coverArtContainer {
-        min-height: 248px; /* BetterLibrary bugfix */
-    }
-
     .main-nowPlayingView-coverArt {
         border-radius: 0;
         box-shadow: var(--album-shadow-big) !important;

@@ -1,6 +1,8 @@
 import { formatTime } from './functions';
+import WindhawkComm from './WindhawkComm';
 
 let playPauseButton, volumeButton, volumeBarProgress, timeTexts, timeTextMode, timeText;
+let longPressTimer = null;
 
 export function setupPlayerbar() {
     const playerBar = document.querySelector('.main-nowPlayingBar-nowPlayingBar');
@@ -14,8 +16,33 @@ export function setupPlayerbar() {
 
     const playerControlsLeft = document.querySelector('.player-controls__left');
     const prevButton = document.querySelector('.player-controls__buttons button[data-testid="control-button-skip-back"]');
+    const nextButton = document.querySelector('.player-controls__buttons button[data-testid="control-button-skip-forward"]');
     const repeatButton = document.querySelector('.player-controls__buttons button[data-testid="control-button-repeat"]');
     playerControlsLeft.insertBefore(repeatButton, prevButton);
+
+    const whStatus = WindhawkComm.query();
+    if (whStatus?.speedModSupported && whStatus.immediateSpeedChange) {
+        nextButton.addEventListener('pointerdown', () => {
+            // Speed control won't work when using Spotify Connect (playing on another device)
+            if (nextButton.disabled || Spicetify.Platform.ConnectAPI.state.connectionStatus === 'connected') {
+                return;
+            }
+            longPressTimer = setTimeout(() => {
+                nextButton.dataset.fastForward = true;
+                WindhawkComm.setPlaybackSpeed(5);
+                Spicetify.Player.play();
+            }, 1000);
+        });
+        nextButton.addEventListener('click', (event) => {
+            clearTimeout(longPressTimer);
+            if (nextButton.dataset.fastForward) {
+                delete nextButton.dataset.fastForward;
+                WindhawkComm.setPlaybackSpeed(1);
+                event.preventDefault();
+                event.stopPropagation();
+            }
+        });
+    }
 
     const stopButton = document.createElement('button');
     stopButton.setAttribute('aria-label', 'Stop');

@@ -30,10 +30,6 @@
 * Disable forced dark mode to prevent Spotify from forcing dark mode on the CEF UI & web contents
 * Force enable Chrome extension support
 * Use the settings tab on the mod details page to configure the features
-## Important Notes (for now - Windhawk 1.5.1 and below)
-* Replace `%PROGRAMDATA%` with `%ProgramData%` in `C:\Program Files\Windhawk\windhawk.ini` and `C:\Program Files\Windhawk\Engine\<version>\engine.ini` then restart Windhawk to get the renderer hook working
-* Not needed in portable installations of Windhawk
-* Run Spotify with `--no-sandbox` flag to get Windhawk logging working in the renderer process
 ## Notes
 * Supported CEF versions: 90.4 to 132
     * This mod won't work with versions before 90.4
@@ -84,16 +80,16 @@
   $name: Enable transparent rendering*
   $description: "Make the transparent parts of the web contents transparent\nWill use the ButtonFace color instead if the classic theme is being used and native frames are enabled\nChrome runtime is required for this to work"
 - noforceddarkmode: false
-  $name: Disable forced dark mode
+  $name: Disable forced dark mode*
   $description: Prevents Spotify from forcing dark mode on the CEF UI & web contents
 - forceextensions: true
-  $name: Force enable Chrome extensions
+  $name: Force enable Chrome extensions*
   $description: Always enable Chrome extension support, regardless of the DevTools status
 - ignoreminsize: false
   $name: Ignore minimum window size
   $description: Allows resizing the window below the minimum size set by Spotify
 - allowuntested: false
-  $name: (Advanced) Use unsafe methods on untested CEF versions
+  $name: (Advanced) Use unsafe methods on untested CEF versions*
   $description: Allows calling unsafe functions on untested CEF versions. May cause crashes or other issues. If disabled, an inefficient alternative method will be used on untested versions. JS API will also be disabled on untested versions
 */
 // ==/WindhawkModSettings==
@@ -136,7 +132,6 @@
 #include <libloaderapi.h>
 #include <windhawk_api.h>
 #include <windhawk_utils.h>
-#include <codecvt>
 #include <condition_variable>
 #include <cstdint>
 #include <thread>
@@ -157,6 +152,7 @@ using namespace std::string_view_literals;
 #define cef_window_handle_t HWND
 #define ANY_MINOR -1
 #define PIPE_NAME L"\\\\.\\pipe\\CTEWH-IPC"
+#define LAST_TESTED_CEF_VERSION 131
 
 struct cte_settings {
     BOOL showframe;
@@ -237,16 +233,16 @@ int g_minHeight = -1;
 BOOL g_hwAccelerated = FALSE;
 BOOL g_dwmBackdropEnabled = FALSE;
 BOOL g_titleLocked = FALSE;
-double g_playbackSpeed = 1.0;
-BOOL g_speedModSupported = FALSE;
 
-HANDLE g_hSrvPipe = INVALID_HANDLE_VALUE;
-HANDLE g_hClientPipe = INVALID_HANDLE_VALUE;
+double g_playbackSpeed = 1.0;
+int64_t g_currentTrackPlayer = NULL;
+
+HANDLE g_hPipe = INVALID_HANDLE_VALUE;
 BOOL g_shouldClosePipe = FALSE;
 std::thread g_pipeThread;
 
 std::condition_variable g_queryResponseCv;
-std::mutex g_queryResponseMutex;
+std::mutex g_ipcMutex;
 bool g_queryResponseReceived = false;
 
 struct cte_queryResponse_t {
@@ -264,6 +260,7 @@ struct cte_queryResponse_t {
     int dpi;
     BOOL speedModSupported;
     double playbackSpeed;
+    BOOL immediateSpeedChange;
 } g_queryResponse;
 
 #pragma region CEF structs (as minimal and cross-version compatible as possible)
@@ -421,17 +418,26 @@ cef_v8value_create_array_t cef_v8value_create_array;
 
 typedef int (*cef_version_info_t)(int entry);
 
-std::u16string to_u16string(int const &i) {
-  std::wstring_convert<std::codecvt_utf8_utf16<char16_t, 0x10ffff, std::little_endian>, char16_t> conv;
-  return conv.from_bytes(std::to_string(i));
-}
-
 cef_string_t* GenerateCefString(std::u16string str) {
     cef_string_t* cefStr = (cef_string_t*)calloc(1, sizeof(cef_string_t));
     cefStr->str = (char16_t*)calloc(str.size() + 1, sizeof(char16_t));
     cefStr->length = str.size();
     memcpy(cefStr->str, str.c_str(), str.size() * sizeof(char16_t));
     return cefStr;
+}
+
+cef_string_t* GenerateCefString(std::wstring str) {
+    return GenerateCefString(std::u16string(str.begin(), str.end()));
+}
+
+cef_string_t* FormatCefString(const wchar_t* format, ...) {
+    va_list args;
+    va_start(args, format);
+    int len = _vscwprintf(format, args);
+    std::wstring str(len + 1, L'\0');
+    vswprintf_s(&str[0], len + 1, format, args);
+    va_end(args);
+    return GenerateCefString(std::u16string(str.begin(), str.end()));
 }
 
 int AddFunctionToObj(cef_v8value_t* obj, std::u16string name, cef_v8handler_t* handler) {
@@ -465,6 +471,7 @@ BOOL IsDwmEnabled() {
     return dwmEnabled && dwmFrameEnabled;
 }
 
+#pragma region Subclassing
 LRESULT CALLBACK SubclassProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, DWORD_PTR dwRefData) {
     // dwRefData is 1 if the window is created by cef_window_create_top_level
     // Assumed 1 if this mod is loaded after the window is created
@@ -572,6 +579,7 @@ BOOL CALLBACK UninitEnumWindowsProc(HWND hWnd, LPARAM lParam) {
     }
     return TRUE;
 }
+#pragma endregion
 
 #pragma region Memory patches
 // From https://windhawk.net/mods/visual-studio-anti-rich-header
@@ -585,7 +593,8 @@ std::string ReplaceAll(std::string str, const std::string& from, const std::stri
     return str;
 }
 
-BOOL PatchMemory(char* pbExecutable, const std::string& targetRegex, const std::vector<uint8_t>& targetPatch, int expectedSection = -1, int maxMatch = -1) {
+// Pass an empty targetPatch to use it as a regex search
+int64_t PatchMemory(char* pbExecutable, const std::string& targetRegex, const std::vector<uint8_t>& targetPatch, int expectedSection = -1, int maxMatch = -1) {
     IMAGE_DOS_HEADER* pDosHeader = (IMAGE_DOS_HEADER*)pbExecutable;
     IMAGE_NT_HEADERS* pNtHeader = (IMAGE_NT_HEADERS*)((char*)pDosHeader + pDosHeader->e_lfanew);
     IMAGE_SECTION_HEADER* pSectionHeader = (IMAGE_SECTION_HEADER*)((char*)&pNtHeader->OptionalHeader + pNtHeader->FileHeader.SizeOfOptionalHeader);
@@ -610,6 +619,11 @@ BOOL PatchMemory(char* pbExecutable, const std::string& targetRegex, const std::
             auto pos = from + match.position(0);
 
             Wh_Log(L"Match found in section %d at position: %p", i, pos);
+
+            if (targetPatch.size() == 0) {
+                // Just return the address of the first match
+                return (int64_t)pos;
+            }
 
             // #include <iomanip>
             // #include <sstream>
@@ -776,7 +790,6 @@ const char* search_function_instructions(std::string_view code_section, function
         }
     }
     if (entry) {
-        entry -= 3; // there are extra three bytes before the string prologue
         Wh_Log(L"Found entrypoint for function %s at addr %p", symbol_name, entry);
         if (entry[-1]!=(char)0xcc && entry[-1]!=(char)0xc3) {
             Wh_Log(L"Warn: prologue not preceded by INT3 or RET");
@@ -789,8 +802,8 @@ const char* search_function_instructions(std::string_view code_section, function
     }
 }
 
-typedef uint64_t* (*CreateTrackPlayer_t)(
-    int64_t a1,
+typedef uint64_t* __fastcall (*CreateTrackPlayer_t)(
+    int64_t trackPlayer,
     void* a2,
     void* a3,
     double speed,
@@ -805,7 +818,7 @@ typedef uint64_t* (*CreateTrackPlayer_t)(
 );
 CreateTrackPlayer_t CreateTrackPlayer_original;
 uint64_t* __fastcall CreateTrackPlayer_hook(
-    int64_t a1,
+    int64_t trackPlayer,
     uint64_t* a2,
     uint64_t* a3,
     double speed,
@@ -819,20 +832,31 @@ uint64_t* __fastcall CreateTrackPlayer_hook(
     int64_t a12
 ) {
     Wh_Log(L"CreateTrackPlayer_hook");
-    return CreateTrackPlayer_original(a1, a2, a3, g_playbackSpeed, a5, a6, a7, a8, a9, a10, a11, a12);
+    g_currentTrackPlayer = trackPlayer;
+    return CreateTrackPlayer_original(trackPlayer, a2, a3, g_playbackSpeed, a5, a6, a7, a8, a9, a10, a11, a12);
 }
 
 const std::string_view CreateTrackPlayer_instructions =
-    "\x01"sv // just a single byte before the instructions below, to distinguish from another match
+    "\x01"sv         // just a single byte before the instructions below, to distinguish from another match
     "\x49\x8B\x0F"sv // mov rcx, [r15]
     "\x48\x8B\x01"sv // mov rax, [rcx]
     "\xFF\x50\x38"sv // call qword ptr [rax+38h]
-    "\x48\x8D"sv; // lea rdx, (followed by address of "yes" in .rdata)
-const std::string_view CreateTrackPlayer_prologue = "USVWATAUAVAWH"sv;
+    "\x48\x8D"sv;    // lea rdx, (followed by address of "yes" in .rdata)
+const std::string_view CreateTrackPlayer_prologue = "\x48\x8B\xC4USVWATAUAVAWH"sv;
+
+typedef char __fastcall (*SetPlaybackSpeed_t)(int64_t trackPlayer, double speed);
+SetPlaybackSpeed_t SetPlaybackSpeed;
+
+const std::string SetPlaybackSpeed_instructions =
+    R"(\x48\x8B\xC4)"                // mov rax, rsp
+    R"(\x48\x89\x58\x18)"            // mov [rax+18h], rbx
+    R"(\x48\x89\x70\x20)"            // mov [rax+20h], rsi
+    R"(\x55\x57\x41\x56)"            // push rbp, push rdi, push r14
+    R"(\x48\x8D\xA8.?\xFD\xFF\xFF)"; // lea rbp, [rax-??h]
 
 // Only works on Spotify x64 1.2.36 and newer
 // No plans to support x86 or older versions
-BOOL HookCreateTrackPlayer(char* pbExecutable) {
+BOOL HookCreateTrackPlayer(char* pbExecutable, BOOL shouldFindSetPlaybackSpeed) {
     std::string_view code_section = getCodeSection((HMODULE)pbExecutable);
     if (code_section.size() == 0) return FALSE;
     const char* addr = search_function_instructions(
@@ -847,8 +871,18 @@ BOOL HookCreateTrackPlayer(char* pbExecutable) {
     if (addr == NULL) return FALSE;
     Wh_Log(L"Hooking CreateTrackPlayer at %p", addr);
     Wh_SetFunctionHook((void*)addr, (void*)CreateTrackPlayer_hook, (void**)&CreateTrackPlayer_original);
+
+    // This only works on Spotify x64 1.2.45 and newer
+    // Don't find SetPlaybackSpeed on a known unsupported version, as finding non-existent instructions will delay startup
+    if (shouldFindSetPlaybackSpeed) {
+        SetPlaybackSpeed = (SetPlaybackSpeed_t)PatchMemory(pbExecutable, SetPlaybackSpeed_instructions, {}, 0, 1);
+        Wh_Log(L"SetPlaybackSpeed at %p", SetPlaybackSpeed);
+    }
     return TRUE;
 }
+#else
+#define CreateTrackPlayer_original NULL
+#define SetPlaybackSpeed NULL
 #endif
 #pragma endregion
 
@@ -1063,6 +1097,31 @@ BOOL WINAPI CreateProcessAsUserW_hook(
 ) {
     Wh_Log(L"CreateProcessAsUserW_hook");
 
+    // Inject %PROGRAMDATA% to get Windhawk 1.5.1 and below to work with sandboxed renderers
+    const wchar_t* lpEnvironmentCopy = (wchar_t*)lpEnvironment;
+    if (lpCommandLine && wcsstr(lpCommandLine, L"--type=renderer")) {
+        if (lpEnvironment && wcsstr((wchar_t*)lpEnvironment, L"%PROGRAMDATA%") == NULL) {
+            size_t envLen = 0;
+            while (((wchar_t*)lpEnvironment)[envLen] != L'\0' || ((wchar_t*)lpEnvironment)[envLen + 1] != L'\0') {
+                envLen++;
+            }
+            envLen += 1; // Only include one null terminator at the end
+
+            std::wstring append1 = L"PROGRAMDATA=";
+            std::wstring append2(MAX_PATH, L'\0');
+            GetEnvironmentVariableW(L"PROGRAMDATA", append2.data(), MAX_PATH);
+            std::wstring append3 = L"\0\0";
+            std::wstring append = append1 + append2 + append3;
+            size_t appendLen = append.size();
+
+            wchar_t* newEnv = new wchar_t[envLen + appendLen];
+            memcpy(newEnv, lpEnvironment, envLen * sizeof(wchar_t));
+            memcpy(newEnv + envLen, append.c_str(), appendLen * sizeof(wchar_t));
+
+            lpEnvironmentCopy = newEnv;
+        }
+    }
+
     BOOL result = CreateProcessAsUserW_original(
         hToken,
         lpApplicationName,
@@ -1071,7 +1130,7 @@ BOOL WINAPI CreateProcessAsUserW_hook(
         lpThreadAttributes,
         bInheritHandles,
         dwCreationFlags,
-        lpEnvironment,
+        (LPVOID)lpEnvironmentCopy,
         lpCurrentDirectory,
         lpStartupInfo,
         lpProcessInformation
@@ -1093,7 +1152,7 @@ void HandleWindhawkComm(LPCWSTR command) {
         return;
     }
 
-    std::lock_guard<std::mutex> lock(g_queryResponseMutex); // Protect shared resources
+    std::lock_guard<std::mutex> lock(g_ipcMutex); // Protect shared resources
 
     int len = wcslen(command);
     Wh_Log(L"HandleWindhawkComm: %s, len: %d, size: %d", command, len, sizeof(command));
@@ -1218,16 +1277,19 @@ void HandleWindhawkComm(LPCWSTR command) {
         double speed;
         if (swscanf(command + 21, L"%lf", &speed) == 1) {
             g_playbackSpeed = speed;
+            if (SetPlaybackSpeed != NULL && g_currentTrackPlayer != NULL) {
+                SetPlaybackSpeed(g_currentTrackPlayer, speed);
+            }
         }
     #endif
     // /WH:Query
     } else if (wcscmp(command, L"/WH:Query") == 0) {
-        if (g_hSrvPipe == INVALID_HANDLE_VALUE) {
+        if (g_hPipe == INVALID_HANDLE_VALUE) {
             return;
         }
         wchar_t queryResponse[256];
-        // <showframe:showframeonothers:showmenu:showcontrols:transparentcontrols:transparentrendering:ignoreminsize:isMaximized:isTopMost:isLayered:isThemingEnabled:isDwmEnabled:dwmBackdropEnabled:hwAccelerated:minWidth:minHeight:titleLocked:dpi:speedModSupported:playbackSpeed>
-        swprintf(queryResponse, 256, L"/WH:QueryResponse:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%lf",
+        // <showframe:showframeonothers:showmenu:showcontrols:transparentcontrols:transparentrendering:ignoreminsize:isMaximized:isTopMost:isLayered:isThemingEnabled:isDwmEnabled:dwmBackdropEnabled:hwAccelerated:minWidth:minHeight:titleLocked:dpi:speedModSupported:playbackSpeed:immediateSpeedChange>
+        swprintf(queryResponse, 256, L"/WH:QueryResponse:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%lf:%d",
             cte_settings.showframe,
             cte_settings.showframeonothers,
             cte_settings.showmenu,
@@ -1246,11 +1308,12 @@ void HandleWindhawkComm(LPCWSTR command) {
             g_minHeight,
             g_titleLocked,
             GetDpiForWindow(g_mainHwnd),
-            g_speedModSupported,
-            g_playbackSpeed
+            CreateTrackPlayer_original != NULL,
+            g_playbackSpeed,
+            SetPlaybackSpeed != NULL
         );
         DWORD bytesWritten;
-        WriteFile(g_hSrvPipe, queryResponse, wcslen(queryResponse) * sizeof(wchar_t), &bytesWritten, NULL);
+        WriteFile(g_hPipe, queryResponse, wcslen(queryResponse) * sizeof(wchar_t), &bytesWritten, NULL);
     }
 }
 
@@ -1319,7 +1382,7 @@ void CreateNamedPipeServer() {
     securityAttributes.bInheritHandle = TRUE;
 
     while (!g_shouldClosePipe) {
-        g_hSrvPipe = CreateNamedPipe(
+        g_hPipe = CreateNamedPipe(
             PIPE_NAME,                                       // Pipe name
             PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,       // Read/Write access with overlapped I/O
             PIPE_TYPE_MESSAGE |                              // Message type pipe
@@ -1332,20 +1395,20 @@ void CreateNamedPipeServer() {
             pSecurityDescriptor ? &securityAttributes : NULL // Security attributes
         );
 
-        if (g_hSrvPipe == INVALID_HANDLE_VALUE) {
+        if (g_hPipe == INVALID_HANDLE_VALUE) {
             Wh_Log(L"CreateNamedPipe failed, GLE=%d", GetLastError());
             return;
         }
 
         Wh_Log(L"Waiting for client to connect...");
-        BOOL connected = ConnectNamedPipe(g_hSrvPipe, NULL) ? TRUE : (GetLastError() == ERROR_PIPE_CONNECTED);
+        BOOL connected = ConnectNamedPipe(g_hPipe, NULL) ? TRUE : (GetLastError() == ERROR_PIPE_CONNECTED);
 
         if (connected) {
             Wh_Log(L"Client connected, waiting for message...");
             wchar_t buffer[512];
             DWORD bytesRead;
             while (!g_shouldClosePipe) {
-                BOOL result = ReadFile(g_hSrvPipe, buffer, sizeof(buffer) - sizeof(wchar_t), &bytesRead, NULL);
+                BOOL result = ReadFile(g_hPipe, buffer, sizeof(buffer) - sizeof(wchar_t), &bytesRead, NULL);
                 if (result) {
                     if (bytesRead >= sizeof(buffer) - sizeof(wchar_t)) {
                         Wh_Log(L"Buffer overflow detected");
@@ -1367,15 +1430,15 @@ void CreateNamedPipeServer() {
         }
 
         Wh_Log(L"Closing pipe...");
-        CloseHandle(g_hSrvPipe);
-        g_hSrvPipe = INVALID_HANDLE_VALUE;
+        CloseHandle(g_hPipe);
+        g_hPipe = INVALID_HANDLE_VALUE;
     }
 
     LocalFree(pSecurityDescriptor);
 }
 
 int ConnectToNamedPipe() {
-    g_hClientPipe = CreateFile(
+    g_hPipe = CreateFile(
         PIPE_NAME,
         GENERIC_READ | GENERIC_WRITE,
         0,
@@ -1385,7 +1448,7 @@ int ConnectToNamedPipe() {
         NULL
     );
 
-    if (g_hClientPipe == INVALID_HANDLE_VALUE) {
+    if (g_hPipe == INVALID_HANDLE_VALUE) {
         int gle = GetLastError();
         Wh_Log(L"CreateFile failed, GLE=%d", gle);
         return gle;
@@ -1402,15 +1465,15 @@ int ConnectToNamedPipe() {
         }
 
         while (!g_shouldClosePipe) {
-            BOOL result = ReadFile(g_hClientPipe, buffer, sizeof(buffer) - sizeof(wchar_t), &bytesRead, &overlapped);
+            BOOL result = ReadFile(g_hPipe, buffer, sizeof(buffer) - sizeof(wchar_t), &bytesRead, &overlapped);
             if (!result && GetLastError() == ERROR_IO_PENDING) {
                 DWORD waitResult = WaitForSingleObject(overlapped.hEvent, INFINITE);
                 if (waitResult == WAIT_OBJECT_0) {
-                    if (GetOverlappedResult(g_hClientPipe, &overlapped, &bytesRead, FALSE)) {
+                    if (GetOverlappedResult(g_hPipe, &overlapped, &bytesRead, FALSE)) {
                         buffer[bytesRead / sizeof(wchar_t)] = L'\0';
                         Wh_Log(L"Received message: %s", buffer);
                         if (wcsncmp(buffer, L"/WH:QueryResponse:", 18) == 0) {
-                            if (swscanf(buffer + 18, L"%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%lf",
+                            if (swscanf(buffer + 18, L"%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%d:%lf:%d",
                                 &cte_settings.showframe,
                                 &cte_settings.showframeonothers,
                                 &cte_settings.showmenu,
@@ -1430,13 +1493,14 @@ int ConnectToNamedPipe() {
                                 &g_queryResponse.titleLocked,
                                 &g_queryResponse.dpi,
                                 &g_queryResponse.speedModSupported,
-                                &g_queryResponse.playbackSpeed) == 20
+                                &g_queryResponse.playbackSpeed,
+                                &g_queryResponse.immediateSpeedChange) == 21
                             ) {
                                 g_queryResponse.success = TRUE;
                             }
                             // Notify the condition variable
                             {
-                                std::lock_guard<std::mutex> lock(g_queryResponseMutex);
+                                std::lock_guard<std::mutex> lock(g_ipcMutex);
                                 g_queryResponseReceived = true;
                             }
                             g_queryResponseCv.notify_one();
@@ -1452,8 +1516,8 @@ int ConnectToNamedPipe() {
             }
         }
         CloseHandle(overlapped.hEvent);
-        CloseHandle(g_hClientPipe);
-        g_hClientPipe = INVALID_HANDLE_VALUE;
+        CloseHandle(g_hPipe);
+        g_hPipe = INVALID_HANDLE_VALUE;
     });
     g_pipeThread.detach();
 
@@ -1461,7 +1525,7 @@ int ConnectToNamedPipe() {
 }
 
 int SendNamedPipeMessage(LPCWSTR message) {
-    if (g_hClientPipe == INVALID_HANDLE_VALUE) {
+    if (g_hPipe == INVALID_HANDLE_VALUE) {
         Wh_Log(L"SendNamedPipeMessage failed: pipe is not connected");
         return ERROR_PIPE_NOT_CONNECTED;
     }
@@ -1478,7 +1542,7 @@ int SendNamedPipeMessage(LPCWSTR message) {
         return gle;
     }
 
-    BOOL result = WriteFile(g_hClientPipe, message, messageLength, &bytesWritten, &overlapped);
+    BOOL result = WriteFile(g_hPipe, message, messageLength, &bytesWritten, &overlapped);
     if (!result && GetLastError() != ERROR_IO_PENDING) {
         int gle = GetLastError();
         Wh_Log(L"WriteFile failed, GLE=%d", gle);
@@ -1496,7 +1560,7 @@ int SendNamedPipeMessage(LPCWSTR message) {
     }
 
     // Check the result of the write operation
-    if (!GetOverlappedResult(g_hClientPipe, &overlapped, &bytesWritten, FALSE)) {
+    if (!GetOverlappedResult(g_hPipe, &overlapped, &bytesWritten, FALSE)) {
         int gle = GetLastError();
         Wh_Log(L"GetOverlappedResult failed, GLE=%d", gle);
         CloseHandle(overlapped.hEvent);
@@ -1508,7 +1572,7 @@ int SendNamedPipeMessage(LPCWSTR message) {
 
     if (wcsncmp(message, L"/WH:Query", 9) == 0) {
         // Wait for the query response
-        std::unique_lock<std::mutex> lock(g_queryResponseMutex);
+        std::unique_lock<std::mutex> lock(g_ipcMutex);
         g_queryResponseCv.wait(lock, [] { return g_queryResponseReceived; });
         g_queryResponseReceived = false;
     }
@@ -1519,7 +1583,7 @@ int SendNamedPipeMessage(LPCWSTR message) {
 int CEF_CALLBACK WindhawkCommV8Handler(cef_v8handler_t* self, const cef_string_t* name, cef_v8value_t* object, size_t argumentsCount, cef_v8value_t* const* arguments, cef_v8value_t** retval, cef_string_t* exception) {
     Wh_Log(L"WindhawkCommV8Handler called with name: %s", name->str);
     std::u16string nameStr(name->str, name->length);
-    if (g_hClientPipe == INVALID_HANDLE_VALUE) {
+    if (g_hPipe == INVALID_HANDLE_VALUE) {
         *exception = *GenerateCefString(u"Disconnected from the Windhawk mod running in the main process. Is the mod unloaded?");
         return TRUE;
     }
@@ -1653,13 +1717,6 @@ int CEF_CALLBACK WindhawkCommV8Handler(cef_v8handler_t* self, const cef_string_t
             return TRUE;
         }
     #endif
-    // } else if (nameStr == u"executeCommand") {
-    //     if (argumentsCount == 1) {
-    //         cef_string_t* arg = arguments[0]->get_string_value(arguments[0]);
-    //         std::wstring argStr(arg->str, arg->str + arg->length);
-    //         Wh_Log(L"Argument: %s", argStr.c_str());
-    //         ipcRes = SendNamedPipeMessage(argStr.c_str());
-    //     }
     } else if (nameStr == u"query") {
         ipcRes = SendNamedPipeMessage(L"/WH:Query");
         if (g_queryResponse.success) {
@@ -1690,6 +1747,7 @@ int CEF_CALLBACK WindhawkCommV8Handler(cef_v8handler_t* self, const cef_string_t
             retobj->set_value_bykey(retobj, GenerateCefString(u"speedModSupported"), cef_v8value_create_bool(g_queryResponse.speedModSupported), V8_PROPERTY_ATTRIBUTE_NONE);
             #ifdef _WIN64
             retobj->set_value_bykey(retobj, GenerateCefString(u"playbackSpeed"), cef_v8value_create_double(g_queryResponse.playbackSpeed), V8_PROPERTY_ATTRIBUTE_NONE);
+            retobj->set_value_bykey(retobj, GenerateCefString(u"immediateSpeedChange"), cef_v8value_create_bool(g_queryResponse.immediateSpeedChange), V8_PROPERTY_ATTRIBUTE_NONE);
             #endif
             *retval = retobj;
             g_queryResponse.success = FALSE;
@@ -1700,7 +1758,7 @@ int CEF_CALLBACK WindhawkCommV8Handler(cef_v8handler_t* self, const cef_string_t
     }
 
     if (ipcRes != 0) {
-        *exception = *GenerateCefString(u"IPC Error: " + to_u16string(ipcRes));
+        *exception = *FormatCefString(L"IPC Error: %d", ipcRes);
     }
     return TRUE;
 }
@@ -1717,7 +1775,6 @@ int CEF_CALLBACK _getSpotifyModule_hook(cef_v8handler_t* self, const cef_string_
             ctewh->base.size = sizeof(cef_v8handler_t);
             ctewh->execute = WindhawkCommV8Handler;
             cef_v8value_t* retobj = cef_v8value_create_object(NULL, NULL);
-            //AddFunctionToObj(retobj, u"executeCommand", ctewh);
             AddFunctionToObj(retobj, u"query", ctewh);
             AddFunctionToObj(retobj, u"extendFrame", ctewh);
             AddFunctionToObj(retobj, u"minimize", ctewh);
@@ -1757,6 +1814,10 @@ cef_v8value_create_function_t CEF_EXPORT cef_v8value_create_function_hook = [](c
     Wh_Log(L"cef_v8value_create_function called with name: %s", name->str);
     if (u"_getSpotifyModule" == std::u16string(name->str, name->length)) {
         Wh_Log(L"_getSpotifyModule is being created");
+        if (g_hPipe == INVALID_HANDLE_VALUE) {
+            // API won't be available if the pipe is not connected
+            return cef_v8value_create_function_original(name, handler);
+        }
         _getSpotifyModule_original = handler->execute;
         handler->execute = _getSpotifyModule_hook;
         return cef_v8value_create_function_original(name, handler);
@@ -1883,14 +1944,18 @@ BOOL Wh_ModInit() {
         cef_version_info(7)
     );
 
-    get_window_handle_offset = FindOffset(major, minor, get_window_handle_offsets, ARRAYSIZE(get_window_handle_offsets), cte_settings.allowuntested);
-    Wh_Log(L"get_window_handle offset: %#x", get_window_handle_offset);
+    if (major <= 89 || (major == 90 && minor <= 3)) {
+        Wh_Log(L"Unsupported CEF version!");
+        return FALSE;
+    }
+
+    BOOL isTestedVersion = cte_settings.allowuntested || major <= LAST_TESTED_CEF_VERSION;
 
     // Check if this process is auxilliary process by checking if the arguments contain --type=
     LPWSTR args = GetCommandLineW();
     if (wcsstr(args, L"--type=") != NULL) {
         if (isSpotify && isInitialThread && major >= 108 &&
-            get_window_handle_offset != NULL &&
+            isTestedVersion &&
             wcsstr(args, L"--type=renderer") != NULL &&
             wcsstr(args, L"--extension-process") == NULL
         ) {
@@ -1903,6 +1968,8 @@ BOOL Wh_ModInit() {
     // Get appropriate offsets for current CEF version
     is_frameless_offset = FindOffset(major, minor, is_frameless_offsets, ARRAYSIZE(is_frameless_offsets));
     Wh_Log(L"is_frameless offset: %#x", is_frameless_offset);
+    get_window_handle_offset = FindOffset(major, minor, get_window_handle_offsets, ARRAYSIZE(get_window_handle_offsets), cte_settings.allowuntested);
+    Wh_Log(L"get_window_handle offset: %#x", get_window_handle_offset);
     if (isSpotify) {
         add_child_view_offset = FindOffset(major, minor, add_child_view_offsets, ARRAYSIZE(add_child_view_offsets));
         Wh_Log(L"add_child_view offset: %#x", add_child_view_offset);
@@ -1950,7 +2017,9 @@ BOOL Wh_ModInit() {
             }
 
             #ifdef _WIN64
-                g_speedModSupported = HookCreateTrackPlayer(pbExecutable);
+            if (major >= 122 && isTestedVersion) {
+                HookCreateTrackPlayer(pbExecutable, major >= 127);
+            }
             #endif
         }
     }
@@ -1967,9 +2036,9 @@ void Wh_ModUninit() {
 
     if (g_isSpotifyRenderer) {
         // Note: sandboxed renderers won't even respond to the uninit request and keep loaded until the renderer exits
-        if (g_hClientPipe != INVALID_HANDLE_VALUE) {
-            CloseHandle(g_hClientPipe);
-            g_hClientPipe = INVALID_HANDLE_VALUE;
+        if (g_hPipe != INVALID_HANDLE_VALUE) {
+            CloseHandle(g_hPipe);
+            g_hPipe = INVALID_HANDLE_VALUE;
         }
         if (g_pipeThread.joinable()) {
             g_pipeThread.join();
@@ -1977,10 +2046,10 @@ void Wh_ModUninit() {
         return;
     }
 
-    if (g_hSrvPipe != INVALID_HANDLE_VALUE) {
-        CancelIoEx(g_hSrvPipe, NULL);
-        CloseHandle(g_hSrvPipe);
-        g_hSrvPipe = INVALID_HANDLE_VALUE;
+    if (g_hPipe != INVALID_HANDLE_VALUE) {
+        CancelIoEx(g_hPipe, NULL);
+        CloseHandle(g_hPipe);
+        g_hPipe = INVALID_HANDLE_VALUE;
     }
     if (g_pipeThread.joinable()) {
         g_pipeThread.join();

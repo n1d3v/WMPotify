@@ -105,18 +105,6 @@ export default WindhawkComm = {
     async setPlaybackSpeed(speed) {
         if (windhawkModule?.setPlaybackSpeed) {
             windhawkModule.setPlaybackSpeed(parseFloat(speed));
-            const playerAPI = window.Spicetify?.Platform?.PlayerAPI;
-            if (playerAPI) {
-                const state = playerAPI.getState();
-                const position = (Date.now() - state.timestamp) * state.speed + state.positionAsOfTimestamp;
-
-                await playerAPI.skipToNext();
-                await playerAPI.skipToPrevious();
-                await playerAPI.seekTo(position);
-                if (state.isPaused) {
-                    await playerAPI.pause();
-                }
-            }
         }
     },
 

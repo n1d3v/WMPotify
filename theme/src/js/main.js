@@ -121,6 +121,10 @@ earlyInit();
 async function init() {
     await createTitlebar(titleStyle);
 
+    if (!localStorage.wmpotifyShowLibX) {
+        Spicetify.Platform.LocalStorageAPI.setItem("ylx-sidebar-state", 1);
+    }
+
     if (localStorage.wmpotifyTintColor) {
         const [hue, sat, tintPb] = localStorage.wmpotifyTintColor.split(',');
         setTintColor(hue, sat, tintPb);
@@ -147,6 +151,9 @@ function isReady() {
         window.Spicetify.AppTitle &&
         window.Spicetify.Player?.origin?._state &&
         window.Spicetify.Menu &&
+        window.Spicetify.Platform.History?.listen &&
+        window.Spicetify.Platform.LocalStorageAPI &&
+        window.Spicetify._platform.initialUser.username &&
         elementsRequired.every(selector => document.querySelector(selector));
 }
 

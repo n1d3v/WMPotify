@@ -113,7 +113,7 @@
             position: relative;
             top: 0;
             left: 0;
-            width: 100%;
+            font-size: 13px;
             text-align: center;
         }
 
@@ -221,6 +221,7 @@
             padding-inline: 4px;
             padding-block: unset;
             box-shadow: none;
+            cursor: text !important;
 
             &::placeholder {
                 font-style: italic;
@@ -263,8 +264,22 @@
     }
 }
 
-#main:has(#searchPage) #wmpotify-search-container {
-    display: block;
+#main:has(#searchPage) {
+    #wmpotify-search-container {
+        display: block;
+    }
+
+    #wmpotify-tabs-container button:nth-child(2) { /* Search button */
+        border-image-source: url('resources/topbar/tab_active.png');
+
+        &:hover {
+            border-image-source: url('resources/topbar/tab_active_hover.png');
+        }
+
+        &:active {
+            border-image-source: url('resources/topbar/tab_active_pressed.png');
+        }
+    }
 }
 
 .Root__main-view:has(#searchPage) {

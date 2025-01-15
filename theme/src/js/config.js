@@ -125,7 +125,11 @@ function open() {
     if (!tabs) {
         return;
     }
-    if (configWindow.style.display === 'block') {
+    if (document.body.dataset.wmpotifyLibPageOpen) {
+        // Close standalone LibX and go to home to show the config panel
+        // As standalone LibX page hides the main area
+        document.querySelector("#wmpotify-tabs-container button")?.click();
+    } else if (configWindow.style.display === 'block') {
         close();
         return;
     }
@@ -190,6 +194,10 @@ function onSpeedChange() {
 }
 
 function setSpeed(speed) {
+    if (Spicetify.Platform.ConnectAPI.state.connectionStatus === 'connected') {
+        Spicetify.showNotification('Cannot change playback speed while playing from another device');
+        return;
+    }
     speed = parseFloat(speed);
     const prevSpeed = WindhawkComm.query().playbackSpeed || 1;
     if (speed === prevSpeed) {

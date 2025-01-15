@@ -2,11 +2,11 @@
 * A Windows Media Player 11 inspired Spicetify theme for Spotify
 * Still WIP
 * Supported versions
-    * 1.2.52 (full)
+    * 1.2.52 (full, primarily tested)
+    * 1.2.53 (should work)
     * 1.2.50 (partial)
     * 1.2.49 (maybe)
     * ~~1.2.45~~ (fully broken)
-    * ~~1.2.53~~ (kinda broken)
 
 ## Installation
 * No proper installation guide yet
@@ -28,27 +28,24 @@ echo.
 
 ## TODO
 * Theme more pages
-    * Artist page
-    * Album page
+    * Artist discography page
     * Search page
     * Settings page
 * Theme more elements
     * Main view header bar
 * Full screen mode theme
 * Support more versions of Spotify
-    * 1.2.53 support
     * Older versions support, possibly down to 1.2.49?
 * Add installation script + guide
 
 ### Things to be done after a proper beta release
 * Dark mode support + dynamic theme support
-* (Maybe) make a own library custom app to replace betterLibrary and make it more WMP11-like
+* (Maybe) make a own library custom app to replace LibraryX and make it more WMP11-like
 
 ## Credits
 * [Spicetify](https://spicetify.app/)
 * [Spotify](https://www.spotify.com/)
 * wmploc.dll resources from Windows Media Player 11 by Microsoft
-* [betterLibrary](https://github.com/Sowgro/betterLibrary) by Sowgro
 * Some codes from [spicetify-visualizer](https://github.com/Konsl/spicetify-visualizer) by Konsl
 * [7.css](https://khang-nd.github.io/7.css) by Khang-ND - used for some controls like buttons, menus, etc. Actually from my own fork from ModernActiveDesktop
 * Some codes are from my previous [ModernActiveDesktop](https://github.com/Ingan121/ModernActiveDesktop) project

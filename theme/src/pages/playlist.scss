@@ -385,7 +385,13 @@
             left: 0;
             width: 100%;
             height: 28px;
-            background: var(--wmp11-window);
+            background: #EEF3FA;
+        }
+    }
+
+    :root:not([data-wmpotify-title-style="native"]) &:has(.main-entityHeader-topbarContentFadeIn) {
+        .playlist-playlist-searchBoxContainer {
+            top: 64px;
         }
     }
 }

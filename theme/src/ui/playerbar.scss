@@ -15,6 +15,7 @@
     --next-hover: url('resources/playerbar/next_hover.png');
     --next-pressed: url('resources/playerbar/next_pressed.png');
     --next-disabled: url('resources/playerbar/next_disabled.png');
+    --fast-forward-pressed: url('resources/playerbar/fastforward_pressed.png');
     --repeat: url('resources/playerbar/repeat.png');
     --repeat-active: url('resources/playerbar/repeat_active.png');
     --shuffle: url('resources/playerbar/shuffle.png');
@@ -226,6 +227,10 @@ div[data-testid='now-playing-widget'] {
             &:active {
                 background-image: var(--next-pressed);
             }
+
+            &[data-fast-forward] {
+                background-image: var(--fast-forward-pressed);
+            }
         }
     }
 }
@@ -397,13 +402,29 @@ div[data-testid='now-playing-widget'] {
 .main-nowPlayingBar-right {
     margin-top: 10px;
 
+    .main-nowPlayingBar-extraControls {
+        > * {
+            margin: 0 4px;
+        }
+
+        button {
+            width: 21px;
+            height: 21px;
+            border-radius: 0;
+            transform: none !important;
+
+            &:hover {
+                background: url('resources/playerbar/btn_21_hover.png') no-repeat center;
+            }
+
+            &:active {
+                background: url('resources/playerbar/btn_21_pressed.png') no-repeat center;
+            }
+        }
+    }
+
     button[data-testid='pip-toggle-button'] {
-        width: 21px;
-        height: 21px;
-        margin-right: 8px;
-        border-radius: 0;
         background: var(--miniplayer) no-repeat center;
-        transform: none !important;
 
         svg {
             display: none;
@@ -424,13 +445,9 @@ div[data-testid='now-playing-widget'] {
 
     button[data-testid='fullscreen-mode-button'],
     #BeautifulLyricsFullscreenButton {
-        width: 21px;
         min-width: 0;
-        height: 21px;
-        border-radius: 0;
         background: var(--fullscreen) no-repeat center;
         scale: 1 !important;
-        transform: none !important;
 
         svg {
             display: none;
@@ -503,16 +520,8 @@ div[data-testid='now-playing-widget'] {
 
 :root:not([data-wmpotify-style="xp"]) {
     .main-nowPlayingBar-extraControls {
-        > * {
-            margin: 0 4px;
-        }
-
         button[data-testid="control-button-npv"] {
-            width: 21px;
-            height: 21px;
-            border-radius: 0;
             background: url('resources/playerbar/npv.png') no-repeat center;
-            transform: none !important;
 
             svg {
                 display: none;
@@ -528,11 +537,7 @@ div[data-testid='now-playing-widget'] {
         }
 
         button[data-testid="lyrics-button"] {
-            width: 21px;
-            height: 21px;
-            border-radius: 0;
             background: url('resources/playerbar/lyrics.png') no-repeat center;
-            transform: none !important;
 
             svg {
                 display: none;
@@ -548,11 +553,7 @@ div[data-testid='now-playing-widget'] {
         }
 
         button[data-testid="control-button-queue"] {
-            width: 21px;
-            height: 21px;
-            border-radius: 0;
             background: url('resources/playerbar/queue.png') no-repeat center;
-            transform: none !important;
 
             svg {
                 display: none;
@@ -568,11 +569,7 @@ div[data-testid='now-playing-widget'] {
         }
 
         .main-contextMenu-tippyWrapper button { /* connect button */
-            width: 21px;
-            height: 21px;
-            border-radius: 0;
             background: url('resources/playerbar/connect.png') no-repeat center;
-            transform: none !important;
 
             svg {
                 display: none;
@@ -585,7 +582,6 @@ div[data-testid='now-playing-widget'] {
             &:active {
                 background-image: url('resources/playerbar/connect_pressed.png');
             }
-
         }
     }
 }
@@ -609,6 +605,7 @@ div[data-testid='now-playing-widget'] {
     --next-hover: url('resources/playerbar/xp/next_hover.png');
     --next-pressed: url('resources/playerbar/xp/next_pressed.png');
     --next-disabled: url('resources/playerbar/xp/next_disabled.png');
+    --fast-forward-pressed: url('resources/playerbar/xp/fastforward_pressed.png');
     --repeat: url('resources/playerbar/xp/repeat.png');
     --repeat-active: url('resources/playerbar/xp/repeat_active.png');
     --shuffle: url('resources/playerbar/xp/shuffle.png');
