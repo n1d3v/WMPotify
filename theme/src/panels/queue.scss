@@ -149,8 +149,13 @@
             display: none; /* Hide the album art */
         }
 
-        div[data-flip-id*="section-header-"] {
+        div[data-flip-id*="section-header-"],
+        div:has(> h2) { /* When device has a touch screen */
             display: none; /* Hide the 'Now playing' / 'Next from' title */
+        }
+
+        > div:first-child { /* Gap exists only when device has a touch screen */
+            gap: 0;
         }
 
         ul {

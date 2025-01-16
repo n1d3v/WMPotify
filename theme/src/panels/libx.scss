@@ -217,3 +217,65 @@
         }
     }
 }
+
+
+body[data-wmpotify-lib-page-open]:not(#Prio1):not(#Prio2):not(#Prio3) { /* dirty hack to increase specificity */
+    #wmpotify-library-button {
+        border-image-source: url('resources/topbar/tab_active.png');
+
+        &:hover {
+            border-image-source: url('resources/topbar/tab_active_hover.png');
+        }
+
+        &:active {
+            border-image-source: url('resources/topbar/tab_active_pressed.png');
+        }
+    }
+
+    #Desktop_LeftSidebar_Id {
+        display: flex;
+        width: 100vw;
+        margin-left: calc(var(--panel-gap) * -1);
+        margin-right: calc(var(--panel-gap) * -3);
+        padding-top: 0;
+
+        .main-yourLibraryX-header {
+            display: none;
+        }
+
+        .main-yourLibraryX-library {
+            border-radius: 0;
+        }
+
+        .LayoutResizer__resize-bar {
+            display: none;
+        }
+    }
+    
+    .Root:has(.Root__right-sidebar aside) #Desktop_LeftSidebar_Id {
+        width: calc(100vw - var(--panel-width) * 1px - 2px);
+        margin-right: calc(var(--panel-gap) * -2 + 2px);
+    }
+
+    .Root__main-view {
+        width: 0;
+    }
+
+    .Root__right-sidebar {
+        .LayoutResizer__resize-bar {
+            /* Disallow right panel resizing when standlone libx is open as it's buggy */
+            pointer-events: none;
+        }
+    }
+
+    :root[data-wmpotify-style="xp"] & {
+        #Desktop_LeftSidebar_Id {
+            width: calc(100vw - var(--panel-gap) * 2);
+            margin-left: 0;
+        }
+
+        .Root:has(.Root__right-sidebar aside) #Desktop_LeftSidebar_Id {
+            width: calc(100vw - var(--panel-width) * 1px - var(--panel-gap) * 2 - 2px);
+        }
+    }
+}
