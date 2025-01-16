@@ -1,0 +1,52 @@
+section[data-testid="artist-page"] {
+    .artist-artistDiscography-topBar {
+        position: fixed;
+        height: 28px;
+        top: 36px;
+        left: 0;
+        width: calc(100% - var(--main-area-right));
+        border-bottom: solid 1px var(--wmp11-separator-shadow);
+        box-shadow: none !important;
+
+        .artist-artistDiscography-artistName {
+            margin-left: 8px;
+            font-size: 12px;
+            font-family: var(--ui-font);
+        }
+
+        .artist-artistDiscography-button {
+            width: 28px;
+            margin-left: 0;
+
+            &::after {
+                content: '';
+                display: block;
+                position: absolute;
+                top: 0;
+                left: 1px;
+                width: 16px;
+                height: 16px;
+                background: url('resources/icon/list_discography.png') no-repeat;
+            }
+
+            &:last-child::after {
+                background-image: url('resources/icon/grid.png');
+            }
+
+            svg {
+                display: none;
+            }
+        }
+    }
+}
+
+.Root__main-view:has(section .artist-artistDiscography-topBar) {
+    header {
+        display: flex !important;
+        position: relative !important;
+        width: 100% !important;
+        border-bottom: solid 1px var(--wmp11-separator-shadow);
+        outline: solid 1px var(--wmp11-separator-light) !important;
+        z-index: -1;
+    }
+}

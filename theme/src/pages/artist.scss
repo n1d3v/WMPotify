@@ -107,6 +107,11 @@ section[data-testid="artist-page"] {
         }
     }
 
+    img.main-entityHeader-image {
+        border-radius: 0;
+        box-shadow: var(--album-shadow-big);
+    }
+
     > div > div:last-child > .contentSpacing > div:last-child {
         /* Artist about button with background image */
         button[style*="i.scdn.co"] div * {
