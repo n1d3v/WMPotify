@@ -12,8 +12,10 @@ export function initQueuePanel() {
     }
 
     const panel = document.querySelector('#Desktop_PanelContainer_Id');
+    panel.classList.add('spotify-queue-panel');
     const top = document.querySelector('#Desktop_PanelContainer_Id > div > div:first-child > div:first-child');
     const belowSeparator = document.querySelector('#Desktop_PanelContainer_Id > div > div:nth-child(2)');
+    belowSeparator.id = 'spotify-queue-panel-content';
 
     const queueToolbar = document.createElement('div');
     queueToolbar.id = 'wmpotify-queue-toolbar';

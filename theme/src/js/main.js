@@ -15,7 +15,6 @@ const elementsRequired = [
     '.main-globalNav-searchContainer > button',
     '.main-globalNav-searchContainer div form button',
     '.main-topBar-searchBar',
-    '.custom-navlinks-scrollable_container div[role="presentation"] > button',
     '.main-topBar-topbarContentRight > .main-actionButtons > button',
     '.main-topBar-topbarContentRight > button:last-child',
     '.Root__main-view',

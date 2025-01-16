@@ -280,8 +280,8 @@
             border-image-source: url('resources/topbar/tab_active_pressed.png');
         }
     }
-}
 
-.Root__main-view:has(#searchPage) {
-    margin-top: 30px;
+    .Root__main-view {
+        margin-top: 30px;
+    }
 }

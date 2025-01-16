@@ -87,7 +87,7 @@ body[data-hide-libx] {
             background: transparent !important;
         }
 
-        div div:has(.os-size-observer) div div:has([data-testid='NPV_Panel_OpenDiv']) {
+        div:has([data-testid='NPV_Panel_OpenDiv']) {
             background: transparent !important;
         }
 

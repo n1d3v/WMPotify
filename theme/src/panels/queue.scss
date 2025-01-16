@@ -3,7 +3,7 @@
 }
 
 /* <aside aria-label="Queue" class="ffFwfKcPDbmAPLXzxzKq" id="Desktop_PanelContainer_Id" tabindex="-1"> */
-#Desktop_PanelContainer_Id > div:has(#queue-panel) {
+.spotify-queue-panel > div {
     > div:first-child { /* panel header (tabs) */
         box-shadow: none; /* Hide the shadow when the queue panel is scrolled down */
 
@@ -48,7 +48,7 @@
     }
 
     /* <div data-overlayscrollbars-initialize="true" class="cZCuJDjrGA2QMXja_Sua" data-overlayscrollbars="host"> */
-    > div:nth-child(2) { /* panel content */
+    #spotify-queue-panel-content {
         border-top: solid 1px var(--wmp11-separator-shadow);
         flex-direction: column !important;
 
