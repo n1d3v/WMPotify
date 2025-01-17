@@ -14,6 +14,8 @@ export default WindhawkComm = {
     },
 
     // (int, int, int, int)
+    // To disable: (0, 0, 0, 0)
+    // To extend to full window: (-1, -1, -1, -1)
     extendFrame(left, top, right, bottom) {
         if (windhawkModule?.extendFrame) {
             [left, top, right, bottom] = [left, top, right, bottom].map(v => Math.round(v * window.devicePixelRatio));
@@ -100,9 +102,9 @@ export default WindhawkComm = {
         }
     },
 
-    // (double - 1.0 is normal speed)
+    // (double - 1.0 is normal speed, must be between 0.5 and 5.0)
     // Win64 only
-    async setPlaybackSpeed(speed) {
+    setPlaybackSpeed(speed) {
         if (windhawkModule?.setPlaybackSpeed) {
             windhawkModule.setPlaybackSpeed(parseFloat(speed));
         }

@@ -4,9 +4,12 @@ import { createTitlebar } from './titlebar';
 import { setupTopbar } from './topbar';
 import { setupPlayerbar, updatePlayPauseButton } from './playerbar';
 import Config from './config';
+import SidebarManager from './SidebarManager';
 import { initQueuePanel } from './queue';
 import WindhawkComm from './WindhawkComm';
 globalThis.WindhawkComm = WindhawkComm;
+
+'use strict';
 
 const elementsRequired = [
     '.Root__globalNav',
@@ -74,8 +77,7 @@ function earlyInit() {
     document.documentElement.dataset.wmpotifyTitleStyle = titleStyle;
 
     if (whStatus && !localStorage.wmpotifyStyle && titleStyle === 'native' && whStatus.isThemingEnabled) {
-        if (whStatus.options.transparentrendering &&
-            whStatus.isDwmEnabled) {
+        if (whStatus.options.transparentrendering && whStatus.isDwmEnabled) {
             style = 'aero';
         } else if (!whStatus.isDwmEnabled) {
             style = 'basic';
@@ -139,20 +141,20 @@ async function init() {
     setupPlayerbar();
     new MutationObserver(updatePlayPauseButton).observe(document.querySelector('.main-view-container__scroll-node-child main'), { childList: true });
 
+    SidebarManager.init();
+
     initQueuePanel();
     new MutationObserver(initQueuePanel).observe(document.querySelector('.Root__right-sidebar div[class]'), { childList: true });
 }
 
 function isReady() {
-    return window.Spicetify &&
-        window.Spicetify.CosmosAsync &&
+    return window.Spicetify?.CosmosAsync &&
         window.Spicetify.Platform?.PlayerAPI &&
         window.Spicetify.AppTitle &&
         window.Spicetify.Player?.origin?._state &&
         window.Spicetify.Menu &&
         window.Spicetify.Platform.History?.listen &&
         window.Spicetify.Platform.LocalStorageAPI &&
-        window.Spicetify._platform.initialUser.username &&
         elementsRequired.every(selector => document.querySelector(selector));
 }
 

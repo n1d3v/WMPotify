@@ -188,6 +188,10 @@
                 * {
                     color: var(--hilight-text) !important;
                 }
+
+                p[data-encore-id="listRowSubtitle"]::before {
+                    color: var(--hilight-text) !important;
+                }
             }
 
             div[data-encore-id="listRow"]::after {

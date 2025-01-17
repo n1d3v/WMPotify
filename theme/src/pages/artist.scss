@@ -42,6 +42,11 @@ section[data-testid="artist-page"] {
         }
     }
 
+    .main-entityHeader-backgroundColor,
+    .main-actionBarBackground-background {
+        display: none;
+    }
+
     div[style*="background-base:"] {
         background: var(--wmp11-window);
     }

@@ -1,5 +1,8 @@
 import { MadMenu, createMadMenu } from './MadMenu';
+import DirectUserStorage from './DirectUserStorage';
 import WindhawkComm from './WindhawkComm';
+
+'use strict';
 
 let tabsContainer;
 let tabs = [];
@@ -100,28 +103,6 @@ export function setupTopbar() {
     if (rightSidebarWidth) {
         document.documentElement.style.setProperty("--panel-width", rightSidebarWidth);
     }
-    const widthLocker = new MutationObserver(() => {
-        if (Spicetify.Platform.History.location.pathname !== '/wmpotify-standalone-libx') {
-            // 1.2.53 changed --panel-width to --right-sidebar-width
-            const rightSidebarWidth = getComputedStyle(document.documentElement).getPropertyValue("--right-sidebar-width");
-            if (rightSidebarWidth) {
-                widthLocker.disconnect();
-                document.documentElement.style.setProperty("--panel-width", rightSidebarWidth);
-                widthLocker.observe(document.documentElement, { attributes: true, attributeFilter: ['style'] });
-            }
-            return;
-        }
-        // Prevent Spotify from wrongly setting the panel width CSS variable
-        // Spotify thinks full LibX is open as a left sidebar and there's not much space left
-        // Thus reducing the right sidebar width
-        // So just get the real width and set it back
-        widthLocker.disconnect();
-        const rightSidebar = document.querySelector('.Root__right-sidebar aside');
-        document.documentElement.style.setProperty("--panel-width", rightSidebar ? rightSidebar.offsetWidth : 8);
-        document.documentElement.style.setProperty("--right-sidebar-width", rightSidebar ? rightSidebar.offsetWidth : 8);
-        widthLocker.observe(document.documentElement, { attributes: true, attributeFilter: ['style'] });
-    });
-    widthLocker.observe(document.documentElement, { attributes: true, attributeFilter: ['style'] });
 }
 
 function addTab(btn) {
@@ -151,24 +132,27 @@ function handleTabOverflow() {
 }
 
 function handleLocChange(location) {
-    const username = Spicetify._platform.initialUser.username;
+    const username = Spicetify._platform?.initialUser?.username;
     if (location.pathname === '/wmpotify-standalone-libx') {
         document.body.dataset.wmpotifyLibPageOpen = true;
 
-        const origSidebarState = parseInt(localStorage.getItem(username + ":ylx-sidebar-state"));
-        const origSidebarWidth = parseInt(localStorage.getItem(username + ":ylx-expanded-state-nav-bar-width"));
+        // Use Spicetify.LocalStorageAPI for immediate effect, then revert the underlying localStorage values to prevent persistence
+        const origSidebarState = DirectUserStorage.getItem("ylx-sidebar-state");
+        const origSidebarWidth = DirectUserStorage.getItem("ylx-expanded-state-nav-bar-width");
         Spicetify.Platform.LocalStorageAPI.setItem("ylx-sidebar-state", 2);
         Spicetify.Platform.LocalStorageAPI.setItem("ylx-expanded-state-nav-bar-width", 0);
-        localStorage.setItem(username + ":ylx-sidebar-state", origSidebarState); // make the previous setItem temporary
-        localStorage.setItem(username + ":ylx-expanded-state-nav-bar-width", origSidebarWidth);
+        // localStorage.setItem(username + ":ylx-sidebar-state", origSidebarState); // make the previous setItem temporary
+        // localStorage.setItem(username + ":ylx-expanded-state-nav-bar-width", origSidebarWidth);
+        DirectUserStorage.setItem("ylx-sidebar-state", origSidebarState); // make the previous setItem temporary
+        DirectUserStorage.setItem("ylx-expanded-state-nav-bar-width", origSidebarWidth);
     } else if (document.body.dataset.wmpotifyLibPageOpen) {
         delete document.body.dataset.wmpotifyLibPageOpen;
 
         if (localStorage.wmpotifyShowLibX) {
-            const origSidebarState = localStorage.getItem(username + ":ylx-sidebar-state");
-            localStorage.removeItem(username + ":ylx-sidebar-state"); // Spicetify LocalStorageAPI does nothing if setting to same value
-            const origSidebarWidth = localStorage.getItem(username + ":ylx-expanded-state-nav-bar-width");
-            localStorage.removeItem(username + ":ylx-expanded-state-nav-bar-width");
+            const origSidebarState = DirectUserStorage.getItem("ylx-sidebar-state");
+            DirectUserStorage.removeItem("ylx-sidebar-state"); // Spicetify LocalStorageAPI does nothing if setting to same value, so remove it first
+            const origSidebarWidth = DirectUserStorage.getItem("ylx-expanded-state-nav-bar-width");
+            DirectUserStorage.removeItem("ylx-expanded-state-nav-bar-width");
             Spicetify.Platform.LocalStorageAPI.setItem("ylx-sidebar-state", parseInt(origSidebarState));
             Spicetify.Platform.LocalStorageAPI.setItem("ylx-expanded-state-nav-bar-width", parseInt(origSidebarWidth));
         } else {

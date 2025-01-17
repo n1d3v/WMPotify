@@ -836,6 +836,7 @@ uint64_t* __fastcall CreateTrackPlayer_hook(
     return CreateTrackPlayer_original(trackPlayer, a2, a3, g_playbackSpeed, a5, a6, a7, a8, a9, a10, a11, a12);
 }
 
+// Find this function with xref of string "    Creating track player for track (playback_id %s)"
 const std::string_view CreateTrackPlayer_instructions =
     "\x01"sv         // just a single byte before the instructions below, to distinguish from another match
     "\x49\x8B\x0F"sv // mov rcx, [r15]
@@ -847,8 +848,10 @@ const std::string_view CreateTrackPlayer_prologue = "\x48\x8B\xC4USVWATAUAVAWH"s
 typedef char __fastcall (*SetPlaybackSpeed_t)(int64_t trackPlayer, double speed);
 SetPlaybackSpeed_t SetPlaybackSpeed;
 
+// Find this function with xref of string "Setting playback speed to %d percent (playback_id %s) from %d percent"
+// This function's various numbers are different in every version, so we need to perform a regex search
 const std::string SetPlaybackSpeed_instructions =
-    R"(\x48\x8B\xC4)"                // mov rax, rsp
+    R"(\x48\x8B\xC4)"                // mov rax, rsp (beginning of function)
     R"(\x48\x89\x58\x18)"            // mov [rax+18h], rbx
     R"(\x48\x89\x70\x20)"            // mov [rax+20h], rsi
     R"(\x55\x57\x41\x56)"            // push rbp, push rdi, push r14
@@ -1954,8 +1957,8 @@ BOOL Wh_ModInit() {
     // Check if this process is auxilliary process by checking if the arguments contain --type=
     LPWSTR args = GetCommandLineW();
     if (wcsstr(args, L"--type=") != NULL) {
-        if (isSpotify && isInitialThread && major >= 108 &&
-            isTestedVersion &&
+        if (isSpotify && isInitialThread &&
+            major >= 108 && isTestedVersion &&
             wcsstr(args, L"--type=renderer") != NULL &&
             wcsstr(args, L"--extension-process") == NULL
         ) {
