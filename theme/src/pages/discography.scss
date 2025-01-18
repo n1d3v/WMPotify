@@ -137,20 +137,8 @@ section[data-testid="artist-page"] {
             display: none; /* Only show first album header */
         }
 
-        /*.main-rootlist-wrapper {
-            height: unset !important;
-            contain: layout;
-        }*/
-
-        [role="row"] {
-            height: var(--queue-item-height);
-        }
-
         .main-trackList-trackListRow {
-            height: var(--queue-item-height);
-
             > div {
-                height: var(--queue-item-height);
                 padding-left: 5px;
             }
 
@@ -169,16 +157,7 @@ section[data-testid="artist-page"] {
                 font-size: 12px !important;
             }
 
-            div.encore-text {
-                margin-top: -4px;
-            }
-
-            .main-trackList-rowSectionVariable {
-                margin-top: -2px;
-            }
-
             .main-trackList-rowMarker {
-                margin-top: 4px;
                 span {
                     display: inline !important;
                 }
@@ -248,6 +227,78 @@ section[data-testid="artist-page"] {
                     }
                 }
             }
+        }
+    }
+
+    .artist-artistDiscography-cardGrid {
+        margin-top: 0;
+
+        > div {
+            border: solid 1px transparent;
+            border-radius: 3px;
+
+            &::after {
+                display: none;
+            }
+
+            &:hover {
+                background: var(--item-hover-background);
+                border-color: var(--item-hover-border);
+            }
+        }
+    }
+}
+
+:root[data-wmpotify-style="xp"] section[data-testid="artist-page"] {
+    .artist-artistDiscography-topBar {
+        margin-left: var(--panel-gap);
+        width: calc(100% - var(--main-area-right) - var(--panel-gap));
+    }
+
+    .artist-artistDiscography-firstAlbum + .artist-artistDiscography-tracklist {
+        .main-trackList-trackListHeader {
+            left: var(--panel-gap);
+            width: calc(100% - var(--main-area-right) - var(--panel-gap) - var(--scrollbar-size));
+        }
+    }
+}
+
+:root:not([data-wmpotify-title-style="native"]) section[data-testid="artist-page"] {
+    .artist-artistDiscography-topBar {
+        top: 61px;
+    }
+
+    .artist-artistDiscography-firstAlbum + .artist-artistDiscography-tracklist {
+        .main-trackList-trackListHeader {
+            top: 90px !important;
+        }
+    }
+}
+
+:root body:not([data-hide-libx]) section[data-testid="artist-page"] {
+    .artist-artistDiscography-topBar {
+        margin-left: calc(var(--panel-gap) * 2 + var(--left-sidebar-width) * 1px);
+        width: calc(100% - var(--main-area-right) - var(--panel-gap) * 2 - var(--left-sidebar-width) * 1px);
+    }
+
+    .artist-artistDiscography-firstAlbum + .artist-artistDiscography-tracklist {
+        .main-trackList-trackListHeader {
+            left: calc(var(--panel-gap) * 2 + var(--left-sidebar-width) * 1px);
+            width: calc(100% - var(--main-area-right) - var(--panel-gap) * 2 - var(--scrollbar-size) - var(--left-sidebar-width) * 1px);
+        }
+    }
+}
+
+:root[data-wmpotify-style="xp"] body:not([data-hide-libx]) section[data-testid="artist-page"] {
+    .artist-artistDiscography-topBar {
+        margin-left: calc(var(--panel-gap) * 3 + var(--left-sidebar-width) * 1px);
+        width: calc(100% - var(--main-area-right) - var(--panel-gap) * 3 - var(--left-sidebar-width) * 1px);
+    }
+
+    .artist-artistDiscography-firstAlbum + .artist-artistDiscography-tracklist {
+        .main-trackList-trackListHeader {
+            left: calc(var(--panel-gap) * 3 + var(--left-sidebar-width) * 1px);
+            width: calc(100% - var(--main-area-right) - var(--panel-gap) * 3 - var(--scrollbar-size) - var(--left-sidebar-width) * 1px);
         }
     }
 }

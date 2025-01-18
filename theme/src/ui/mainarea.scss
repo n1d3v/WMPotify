@@ -109,7 +109,7 @@ body[data-hide-libx] {
 }
 
 .Root {
-    --main-area-right: 0;
+    --main-area-right: 0px;
     &:has(.Root__right-sidebar aside) {
         --main-area-right: calc(var(--panel-width) * 1px + 3px);
     }

@@ -19,7 +19,10 @@ const SidebarManager = {
         SidebarManager.widthManager.disconnect();
         const rightSidebar = document.querySelector('.Root__right-sidebar aside');
         document.documentElement.style.setProperty("--panel-width", rightSidebar ? rightSidebar.offsetWidth : 8);
-        document.documentElement.style.setProperty("--right-sidebar-width", rightSidebar ? rightSidebar.offsetWidth : 8);
+        const rightSidebarWidth = getComputedStyle(document.documentElement).getPropertyValue("--right-sidebar-width");
+        if (rightSidebarWidth) {
+            document.documentElement.style.setProperty("--right-sidebar-width", rightSidebar ? rightSidebar.offsetWidth : 8);
+        }
         SidebarManager.widthManager.observe(document.documentElement, { attributes: true, attributeFilter: ['style'] });
     }),
 

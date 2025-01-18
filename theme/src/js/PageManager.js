@@ -1,4 +1,5 @@
 import DirectUserStorage from "./DirectUserStorage";
+import { initCustomLibX } from "./libx";
 import { updatePlayPauseButton } from "./playerbar";
 import { initDiscographyPage } from "./discography";
 
@@ -38,6 +39,8 @@ const PageManager = {
             Spicetify.Platform.LocalStorageAPI.setItem("ylx-expanded-state-nav-bar-width", 0);
             DirectUserStorage.setItem("ylx-sidebar-state", origSidebarState); // make the previous setItem temporary
             DirectUserStorage.setItem("ylx-expanded-state-nav-bar-width", origSidebarWidth);
+
+            initCustomLibX();
         } else if (document.body.dataset.wmpotifyLibPageOpen) {
             delete document.body.dataset.wmpotifyLibPageOpen;
 

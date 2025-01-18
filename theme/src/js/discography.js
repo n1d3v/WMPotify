@@ -3,7 +3,6 @@
 import PageManager from "./PageManager";
 
 export async function initDiscographyPage(wait) {
-    //console.log(document.querySelector('.main-view-container__scroll-node-child main').innerHTML);
     const section = document.querySelector('section[data-testid="artist-page"]');
     if (!section) {
         if (wait) {
@@ -16,7 +15,6 @@ export async function initDiscographyPage(wait) {
     await waitForFullRender(section);
 
     if (section.querySelector('.artist-artistDiscography-cardGrid')) {
-        // Not yet!
         return;
     }
 
@@ -25,7 +23,7 @@ export async function initDiscographyPage(wait) {
 
     const headers = section.querySelectorAll('.artist-artistDiscography-headerContainer');
     for (const header of headers) {
-        if (document.querySelector('.artist-artistDiscography-headerTitle + div a')) {
+        if (header.querySelector('.artist-artistDiscography-headerTitle + div a')) {
             continue;
         }
         const headerImage = header.querySelector('.main-entityHeader-image');
@@ -64,18 +62,6 @@ export async function initDiscographyPage(wait) {
         trackListHeader.className = 'wmpotify-discography-trackList-header';
         trackListHeader.textContent = albumTitle;
         trackList.insertAdjacentElement('afterbegin', trackListHeader);
-        // const rootlist = trackList.querySelector('.main-rootlist-wrapper');
-        // //rootlist.style.height = parseInt(rootlist.style.height) / 2 + 48 + 'px';
-        // //rootlist.style.setProperty('--row-height', '16px');
-        // //rootlist.style.setProperty('--child-cnt', rootlist.querySelectorAll('.main-trackList-trackListRow').length);
-        // //console.log(rootlist.innerHTML);
-        // const reactPropsKey = Object.keys(rootlist).find(key => key.startsWith("__reactProps$"));
-        // reactPropsKey && (rootlist[reactPropsKey].style['--row-height'] = '16px');
-        // reactPropsKey && (rootlist[reactPropsKey].style['height'] = parseInt(rootlist[reactPropsKey].style['height']) / 2 + 'px');
-        // rootlist.style.height = parseInt(rootlist.style.height) / 2 + 'px';
-        // rootlist.style.setProperty('--row-height', '16px');
-        // //rootlist.parentElement.style.height = parseInt(rootlist.style.height) / 2 + 48 + 'px';
-        // initRootlist(rootlist);
     }
 
     const observer = new MutationObserver(() => {
@@ -84,18 +70,6 @@ export async function initDiscographyPage(wait) {
     });
     observer.observe(section.querySelector('[data-testid="infinite-scroll-list"]'), { childList: true });
 }
-
-// async function initRootlist(rootlist) {
-//     await waitForChildren(rootlist, '.main-trackList-trackListRow');
-//     // rootlist.style.height = parseInt(rootlist.style.height) / 2 + 48 + 'px';
-//     // rootlist.style.setProperty('--row-height', '16px');
-//     // const reactPropsKey = Object.keys(rootlist).find(key => key.startsWith("__reactProps$"));
-//     // reactPropsKey && (rootlist[reactPropsKey].style['--row-height'] = '16px');
-//     // reactPropsKey && (rootlist[reactPropsKey].style['height'] = parseInt(rootlist[reactPropsKey].style['height']) / 2 + 48 + 'px');
-//     // rootlist.parentElement.style.height = parseInt(rootlist.style.height) / 2 + 48 + 'px';
-//     //console.log(rootlist.innerHTML);
-//     //rootlist.style.marginBottom = (parseInt(rootlist.style.height) / 2) * -1 + 'px';
-// }
 
 function waitForFullRender(section) {
     if (!section.querySelector('.artist-artistDiscography-tracklist')) {

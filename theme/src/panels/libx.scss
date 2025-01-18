@@ -169,6 +169,10 @@
         }
     }
 
+    .main-rootlist-wrapper {
+        margin-bottom: 50px;
+    }
+
     &:has(.main-rootlist-wrapper[style*="row-height: 32"]) {
         .main-yourLibraryX-filterArea {
             [role="combobox"] {
@@ -206,6 +210,24 @@
 
         span:last-child {
             justify-self: start;
+        }
+    }
+
+    /* Custom sidebar */
+    #wmpotify-libx-sidebar {
+        width: 100px;
+        border-right: solid 1px var(--wmp11-separator-light);
+        outline: solid 1px var(--wmp11-separator-shadow);
+
+        .wmpotify-libx-sidebar-item {
+            appearance: none;
+            border: solid 1px transparent;
+            background: none;
+
+            &:hover {
+                background: var(--item-hover-background);
+                border-color: var(--item-hover-border);
+            }
         }
     }
 }
