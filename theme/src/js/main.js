@@ -1,15 +1,16 @@
+'use strict';
+
 import ControlManager from './ControlManager';
 import { setTintColor } from './tinting';
 import { createTitlebar } from './titlebar';
 import { setupTopbar } from './topbar';
-import { setupPlayerbar, updatePlayPauseButton } from './playerbar';
+import { setupPlayerbar } from './playerbar';
 import Config from './config';
 import SidebarManager from './SidebarManager';
 import { initQueuePanel } from './queue';
 import WindhawkComm from './WindhawkComm';
+import PageManager from './PageManager';
 globalThis.WindhawkComm = WindhawkComm;
-
-'use strict';
 
 const elementsRequired = [
     '.Root__globalNav',
@@ -132,16 +133,14 @@ async function init() {
     }
 
     ControlManager.init();
-
-    setupTopbar();
+    PageManager.init();
+    SidebarManager.init();
 
     Config.init();
     new Spicetify.Menu.Item('WMPotify Properties', false, Config.open).register();
 
+    setupTopbar();
     setupPlayerbar();
-    new MutationObserver(updatePlayPauseButton).observe(document.querySelector('.main-view-container__scroll-node-child main'), { childList: true });
-
-    SidebarManager.init();
 
     initQueuePanel();
     new MutationObserver(initQueuePanel).observe(document.querySelector('.Root__right-sidebar div[class]'), { childList: true });

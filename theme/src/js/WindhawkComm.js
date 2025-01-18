@@ -1,7 +1,9 @@
+'use strict';
+
 let windhawkModule = null;
 let lastDpi = 1;
 
-export default WindhawkComm = {
+const WindhawkComm = {
     init() {
         return testWindhawk();
     },
@@ -46,7 +48,8 @@ export default WindhawkComm = {
     },
 
     // (bool, optional int 0-255, optional string)
-    // color: RRGGBB hex
+    // color: RRGGBB hex, makes this color transparent and click-through
+    // Hardware acceleration must be disabled for color to work
     setLayered(layered, alpha, color) {
         if (windhawkModule?.setLayered) {
             windhawkModule.setLayered(layered, alpha, color);
@@ -102,7 +105,7 @@ export default WindhawkComm = {
         }
     },
 
-    // (double - 1.0 is normal speed, must be between 0.5 and 5.0)
+    // (double - 1.0 is normal speed, must be > 0 and <= 5.0)
     // Win64 only
     setPlaybackSpeed(speed) {
         if (windhawkModule?.setPlaybackSpeed) {
@@ -134,8 +137,9 @@ function testWindhawk() {
         return { version, initialOptions };
     } catch (e) {
         // query fails if the main browser process has unloaded the mod and thus closed the pipe
-        // Sandboxed renderer processes won't respond to the Windhawk's uninit request so it'll keep loaded and will continue hooking _getSpotifyModule
         windhawkModule = null;
         console.log("Windhawk mod not available");
     }
 }
+
+export default WindhawkComm;

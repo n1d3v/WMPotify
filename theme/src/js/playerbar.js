@@ -1,3 +1,5 @@
+'use strict';
+
 import { formatTime } from './functions';
 import WindhawkComm from './WindhawkComm';
 
@@ -127,7 +129,7 @@ function setupTrackInfoWidget() {
 }
 
 export function updatePlayPauseButton() {
-    playPauseButton.classList.toggle('playing', Spicetify.Player.isPlaying());
+    playPauseButton?.classList.toggle('playing', Spicetify.Player.isPlaying());
     const currentPlaylistPage = document.querySelector(`.playlist-playlist-playlist[data-test-uri="${Spicetify.Player.data?.context?.uri}"]`);
     if (currentPlaylistPage) {
         currentPlaylistPage.classList.toggle('playing', Spicetify.Player.isPlaying());

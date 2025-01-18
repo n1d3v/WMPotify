@@ -1,8 +1,8 @@
+'use strict';
+
 import { MadMenu, createMadMenu } from './MadMenu';
 import DirectUserStorage from './DirectUserStorage';
 import WindhawkComm from './WindhawkComm';
-
-'use strict';
 
 let tabsContainer;
 let tabs = [];
@@ -36,8 +36,6 @@ export function setupTopbar() {
     libraryButton.addEventListener('click', () => {
         Spicetify.Platform.History.push({ pathname: '/wmpotify-standalone-libx', });
     });
-    Spicetify.Platform.History.listen(handleLocChange);
-    handleLocChange(Spicetify.Platform.History.location);
     addTab(libraryButton);
     tabs = [homeButton, searchButton, libraryButton];
     const customAppButtons = document.querySelectorAll('.custom-navlinks-scrollable_container div[role="presentation"] > button');
@@ -129,34 +127,4 @@ function handleTabOverflow() {
     }
 
     overflowButton.style.display = hiddenTabs > 0 ? 'block' : '';
-}
-
-function handleLocChange(location) {
-    const username = Spicetify._platform?.initialUser?.username;
-    if (location.pathname === '/wmpotify-standalone-libx') {
-        document.body.dataset.wmpotifyLibPageOpen = true;
-
-        // Use Spicetify.LocalStorageAPI for immediate effect, then revert the underlying localStorage values to prevent persistence
-        const origSidebarState = DirectUserStorage.getItem("ylx-sidebar-state");
-        const origSidebarWidth = DirectUserStorage.getItem("ylx-expanded-state-nav-bar-width");
-        Spicetify.Platform.LocalStorageAPI.setItem("ylx-sidebar-state", 2);
-        Spicetify.Platform.LocalStorageAPI.setItem("ylx-expanded-state-nav-bar-width", 0);
-        // localStorage.setItem(username + ":ylx-sidebar-state", origSidebarState); // make the previous setItem temporary
-        // localStorage.setItem(username + ":ylx-expanded-state-nav-bar-width", origSidebarWidth);
-        DirectUserStorage.setItem("ylx-sidebar-state", origSidebarState); // make the previous setItem temporary
-        DirectUserStorage.setItem("ylx-expanded-state-nav-bar-width", origSidebarWidth);
-    } else if (document.body.dataset.wmpotifyLibPageOpen) {
-        delete document.body.dataset.wmpotifyLibPageOpen;
-
-        if (localStorage.wmpotifyShowLibX) {
-            const origSidebarState = DirectUserStorage.getItem("ylx-sidebar-state");
-            DirectUserStorage.removeItem("ylx-sidebar-state"); // Spicetify LocalStorageAPI does nothing if setting to same value, so remove it first
-            const origSidebarWidth = DirectUserStorage.getItem("ylx-expanded-state-nav-bar-width");
-            DirectUserStorage.removeItem("ylx-expanded-state-nav-bar-width");
-            Spicetify.Platform.LocalStorageAPI.setItem("ylx-sidebar-state", parseInt(origSidebarState));
-            Spicetify.Platform.LocalStorageAPI.setItem("ylx-expanded-state-nav-bar-width", parseInt(origSidebarWidth));
-        } else {
-            Spicetify.Platform.LocalStorageAPI.setItem("ylx-sidebar-state", 1); // collapsed
-        }
-    }
 }

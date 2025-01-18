@@ -188,6 +188,10 @@
   }
 }
 
+[data-tippy-root][data-wmpotify-force-transform] {
+  transform: var(--tippy-force-transform) !important;
+}
+
 /* For MadMenu */
 @keyframes fade {
   0% {

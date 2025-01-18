@@ -47,31 +47,110 @@ section[data-testid="artist-page"] {
         padding: 0;
         clear: both;
         float: left;
-        width: 40%;
+        width: 240px;
+        position: relative;
+        z-index: 1;
 
         .artist-artistDiscography-headerImage {
             width: 96px;
             height: 96px;
+            margin-left: 4px;
         }
 
-        * {
-            color: black;
-        }
+        .artist-artistDiscography-headerMetadata {
+            width: 136px;
+            margin-inline-start: 10px;
 
-        .artist-artistDiscography-headerButtons {
-            display: none;
+            * {
+                color: black;
+                font-size: 12px;
+            }
+    
+            a {
+                &:hover {
+                    color: var(--hot-tracking-color);
+                }
+            }
+
+            .artist-artistDiscography-headerTitle {
+                display: block;
+                font-size: 12px;
+                font-weight: normal;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            div[style*="text-subdued"] {
+                flex-direction: column;
+                align-items: flex-start;
+                margin-top: 0;
+
+                span[data-separator="true"] {
+                    display: none;
+                }
+            }
+
+            .artist-artistDiscography-headerButtons {
+                display: none;
+            }
         }
     }
 
     .artist-artistDiscography-tracklist {
-        min-height: 162px;
+        position: relative;
+        min-height: 100px;
+        margin-top: 21px;
+
+        .wmpotify-discography-trackList-header {
+            position: absolute;
+            display: flex;
+            top: -21px;
+            left: 0;
+            width: 100%;
+            height: 20px;
+            font-size: 12px;
+            color: #003399;
+            white-space: nowrap;
+            border: solid 1px transparent;
+            border-radius: 3px;
+            padding-left: 11px;
+
+            &:hover {
+                background: var(--item-hover-background);
+                border-color: var(--item-hover-border);
+            }
+
+            &::after {
+                content: '';
+                display: block;
+                width: 100%;
+                height: 1px;
+                background: #a6b9dd;
+                margin-top: 8px;
+                margin-left: 4px;
+                margin-right: 9px;
+            }
+        }
 
         .main-trackList-trackListHeader {
             display: none; /* Only show first album header */
         }
 
+        /*.main-rootlist-wrapper {
+            height: unset !important;
+            contain: layout;
+        }*/
+
+        [role="row"] {
+            height: var(--queue-item-height);
+        }
+
         .main-trackList-trackListRow {
+            height: var(--queue-item-height);
+
             > div {
+                height: var(--queue-item-height);
                 padding-left: 5px;
             }
 
@@ -84,12 +163,40 @@ section[data-testid="artist-page"] {
                 background: var(--item-hover-background);
                 border-color: var(--item-hover-border);
             }
+
+            * {
+                font-family: var(--ui-font) !important;
+                font-size: 12px !important;
+            }
+
+            div.encore-text {
+                margin-top: -4px;
+            }
+
+            .main-trackList-rowSectionVariable {
+                margin-top: -2px;
+            }
+
+            .main-trackList-rowMarker {
+                margin-top: 4px;
+                span {
+                    display: inline !important;
+                }
+                button {
+                    display: none;
+                }
+            }
+        }
+
+        .main-rootlist-bottomSentinel {
+            display: none;
         }
     }
 
     .artist-artistDiscography-firstAlbum {
         & + .artist-artistDiscography-tracklist {
-            margin-top: 25px;
+            margin-top: 46px;
+            margin-bottom: 44px;
 
             .main-trackList-trackListHeader {
                 display: block;
@@ -99,11 +206,14 @@ section[data-testid="artist-page"] {
                 height: 23.3px;
                 box-shadow: var(--wmp11-separator-light) 0 -1px 0 0, var(--wmp11-separator-shadow) 0 -2px 0 0; 
                 position: fixed;
-                top: 64px !important;
+                top: 65px !important;
                 left: 0;
-                width: calc(100% - var(--main-area-right) - var(--scrollbar-size) - var(--panel-gap) * 3);
+                margin: 0;
+                padding: 0;
+                width: calc(100% - var(--main-area-right) - var(--scrollbar-size));
 
                 .main-trackList-trackListHeaderRow {
+                    margin-left: 240px;
                     height: 25px;
                     grid-gap: 0;
 

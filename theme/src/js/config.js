@@ -1,3 +1,5 @@
+'use strict';
+
 import { setTintColor } from "./tinting";
 import WindhawkComm from "./WindhawkComm";
 
@@ -230,7 +232,7 @@ function apply() {
     location.reload();
 }
 
-export default Config = {
+const Config = {
     init,
     open,
     close,
@@ -240,3 +242,5 @@ export default Config = {
     apply,
     isOpen: () => configWindow.style.display === 'block'
 };
+
+export default Config;

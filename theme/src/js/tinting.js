@@ -1,3 +1,5 @@
+'use strict';
+
 function getTintedBackgroundColor(hue, sat) {
     this.canvas = this.canvas || document.createElement('canvas');
     this.canvas.width = 1;

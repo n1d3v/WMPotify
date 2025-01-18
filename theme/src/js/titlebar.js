@@ -1,3 +1,5 @@
+'use strict';
+
 import ControlManager from "./ControlManager";
 import WindhawkComm from "./WindhawkComm";
 

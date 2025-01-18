@@ -2,7 +2,7 @@
 
 // Spicetify LocalStorageAPI but without immediate effect
 
-export default DirectUserStorage = {
+const DirectUserStorage = {
     getItem(key) {
         const username = Spicetify._platform?.initialUser?.username;
         const res = localStorage.getItem(username + ":" + key);
@@ -21,3 +21,5 @@ export default DirectUserStorage = {
         localStorage.removeItem(username + ":" + key);
     }
 }
+
+export default DirectUserStorage;

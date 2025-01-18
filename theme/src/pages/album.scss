@@ -43,6 +43,10 @@ section[data-testid="album-page"] {
                 }
             }
 
+            .main-trackList-column {
+                justify-content: flex-start;
+            }
+
             .main-trackList-rowSectionIndex {
                 min-width: 30px;
             }

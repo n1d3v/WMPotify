@@ -1709,9 +1709,10 @@ int CEF_CALLBACK WindhawkCommV8Handler(cef_v8handler_t* self, const cef_string_t
     } else if (nameStr == u"setPlaybackSpeed") {
         if (argumentsCount == 1 && arguments[0]->is_double(arguments[0])) {
             double speed = arguments[0]->get_double_value(arguments[0]);
-            if (speed < 0.5 || speed > 5.0) {
+            if (speed <= 0 || speed > 5.0) {
                 // Prevent potential ban risk by limiting the playback speed
-                *exception = *GenerateCefString(u"Playback speed must be between 0.5 and 2.0");
+                // Note: setting to zero or negative values will be ignored by SetPlaybackSpeed and causes crashes in CreateTrackPlayer
+                *exception = *GenerateCefString(u"Playback speed must be faster than 0 and less than or equal to 5.0");
                 return TRUE;
             }
             ipcRes = SendNamedPipeMessage((L"/WH:SetPlaybackSpeed:" + std::to_wstring(speed)).c_str());
