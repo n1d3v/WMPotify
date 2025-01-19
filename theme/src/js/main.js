@@ -89,6 +89,7 @@ function earlyInit() {
     if (localStorage.wmpotifyStyle && ['xp', 'aero', 'basic'].includes(localStorage.wmpotifyStyle)) {
         style = localStorage.wmpotifyStyle;
     }
+    WindhawkComm.setMinSize(358, 60); // mini mode
     WindhawkComm.setBackdrop('mica'); // win11
     switch (style) {
         case 'xp':
@@ -154,6 +155,7 @@ function isReady() {
         window.Spicetify.Menu &&
         window.Spicetify.Platform.History?.listen &&
         window.Spicetify.Platform.LocalStorageAPI &&
+        window.Spicetify.Platform.Translations &&
         elementsRequired.every(selector => document.querySelector(selector));
 }
 

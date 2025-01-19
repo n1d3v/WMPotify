@@ -1,5 +1,5 @@
 import DirectUserStorage from "./DirectUserStorage";
-import { initCustomLibX } from "./libx";
+import CustomLibX from "./libx";
 import { updatePlayPauseButton } from "./playerbar";
 import { initDiscographyPage } from "./discography";
 
@@ -40,9 +40,11 @@ const PageManager = {
             DirectUserStorage.setItem("ylx-sidebar-state", origSidebarState); // make the previous setItem temporary
             DirectUserStorage.setItem("ylx-expanded-state-nav-bar-width", origSidebarWidth);
 
-            initCustomLibX();
+            CustomLibX.init();
         } else if (document.body.dataset.wmpotifyLibPageOpen) {
             delete document.body.dataset.wmpotifyLibPageOpen;
+
+            CustomLibX.uninit();
 
             if (localStorage.wmpotifyShowLibX) {
                 const origSidebarState = DirectUserStorage.getItem("ylx-sidebar-state");

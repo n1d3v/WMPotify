@@ -1,0 +1,23 @@
+.ReactModalPortal,
+generic-modal {
+    .GenericModal__overlay {
+        background: none;
+        transition: none !important;
+
+        [role="dialog"] {
+            transition: none !important;
+
+            > div {
+                border-radius: 0;
+                background-color: var(--button-face);
+                color: var(--button-text);
+                box-shadow: var(--border-window-outer), var(--border-window-inner);
+            }
+        }
+
+        .main-duplicateTrackModal-buttonContainer {
+            justify-content: flex-end;
+            gap: 8px;
+        }
+    }
+}

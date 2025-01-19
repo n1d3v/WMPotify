@@ -1,4 +1,4 @@
-select.wmpotify-aero:not([multiple]),
+select.wmpotify-aero,
 .main-dropDown-dropDown {
   font: var(--font);
   padding: 2px 3px;
@@ -17,13 +17,13 @@ select.wmpotify-aero:not([multiple]),
   background-position: center right;
   background-repeat: no-repeat;
 
-  &:not(:disabled):not([data-disabled]):hover {
+  &:not(:disabled):hover {
     border-color: var(--button-border-color-hovered);
     background-image: url("resources/icon/button-down.svg"),
       var(--button-gradient-hovered);
   }
 
-  &:not(:disabled):not([data-disabled]):active {
+  &:not(:disabled):active {
     outline: none;
     border-color: var(--button-border-color-active);
     box-shadow: var(--button-shadow-active);
@@ -31,7 +31,7 @@ select.wmpotify-aero:not([multiple]),
       var(--button-gradient-active);
   }
 
-  &:not(:disabled):not([data-disabled]):focus {
+  &:not(:disabled):focus {
     color: #222;
     outline: 1px dotted #000;
     outline-offset: -4px;

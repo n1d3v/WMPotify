@@ -1,6 +1,7 @@
 .wmpotify-toolbar-button,
 .artist-artistDiscography-button,
-[role="combobox"] {
+[role="combobox"],
+header nav li {
   appearance: none;
   background: transparent;
   border: none;
@@ -18,13 +19,22 @@
     border-image-source: url("resources/ui/toolbarbutton_hover.png");
   }
 
-  &:active {
+  &:active,
+  &:has([class*="ctive"]) {
     border-image-source: url("resources/ui/toolbarbutton_pressed.png");
+  }
+
+  a {
+    background-color: transparent !important;
+    margin: 0 !important;
+    padding: 0 5px !important;
   }
 }
 
 button.wmpotify-aero,
 button.Button-sc-y0gtbx-0,
+.ReactModalPortal button.Button-sc-qlcn5g-0,
+.ReactModalPortal button.Button-sc-1dqy6lx-0,
 #context-menu button.Button-sc-1dqy6lx-0,
 #context-menu button.Button-sc-qlcn5g-0 {
   font: var(--font);
@@ -44,18 +54,21 @@ button.Button-sc-y0gtbx-0,
   z-index: 0;
   cursor: default !important;
   transform: none !important;
+  opacity: 1 !important;
 
   svg {
     display: none;
   }
 
-  .ButtonInner-small {
+  .ButtonInner-small,
+  .ButtonInner-medium {
     display: block;
     background: none;
     color: black;
     padding-block: 0;
     padding-inline: 0;
     min-block-size: 0;
+    transform: none !important;
   }
 
   /* Button style on hovered */
@@ -140,7 +153,8 @@ button.Button-sc-y0gtbx-0,
   }
 
   &:focus-visible,
-  &.focused {
+  &.focused,
+  &:has(.ButtonInner-medium) {
     box-shadow: inset 0 0 0 2px var(--button-shade-light-active);
     outline: 1px dotted #000;
     outline-offset: -4px;
@@ -148,7 +162,9 @@ button.Button-sc-y0gtbx-0,
 
   &.default,
   &:focus,
-  &.focused {
+  &.focused,
+  &:has(.ButtonInner-medium),
+  &:has(.ButtonInner-small) {
     border-color: var(--button-border-color-default);
     background-image: var(--button-gradient-hovered);
     animation: 1s ease infinite alternate pulse-anim;

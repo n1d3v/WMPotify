@@ -141,6 +141,10 @@ section[data-testid="artist-page"] {
             background: var(--wmp11-window);
         }
 
+        .main-topBar-overlay {
+            opacity: 0;
+        }
+
         .contentSpacing {
             padding: 8px;
         }

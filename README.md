@@ -3,7 +3,7 @@
 * Still WIP
 * Supported versions
     * 1.2.52 (full, primarily tested)
-    * 1.2.53 (should work)
+    * 1.2.53 / 1.2.55 (should work)
     * 1.2.50 (partial)
     * 1.2.49 (maybe)
     * ~~1.2.45~~ (fully broken)
@@ -27,13 +27,6 @@ echo.
 * Make sure to check for new commits and update the theme (+CustomApps+WH mod) accordingly if you installed this WIP theme
 
 ## TODO
-* Theme more pages
-    * Artist discography page
-    * Search page
-    * Settings page
-* Theme more elements
-    * Main view header bar
-    * Dialogs
 * Full screen mode theme
 * Mini mode for small window sizes
 * Support more versions of Spotify

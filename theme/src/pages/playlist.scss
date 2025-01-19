@@ -51,7 +51,8 @@
 
                 > div {
                     width: 100%;
-                    button {
+                    button,
+                    div {
                         width: 100%;
                         justify-content: flex-start;
 
@@ -367,7 +368,7 @@
     }
 
     &:has(.main-entityHeader-topbarContentFadeIn) {
-        .playlist-playlist-playlistContent div[class][data-overlayscrollbars-viewport] {
+        .playlist-playlist-playlist div[class][data-overlayscrollbars-viewport] {
             z-index: unset;
         }
 

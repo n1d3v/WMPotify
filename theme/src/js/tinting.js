@@ -1,14 +1,15 @@
 'use strict';
 
+const canvas = document.createElement('canvas');
+canvas.width = 1;
+canvas.height = 1;
+const context = canvas.getContext('2d');
+
 function getTintedBackgroundColor(hue, sat) {
-    this.canvas = this.canvas || document.createElement('canvas');
-    this.canvas.width = 1;
-    this.canvas.height = 1;
-    this.context = this.context || this.canvas.getContext('2d');
-    this.context.fillStyle = '#EEF3FA';
-    this.context.filter = `hue-rotate(${hue}deg) saturate(${sat}%)`;
-    this.context.fillRect(0, 0, 1, 1);
-    return 'rgba(' + this.context.getImageData(0, 0, 1, 1).data + ')';
+    context.fillStyle = '#EEF3FA';
+    context.filter = `hue-rotate(${hue}deg) saturate(${sat}%)`;
+    context.fillRect(0, 0, 1, 1);
+    return 'rgba(' + context.getImageData(0, 0, 1, 1).data + ')';
 }
 
 export function setTintColor(hue, sat, tintPb) {

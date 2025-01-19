@@ -63,6 +63,20 @@ export function setupPlayerbar() {
     new MutationObserver(updateVolumeIcon).observe(volumeBarProgress, { attributes: true, attributeFilter: ['style'] });
     playerControlsRight.appendChild(volumeBar);
 
+    const volSlider = document.querySelector('.volume-bar__slider-container');
+    const volPopup = volSlider.children[0];
+    volSlider.addEventListener('click', () => {
+        if (window.innerWidth < 750) {
+            volPopup.classList.add('visible');
+            volPopup.addEventListener('pointerup', () => {
+                volPopup.classList.remove('visible');
+            }, { once: true });
+            setTimeout(() => {
+                volPopup.classList.remove('visible');
+            }, 5000);
+        }
+    });
+
     timeTexts = document.querySelectorAll('.playback-bar .encore-text'); // 0: elapsed, 1: total (both in HH:MM:SS format)
     const timeTextContainer = document.createElement('div');
     timeTextContainer.classList.add('wmpotify-time-text-container');

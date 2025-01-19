@@ -31,13 +31,13 @@
 * Force enable Chrome extension support
 * Use the settings tab on the mod details page to configure the features
 ## Notes
-* Supported CEF versions: 90.4 to 132
+* Supported CEF versions: 90.4 to 131
     * This mod won't work with versions before 90.4
     * Versions after 132 may work but are not tested
     * Variant of this mod using copy-pasted CEF structs instead of hardcoded offsets is available at [here](https://github.com/Ingan121/files/tree/master/cte)
     * Copy required structs/definitions from your wanted CEF version (available [here](https://cef-builds.spotifycdn.com/index.html)) and paste them to the above variant to calculate the offsets
     * Testing with cefclient: `cefclient.exe --use-views --hide-frame --hide-controls`
-* Supported Spotify versions: 1.1.60 to 1.2.53 (newer versions may work)
+* Supported Spotify versions: 1.1.60 to 1.2.55 (newer versions may work)
 * Spotify notes:
     * Old releases are available [here](https://docs.google.com/spreadsheets/d/1wztO1L4zvNykBRw7X4jxP8pvo11oQjT0O5DvZ_-S4Ok/edit?pli=1&gid=803394557#gid=803394557)
     * 1.1.60-1.1.67: Use [SpotifyNoControl](https://github.com/JulienMaille/SpotifyNoControl) to remove the window controls
@@ -126,7 +126,7 @@
 128: 1.2.47-1.2.48
 129: 1.2.49-1.2.50
 130: 1.2.51-1.2.52
-131: 1.2.53
+131: 1.2.53, 1.2.55
 */
 
 #include <libloaderapi.h>
@@ -444,7 +444,24 @@ int AddFunctionToObj(cef_v8value_t* obj, std::u16string name, cef_v8handler_t* h
     cef_string_t* cefName = GenerateCefString(name);
     cef_v8value_t* func = cef_v8value_create_function_original(cefName, handler);
     int result = obj->set_value_bykey(obj, cefName, func, V8_PROPERTY_ATTRIBUTE_NONE);
+    free(cefName->str);
     free(cefName);
+    return result;
+}
+
+int AddValueToObj(cef_v8value_t* obj, std::u16string name, cef_v8value_t* value) {
+    cef_string_t* cefName = GenerateCefString(name);
+    int result = obj->set_value_bykey(obj, cefName, value, V8_PROPERTY_ATTRIBUTE_NONE);
+    free(cefName->str);
+    free(cefName);
+    return result;
+}
+
+int AddValueToObj(cef_v8value_t* obj, std::u16string name, std::u16string value) {
+    cef_string_t* cefValue = GenerateCefString(value);
+    int result = AddValueToObj(obj, name, cef_v8value_create_string(cefValue));
+    free(cefValue->str);
+    free(cefValue);
     return result;
 }
 #pragma endregion
@@ -917,6 +934,7 @@ _cef_window_t* CEF_EXPORT cef_window_create_top_level_hook(void* delegate) {
             Wh_Log(L"Subclassed %p", hWnd);
             if (g_hwAccelerated && cte_settings.transparentrendering) {
                 InvalidateRect(hWnd, NULL, TRUE);
+                RedrawWindow(hWnd, NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW | RDW_ALLCHILDREN);
             }
         }
         if (g_mainHwnd == NULL) {
@@ -1103,25 +1121,37 @@ BOOL WINAPI CreateProcessAsUserW_hook(
     // Inject %PROGRAMDATA% to get Windhawk 1.5.1 and below to work with sandboxed renderers
     const wchar_t* lpEnvironmentCopy = (wchar_t*)lpEnvironment;
     if (lpCommandLine && wcsstr(lpCommandLine, L"--type=renderer")) {
-        if (lpEnvironment && wcsstr((wchar_t*)lpEnvironment, L"%PROGRAMDATA%") == NULL) {
-            size_t envLen = 0;
-            while (((wchar_t*)lpEnvironment)[envLen] != L'\0' || ((wchar_t*)lpEnvironment)[envLen + 1] != L'\0') {
-                envLen++;
+        if (lpEnvironment) {
+            const wchar_t* env = (const wchar_t*)lpEnvironment;
+            BOOL found = FALSE;
+            while (*env) {
+                if (wcsstr(env, L"PROGRAMDATA") != NULL) {
+                    found = TRUE;
+                    break;
+                }
+                env += wcslen(env) + 1;
             }
-            envLen += 1; // Only include one null terminator at the end
 
-            std::wstring append1 = L"PROGRAMDATA=";
-            std::wstring append2(MAX_PATH, L'\0');
-            GetEnvironmentVariableW(L"PROGRAMDATA", append2.data(), MAX_PATH);
-            std::wstring append3 = L"\0\0";
-            std::wstring append = append1 + append2 + append3;
-            size_t appendLen = append.size();
+            if (!found) {
+                size_t envLen = 0;
+                while (((wchar_t*)lpEnvironment)[envLen] != L'\0' || ((wchar_t*)lpEnvironment)[envLen + 1] != L'\0') {
+                    envLen++;
+                }
+                envLen += 1; // Only include one null terminator at the end
 
-            wchar_t* newEnv = new wchar_t[envLen + appendLen];
-            memcpy(newEnv, lpEnvironment, envLen * sizeof(wchar_t));
-            memcpy(newEnv + envLen, append.c_str(), appendLen * sizeof(wchar_t));
+                std::wstring append1 = L"PROGRAMDATA=";
+                std::wstring append2(MAX_PATH, L'\0');
+                GetEnvironmentVariableW(L"PROGRAMDATA", append2.data(), MAX_PATH);
+                std::wstring append3 = L"\0\0";
+                std::wstring append = append1 + append2 + append3;
+                size_t appendLen = append.size();
 
-            lpEnvironmentCopy = newEnv;
+                wchar_t* newEnv = new wchar_t[envLen + appendLen];
+                memcpy(newEnv, lpEnvironment, envLen * sizeof(wchar_t));
+                memcpy(newEnv + envLen, append.c_str(), appendLen * sizeof(wchar_t));
+
+                lpEnvironmentCopy = newEnv;
+            }
         }
     }
 
@@ -1189,6 +1219,10 @@ void HandleWindhawkComm(LPCWSTR command) {
         }
     } else if (wcscmp(command, L"/WH:Close") == 0) {
         PostMessage(g_mainHwnd, WM_CLOSE, 0, 0);
+    // /WH:Focus
+    // Set focus to the main window
+    } else if (wcscmp(command, L"/WH:Focus") == 0) {
+        SetForegroundWindow(g_mainHwnd);
     // /WH:SetLayered:<layered (1/0)>:<alpha>:<optional-transparentColor>
     // Make the window layered with optional transparent color key
     } else if (wcsncmp(command, L"/WH:SetLayered:", 15) == 0) {
@@ -1587,7 +1621,10 @@ int CEF_CALLBACK WindhawkCommV8Handler(cef_v8handler_t* self, const cef_string_t
     Wh_Log(L"WindhawkCommV8Handler called with name: %s", name->str);
     std::u16string nameStr(name->str, name->length);
     if (g_hPipe == INVALID_HANDLE_VALUE) {
-        *exception = *GenerateCefString(u"Disconnected from the Windhawk mod running in the main process. Is the mod unloaded?");
+        cef_string_t* msg = GenerateCefString(u"Disconnected from the Windhawk mod running in the main process. Is the mod unloaded?");
+        *exception = *msg;
+        free(msg->str);
+        free(msg);
         return TRUE;
     }
 
@@ -1600,7 +1637,10 @@ int CEF_CALLBACK WindhawkCommV8Handler(cef_v8handler_t* self, const cef_string_t
             int bottom = arguments[3]->get_int_value(arguments[3]);
             ipcRes = SendNamedPipeMessage((L"/WH:ExtendFrame:" + std::to_wstring(left) + L":" + std::to_wstring(right) + L":" + std::to_wstring(top) + L":" + std::to_wstring(bottom)).c_str());
         } else {
-            *exception = *GenerateCefString(u"Invalid argument types, expected (int, int, int, int)");
+            cef_string_t* msg = GenerateCefString(u"Invalid argument types, expected (int, int, int, int)");
+            *exception = *msg;
+            free(msg->str);
+            free(msg);
             return TRUE;
         }
     } else if (nameStr == u"minimize") {
@@ -1609,27 +1649,38 @@ int CEF_CALLBACK WindhawkCommV8Handler(cef_v8handler_t* self, const cef_string_t
         ipcRes = SendNamedPipeMessage(L"/WH:MaximizeRestore");
     } else if (nameStr == u"close") {
         ipcRes = SendNamedPipeMessage(L"/WH:Close");
+    } else if (nameStr == u"focus") {
+        ipcRes = SendNamedPipeMessage(L"/WH:Focus");
     } else if (nameStr == u"setLayered") {
         if (argumentsCount >= 1 && arguments[0]->is_bool(arguments[0])) {
             bool layered = arguments[0]->get_bool_value(arguments[0]);
             if (argumentsCount >= 2) {
                 if (!arguments[1]->is_int(arguments[1])) {
-                    *exception = *GenerateCefString(u"Invalid argument types, expected (bool, optional int, optional string)");
+                    cef_string_t* msg = GenerateCefString(u"Invalid argument types, expected (bool, optional int, optional string)");
+                    *exception = *msg;
+                    free(msg->str);
+                    free(msg);
                     return TRUE;
                 }
                 int alpha = arguments[1]->get_int_value(arguments[1]);
                 if (argumentsCount >= 3) {
                     if (!arguments[2]->is_string(arguments[2])) {
-                        *exception = *GenerateCefString(u"Invalid argument types, expected (bool, optional int, optional string)");
+                        cef_string_t* msg = GenerateCefString(u"Invalid argument types, expected (bool, optional int, optional string)");
+                        *exception = *msg;
+                        free(msg->str);
+                        free(msg);
                         return TRUE;
                     }
                     cef_string_t* colorArg = arguments[2]->get_string_value(arguments[2]);
                     std::wstring colorStr(colorArg->str, colorArg->str + colorArg->length);
                     int color = 0; // only for format validation
-                    if (swscanf(colorStr.c_str(), L"%6x", &color) == 1) {
+                    if (swscanf(colorStr.c_str(), L"%x", &color) == 1) {
                         ipcRes = SendNamedPipeMessage((L"/WH:SetLayered:" + std::to_wstring(layered) + L":" + std::to_wstring(alpha) + L":" + colorStr).c_str());
                     } else {
-                        *exception = *GenerateCefString(u"Invalid color format, expected six-digit hex string");
+                        cef_string_t* msg = GenerateCefString(u"Invalid color format, expected six-digit hex string");
+                        *exception = *msg;
+                        free(msg->str);
+                        free(msg);
                         return TRUE;
                     }
                 } else {
@@ -1639,7 +1690,10 @@ int CEF_CALLBACK WindhawkCommV8Handler(cef_v8handler_t* self, const cef_string_t
                 ipcRes = SendNamedPipeMessage((L"/WH:SetLayered:" + std::to_wstring(layered)).c_str());
             }
         } else {
-            *exception = *GenerateCefString(u"Invalid argument types, expected (bool, optional int, optional string)");
+            cef_string_t* msg = GenerateCefString(u"Invalid argument types, expected (bool, optional int, optional string)");
+            *exception = *msg;
+            free(msg->str);
+            free(msg);
             return TRUE;
         }
     } else if (nameStr == u"setBackdrop") {
@@ -1649,11 +1703,17 @@ int CEF_CALLBACK WindhawkCommV8Handler(cef_v8handler_t* self, const cef_string_t
             if (backdropStr == L"mica" || backdropStr == L"acrylic" || backdropStr == L"tabbed") {
                 ipcRes = SendNamedPipeMessage((L"/WH:SetBackdrop:" + backdropStr).c_str());
             } else {
-                *exception = *GenerateCefString(u"Invalid backdrop type, expected 'mica', 'acrylic', or 'tabbed'");
+                cef_string_t* msg = GenerateCefString(u"Invalid backdrop type, expected 'mica', 'acrylic', or 'tabbed'");
+                *exception = *msg;
+                free(msg->str);
+                free(msg);
                 return TRUE;
             }
         } else {
-            *exception = *GenerateCefString(u"Invalid argument types, expected (string)");
+            cef_string_t* msg = GenerateCefString(u"Invalid argument types, expected (string)");
+            *exception = *msg;
+            free(msg->str);
+            free(msg);
             return TRUE;
         }
     } else if (nameStr == u"resizeTo") {
@@ -1662,7 +1722,10 @@ int CEF_CALLBACK WindhawkCommV8Handler(cef_v8handler_t* self, const cef_string_t
             int height = arguments[1]->get_int_value(arguments[1]);
             ipcRes = SendNamedPipeMessage((L"/WH:ResizeTo:" + std::to_wstring(width) + L":" + std::to_wstring(height)).c_str());
         } else {
-            *exception = *GenerateCefString(u"Invalid argument types, expected (int, int)");
+            cef_string_t* msg = GenerateCefString(u"Invalid argument types, expected (int, int)");
+            *exception = *msg;
+            free(msg->str);
+            free(msg);
             return TRUE;
         }
     } else if (nameStr == u"setMinSize") {
@@ -1671,7 +1734,10 @@ int CEF_CALLBACK WindhawkCommV8Handler(cef_v8handler_t* self, const cef_string_t
             int height = arguments[1]->get_int_value(arguments[1]);
             ipcRes = SendNamedPipeMessage((L"/WH:SetMinSize:" + std::to_wstring(width) + L":" + std::to_wstring(height)).c_str());
         } else {
-            *exception = *GenerateCefString(u"Invalid argument types, expected (int, int)");
+            cef_string_t* msg = GenerateCefString(u"Invalid argument types, expected (int, int)");
+            *exception = *msg;
+            free(msg->str);
+            free(msg);
             return TRUE;
         }
     } else if (nameStr == u"setTopMost") {
@@ -1679,7 +1745,10 @@ int CEF_CALLBACK WindhawkCommV8Handler(cef_v8handler_t* self, const cef_string_t
             bool topmost = arguments[0]->get_bool_value(arguments[0]);
             ipcRes = SendNamedPipeMessage((L"/WH:SetTopMost:" + std::to_wstring(topmost)).c_str());
         } else {
-            *exception = *GenerateCefString(u"Invalid argument types, expected (bool)");
+            cef_string_t* msg = GenerateCefString(u"Invalid argument types, expected (bool)");
+            *exception = *msg;
+            free(msg->str);
+            free(msg);
             return TRUE;
         }
     } else if (nameStr == u"setTitle") {
@@ -1687,12 +1756,18 @@ int CEF_CALLBACK WindhawkCommV8Handler(cef_v8handler_t* self, const cef_string_t
             cef_string_t* titleArg = arguments[0]->get_string_value(arguments[0]);
             std::wstring titleStr(titleArg->str, titleArg->str + titleArg->length);
             if (titleStr.length() > 255) {
-                *exception = *GenerateCefString(u"Title is too long, max 255 characters");
+                cef_string_t* msg = GenerateCefString(u"Title is too long, max is 255 characters");
+                *exception = *msg;
+                free(msg->str);
+                free(msg);
                 return TRUE;
             }
             ipcRes = SendNamedPipeMessage((L"/WH:SetTitle:" + titleStr).c_str());
         } else {
-            *exception = *GenerateCefString(u"Invalid argument types, expected (string)");
+            cef_string_t* msg = GenerateCefString(u"Invalid argument types, expected (string)");
+            *exception = *msg;
+            free(msg->str);
+            free(msg);
             return TRUE;
         }
     } else if (nameStr == u"lockTitle") {
@@ -1700,7 +1775,10 @@ int CEF_CALLBACK WindhawkCommV8Handler(cef_v8handler_t* self, const cef_string_t
             bool lock = arguments[0]->get_bool_value(arguments[0]);
             ipcRes = SendNamedPipeMessage((L"/WH:LockTitle:" + std::to_wstring(lock)).c_str());
         } else {
-            *exception = *GenerateCefString(u"Invalid argument types, expected (bool)");
+            cef_string_t* msg = GenerateCefString(u"Invalid argument types, expected (bool)");
+            *exception = *msg;
+            free(msg->str);
+            free(msg);
             return TRUE;
         }
     } else if (nameStr == u"openSpotifyMenu") {
@@ -1712,12 +1790,18 @@ int CEF_CALLBACK WindhawkCommV8Handler(cef_v8handler_t* self, const cef_string_t
             if (speed <= 0 || speed > 5.0) {
                 // Prevent potential ban risk by limiting the playback speed
                 // Note: setting to zero or negative values will be ignored by SetPlaybackSpeed and causes crashes in CreateTrackPlayer
-                *exception = *GenerateCefString(u"Playback speed must be faster than 0 and less than or equal to 5.0");
+                cef_string_t* msg = GenerateCefString(u"Playback speed must be faster than 0 and less than or equal to 5.0");
+                *exception = *msg;
+                free(msg->str);
+                free(msg);
                 return TRUE;
             }
             ipcRes = SendNamedPipeMessage((L"/WH:SetPlaybackSpeed:" + std::to_wstring(speed)).c_str());
         } else {
-            *exception = *GenerateCefString(u"Invalid argument types, expected (double)");
+            cef_string_t* msg = GenerateCefString(u"Invalid argument types, expected (double)");
+            *exception = *msg;
+            free(msg->str);
+            free(msg);
             return TRUE;
         }
     #endif
@@ -1726,43 +1810,49 @@ int CEF_CALLBACK WindhawkCommV8Handler(cef_v8handler_t* self, const cef_string_t
         if (g_queryResponse.success) {
             cef_v8value_t* retobj = cef_v8value_create_object(NULL, NULL);
             cef_v8value_t* configObj = cef_v8value_create_object(NULL, NULL);
-            configObj->set_value_bykey(configObj, GenerateCefString(u"showframe"), cef_v8value_create_bool(cte_settings.showframe), V8_PROPERTY_ATTRIBUTE_NONE);
-            configObj->set_value_bykey(configObj, GenerateCefString(u"showframeonothers"), cef_v8value_create_bool(cte_settings.showframeonothers), V8_PROPERTY_ATTRIBUTE_NONE);
-            configObj->set_value_bykey(configObj, GenerateCefString(u"showmenu"), cef_v8value_create_bool(cte_settings.showmenu), V8_PROPERTY_ATTRIBUTE_NONE);
-            configObj->set_value_bykey(configObj, GenerateCefString(u"showcontrols"), cef_v8value_create_bool(cte_settings.showcontrols), V8_PROPERTY_ATTRIBUTE_NONE);
-            configObj->set_value_bykey(configObj, GenerateCefString(u"transparentcontrols"), cef_v8value_create_bool(cte_settings.transparentcontrols), V8_PROPERTY_ATTRIBUTE_NONE);
-            configObj->set_value_bykey(configObj, GenerateCefString(u"ignoreminsize"), cef_v8value_create_bool(cte_settings.ignoreminsize), V8_PROPERTY_ATTRIBUTE_NONE);
-            configObj->set_value_bykey(configObj, GenerateCefString(u"transparentrendering"), cef_v8value_create_bool(cte_settings.transparentrendering), V8_PROPERTY_ATTRIBUTE_NONE);
-            configObj->set_value_bykey(configObj, GenerateCefString(u"noforceddarkmode"), cef_v8value_create_bool(cte_settings.noforceddarkmode), V8_PROPERTY_ATTRIBUTE_NONE);
-            configObj->set_value_bykey(configObj, GenerateCefString(u"forceextensions"), cef_v8value_create_bool(cte_settings.forceextensions), V8_PROPERTY_ATTRIBUTE_NONE);
-            configObj->set_value_bykey(configObj, GenerateCefString(u"allowuntested"), cef_v8value_create_bool(cte_settings.allowuntested), V8_PROPERTY_ATTRIBUTE_NONE);
-            retobj->set_value_bykey(retobj, GenerateCefString(u"options"), configObj, V8_PROPERTY_ATTRIBUTE_NONE);
-            retobj->set_value_bykey(retobj, GenerateCefString(u"isMaximized"), cef_v8value_create_bool(g_queryResponse.isMaximized), V8_PROPERTY_ATTRIBUTE_NONE);
-            retobj->set_value_bykey(retobj, GenerateCefString(u"isTopMost"), cef_v8value_create_bool(g_queryResponse.isTopMost), V8_PROPERTY_ATTRIBUTE_NONE);
-            retobj->set_value_bykey(retobj, GenerateCefString(u"isLayered"), cef_v8value_create_bool(g_queryResponse.isLayered), V8_PROPERTY_ATTRIBUTE_NONE);
-            retobj->set_value_bykey(retobj, GenerateCefString(u"isThemingEnabled"), cef_v8value_create_bool(g_queryResponse.isThemingEnabled), V8_PROPERTY_ATTRIBUTE_NONE);
-            retobj->set_value_bykey(retobj, GenerateCefString(u"isDwmEnabled"), cef_v8value_create_bool(g_queryResponse.isDwmEnabled), V8_PROPERTY_ATTRIBUTE_NONE);
-            retobj->set_value_bykey(retobj, GenerateCefString(u"dwmBackdropEnabled"), cef_v8value_create_bool(g_queryResponse.dwmBackdropEnabled), V8_PROPERTY_ATTRIBUTE_NONE);
-            retobj->set_value_bykey(retobj, GenerateCefString(u"hwAccelerated"), cef_v8value_create_bool(g_queryResponse.hwAccelerated), V8_PROPERTY_ATTRIBUTE_NONE);
-            retobj->set_value_bykey(retobj, GenerateCefString(u"minWidth"), cef_v8value_create_int(g_queryResponse.minWidth), V8_PROPERTY_ATTRIBUTE_NONE);
-            retobj->set_value_bykey(retobj, GenerateCefString(u"minHeight"), cef_v8value_create_int(g_queryResponse.minHeight), V8_PROPERTY_ATTRIBUTE_NONE);
-            retobj->set_value_bykey(retobj, GenerateCefString(u"titleLocked"), cef_v8value_create_bool(g_queryResponse.titleLocked), V8_PROPERTY_ATTRIBUTE_NONE);
-            retobj->set_value_bykey(retobj, GenerateCefString(u"dpi"), cef_v8value_create_int(g_queryResponse.dpi), V8_PROPERTY_ATTRIBUTE_NONE);
-            retobj->set_value_bykey(retobj, GenerateCefString(u"speedModSupported"), cef_v8value_create_bool(g_queryResponse.speedModSupported), V8_PROPERTY_ATTRIBUTE_NONE);
+            AddValueToObj(configObj, u"showframe", cef_v8value_create_bool(cte_settings.showframe));
+            AddValueToObj(configObj, u"showframeonothers", cef_v8value_create_bool(cte_settings.showframeonothers));
+            AddValueToObj(configObj, u"showmenu", cef_v8value_create_bool(cte_settings.showmenu));
+            AddValueToObj(configObj, u"showcontrols", cef_v8value_create_bool(cte_settings.showcontrols));
+            AddValueToObj(configObj, u"transparentcontrols", cef_v8value_create_bool(cte_settings.transparentcontrols));
+            AddValueToObj(configObj, u"transparentrendering", cef_v8value_create_bool(cte_settings.transparentrendering));
+            AddValueToObj(configObj, u"ignoreminsize", cef_v8value_create_bool(cte_settings.ignoreminsize));
+            AddValueToObj(configObj, u"noforceddarkmode", cef_v8value_create_bool(cte_settings.noforceddarkmode));
+            AddValueToObj(configObj, u"forceextensions", cef_v8value_create_bool(cte_settings.forceextensions));
+            AddValueToObj(configObj, u"allowuntested", cef_v8value_create_bool(cte_settings.allowuntested));
+            AddValueToObj(retobj, u"options", configObj);
+            AddValueToObj(retobj, u"isMaximized", cef_v8value_create_bool(g_queryResponse.isMaximized));
+            AddValueToObj(retobj, u"isTopMost", cef_v8value_create_bool(g_queryResponse.isTopMost));
+            AddValueToObj(retobj, u"isLayered", cef_v8value_create_bool(g_queryResponse.isLayered));
+            AddValueToObj(retobj, u"isThemingEnabled", cef_v8value_create_bool(g_queryResponse.isThemingEnabled));
+            AddValueToObj(retobj, u"isDwmEnabled", cef_v8value_create_bool(g_queryResponse.isDwmEnabled));
+            AddValueToObj(retobj, u"dwmBackdropEnabled", cef_v8value_create_bool(g_queryResponse.dwmBackdropEnabled));
+            AddValueToObj(retobj, u"hwAccelerated", cef_v8value_create_bool(g_queryResponse.hwAccelerated));
+            AddValueToObj(retobj, u"minWidth", cef_v8value_create_int(g_queryResponse.minWidth));
+            AddValueToObj(retobj, u"minHeight", cef_v8value_create_int(g_queryResponse.minHeight));
+            AddValueToObj(retobj, u"titleLocked", cef_v8value_create_bool(g_queryResponse.titleLocked));
+            AddValueToObj(retobj, u"dpi", cef_v8value_create_int(g_queryResponse.dpi));
+            AddValueToObj(retobj, u"speedModSupported", cef_v8value_create_bool(g_queryResponse.speedModSupported));
             #ifdef _WIN64
-            retobj->set_value_bykey(retobj, GenerateCefString(u"playbackSpeed"), cef_v8value_create_double(g_queryResponse.playbackSpeed), V8_PROPERTY_ATTRIBUTE_NONE);
-            retobj->set_value_bykey(retobj, GenerateCefString(u"immediateSpeedChange"), cef_v8value_create_bool(g_queryResponse.immediateSpeedChange), V8_PROPERTY_ATTRIBUTE_NONE);
+            AddValueToObj(retobj, u"playbackSpeed", cef_v8value_create_double(g_queryResponse.playbackSpeed));
+            AddValueToObj(retobj, u"immediateSpeedChange", cef_v8value_create_bool(g_queryResponse.immediateSpeedChange));
             #endif
             *retval = retobj;
             g_queryResponse.success = FALSE;
         } else {
-            *exception = *GenerateCefString(u"Error: Query response not received");
+            cef_string_t* msg = GenerateCefString(u"Error: Query response not received");
+            *exception = *msg;
+            free(msg->str);
+            free(msg);
             return TRUE;
         }
     }
 
     if (ipcRes != 0) {
-        *exception = *FormatCefString(L"IPC Error: %d", ipcRes);
+        cef_string_t* msg = FormatCefString(L"IPC Error: %d", ipcRes);
+        *exception = *msg;
+        free(msg->str);
+        free(msg);
     }
     return TRUE;
 }
@@ -1784,6 +1874,7 @@ int CEF_CALLBACK _getSpotifyModule_hook(cef_v8handler_t* self, const cef_string_
             AddFunctionToObj(retobj, u"minimize", ctewh);
             AddFunctionToObj(retobj, u"maximizeRestore", ctewh);
             AddFunctionToObj(retobj, u"close", ctewh);
+            AddFunctionToObj(retobj, u"focus", ctewh);
             AddFunctionToObj(retobj, u"setLayered", ctewh);
             AddFunctionToObj(retobj, u"setBackdrop", ctewh);
             AddFunctionToObj(retobj, u"resizeTo", ctewh);
@@ -1796,17 +1887,19 @@ int CEF_CALLBACK _getSpotifyModule_hook(cef_v8handler_t* self, const cef_string_
             AddFunctionToObj(retobj, u"setPlaybackSpeed", ctewh);
             #endif
             cef_v8value_t* initialConfigObj = cef_v8value_create_object(NULL, NULL);
-            initialConfigObj->set_value_bykey(initialConfigObj, GenerateCefString(u"showframe"), cef_v8value_create_bool(cte_settings.showframe), V8_PROPERTY_ATTRIBUTE_NONE);
-            initialConfigObj->set_value_bykey(initialConfigObj, GenerateCefString(u"showframeonothers"), cef_v8value_create_bool(cte_settings.showframeonothers), V8_PROPERTY_ATTRIBUTE_NONE);
-            initialConfigObj->set_value_bykey(initialConfigObj, GenerateCefString(u"showmenu"), cef_v8value_create_bool(cte_settings.showmenu), V8_PROPERTY_ATTRIBUTE_NONE);
-            initialConfigObj->set_value_bykey(initialConfigObj, GenerateCefString(u"showcontrols"), cef_v8value_create_bool(cte_settings.showcontrols), V8_PROPERTY_ATTRIBUTE_NONE);
-            initialConfigObj->set_value_bykey(initialConfigObj, GenerateCefString(u"transparentcontrols"), cef_v8value_create_bool(cte_settings.transparentcontrols), V8_PROPERTY_ATTRIBUTE_NONE);
-            initialConfigObj->set_value_bykey(initialConfigObj, GenerateCefString(u"ignoreminsize"), cef_v8value_create_bool(cte_settings.ignoreminsize), V8_PROPERTY_ATTRIBUTE_NONE);
-            initialConfigObj->set_value_bykey(initialConfigObj, GenerateCefString(u"transparentrendering"), cef_v8value_create_bool(cte_settings.transparentrendering), V8_PROPERTY_ATTRIBUTE_NONE);
-            initialConfigObj->set_value_bykey(initialConfigObj, GenerateCefString(u"noforceddarkmode"), cef_v8value_create_bool(cte_settings.noforceddarkmode), V8_PROPERTY_ATTRIBUTE_NONE);
-            initialConfigObj->set_value_bykey(initialConfigObj, GenerateCefString(u"forceextensions"), cef_v8value_create_bool(cte_settings.forceextensions), V8_PROPERTY_ATTRIBUTE_NONE);
-            retobj->set_value_bykey(retobj, GenerateCefString(u"initialOptions"), initialConfigObj, V8_PROPERTY_ATTRIBUTE_NONE);
-            retobj->set_value_bykey(retobj, GenerateCefString(u"version"), cef_v8value_create_string(GenerateCefString(u"0.6")), V8_PROPERTY_ATTRIBUTE_NONE);
+            AddValueToObj(initialConfigObj, u"showframe", cef_v8value_create_bool(cte_settings.showframe));
+            AddValueToObj(initialConfigObj, u"showframeonothers", cef_v8value_create_bool(cte_settings.showframeonothers));
+            AddValueToObj(initialConfigObj, u"showmenu", cef_v8value_create_bool(cte_settings.showmenu));
+            AddValueToObj(initialConfigObj, u"showcontrols", cef_v8value_create_bool(cte_settings.showcontrols));
+            AddValueToObj(initialConfigObj, u"transparentcontrols", cef_v8value_create_bool(cte_settings.transparentcontrols));
+            AddValueToObj(initialConfigObj, u"transparentrendering", cef_v8value_create_bool(cte_settings.transparentrendering));
+            AddValueToObj(initialConfigObj, u"ignoreminsize", cef_v8value_create_bool(cte_settings.ignoreminsize));
+            AddValueToObj(initialConfigObj, u"noforceddarkmode", cef_v8value_create_bool(cte_settings.noforceddarkmode));
+            AddValueToObj(initialConfigObj, u"forceextensions", cef_v8value_create_bool(cte_settings.forceextensions));
+            AddValueToObj(initialConfigObj, u"allowuntested", cef_v8value_create_bool(cte_settings.allowuntested));
+            AddValueToObj(retobj, u"initialOptions", initialConfigObj);
+            AddValueToObj(retobj, u"version", u"0.6");
+
             *retval = retobj;
             return TRUE;
         }

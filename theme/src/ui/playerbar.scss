@@ -439,6 +439,7 @@ div[data-testid='now-playing-widget'] {
         }
 
         &:disabled {
+            opacity: 1 !important;
             background-image: var(--miniplayer-disabled) !important;
         }
     }
@@ -462,6 +463,7 @@ div[data-testid='now-playing-widget'] {
         }
 
         &:disabled {
+            opacity: 1 !important;
             background-image: var(--fullscreen-disabled) !important;
         }
     }
@@ -527,12 +529,14 @@ div[data-testid='now-playing-widget'] {
                 display: none;
             }
 
-            &:hover {
-                background-image: url('resources/playerbar/npv_hover.png');
-            }
+            &:not(:disabled) {
+                &:hover {
+                    background-image: url('resources/playerbar/npv_hover.png');
+                }
 
-            &:active {
-                background-image: url('resources/playerbar/npv_pressed.png');
+                &:active {
+                    background-image: url('resources/playerbar/npv_pressed.png');
+                }
             }
         }
 
@@ -543,12 +547,14 @@ div[data-testid='now-playing-widget'] {
                 display: none;
             }
 
-            &:hover {
-                background-image: url('resources/playerbar/lyrics_hover.png');
-            }
+            &:not(:disabled) {
+                &:hover {
+                    background-image: url('resources/playerbar/lyrics_hover.png');
+                }
 
-            &:active {
-                background-image: url('resources/playerbar/lyrics_pressed.png');
+                &:active {
+                    background-image: url('resources/playerbar/lyrics_pressed.png');
+                }
             }
         }
 
@@ -559,12 +565,14 @@ div[data-testid='now-playing-widget'] {
                 display: none;
             }
 
-            &:hover {
-                background-image: url('resources/playerbar/queue_hover.png');
-            }
+            &:not(:disabled) {
+                &:hover {
+                    background-image: url('resources/playerbar/queue_hover.png');
+                }
 
-            &:active {
-                background-image: url('resources/playerbar/queue_pressed.png');
+                &:active {
+                    background-image: url('resources/playerbar/queue_pressed.png');
+                }
             }
         }
 
@@ -575,12 +583,14 @@ div[data-testid='now-playing-widget'] {
                 display: none;
             }
 
-            &:hover {
-                background-image: url('resources/playerbar/connect_hover.png');
-            }
+            &:not(:disabled) {
+                &:hover {
+                    background-image: url('resources/playerbar/connect_hover.png');
+                }
 
-            &:active {
-                background-image: url('resources/playerbar/connect_pressed.png');
+                &:active {
+                    background-image: url('resources/playerbar/connect_pressed.png');
+                }
             }
         }
     }
@@ -699,5 +709,96 @@ div[data-testid='now-playing-widget'] {
 
     .main-nowPlayingBar-nowPlayingBar svg {
         color: #002963 !important;
+    }
+}
+
+@media (max-width: 750px) {
+    .player-controls__buttons {
+        width: 268px;
+        background-image: url('resources/playerbar/bg_small.png');
+    }
+
+    .player-controls__left {
+        /* Shuffle button */
+        > div:first-child button,
+        > button:first-child {
+            display: none;
+        }
+    }
+
+    .player-controls__right {
+        margin-right: 6px;
+    }
+
+    button[data-testid='control-button-repeat'] {
+        display: none;
+    }
+
+    .volume-bar {
+        flex: unset;
+
+        .volume-bar__slider-container {
+            width: 19px !important;
+            height: 25px;
+            background: url('resources/playerbar/vol_mini_expand.png') no-repeat;
+
+            .playback-progressbar {
+                display: none;
+                position: absolute;
+                width: 102px;
+                height: 34px;
+                margin-top: -3px;
+                left: -18px;
+                background: url('resources/playerbar/vol_popup_bg.png') no-repeat;
+
+                .x-progressBar-progressBarBg {
+                    width: 64px;
+                    margin-top: -3px;
+                    margin-left: 13px;
+                }
+
+                &.visible {
+                    display: block;
+                }
+            }
+
+            &:hover:not(:has(.playback-progressbar:hover)) {
+                background-image: url('resources/playerbar/vol_mini_expand_extrahover.png');
+            }
+
+            &:active {
+                background-image: url('resources/playerbar/vol_mini_expand_pressed.png');
+            }
+        }
+
+        .volume-bar__icon-button {
+            min-width: 0;
+
+            &::before {
+                content: '';
+                position: absolute;
+                left: 0;
+                width: 25px;
+                height: 25px;
+                background: no-repeat;
+                z-index: -1;
+            }
+
+            &:hover::before {
+                background-image: url('resources/playerbar/vol_mini_extrahover.png');
+            }
+
+            &:active::before {
+                background-image: url('resources/playerbar/vol_mini_pressed.png');
+            }
+
+            &:hover + .volume-bar__slider-container {
+                background-image: url('resources/playerbar/vol_mini_expand_hover.png');
+            }
+        }
+
+        &:has(.volume-bar__slider-container:hover:not(:has(.playback-progressbar:hover))) .volume-bar__icon-button::before {
+            background-image: url('resources/playerbar/vol_mini_hover.png');
+        }
     }
 }

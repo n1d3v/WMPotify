@@ -1,3 +1,7 @@
+:root {
+    --libx-sidebar-width: 170px;
+}
+
 .main-view-container__scroll-node-child:has(.main-yourLibraryX-libraryContainer) {
     height: 100%;
     padding-bottom: 0;
@@ -12,6 +16,11 @@
 .main-yourLibraryX-libraryContainer {
     > div {
         box-shadow: none;
+    }
+
+    > div:last-child {
+        overflow: visible !important;
+        height: calc(100% - var(--player-bar-height) + 5px);
     }
 
     .main-yourLibraryX-filterArea {
@@ -102,44 +111,44 @@
 
         [role="presentation"] {
             order: -1;
+        }
+    }
 
-            [role="combobox"] {
-                top: -3px;
-                min-height: 0;
-                color: black;
-                padding: 0;
-                opacity: 1 !important;
-                transform: none !important;
+    [role="combobox"] {
+        top: -3px;
+        min-height: 0;
+        color: black;
+        padding: 0;
+        opacity: 1 !important;
+        transform: none !important;
 
-                .encore-text {
-                    order: 1;
-                    font-size: 12px;
-                }
+        .encore-text {
+            order: 1;
+            font-size: 12px;
+        }
 
-                span:nth-child(2) {
-                    width: 16px;
-                    height: 16px;
-                    margin-top: 1px;
-                    margin-left: 2px;
-                    margin-right: 3px;
-                    background: url('resources/icon/list.png') no-repeat;
+        span:nth-child(2) {
+            width: 16px;
+            height: 16px;
+            margin-top: 1px;
+            margin-left: 2px;
+            margin-right: 3px;
+            background: url('resources/icon/list.png') no-repeat;
 
-                    svg {
-                        display: none;
-                    }
-                }
-
-                &::after {
-                    content: '⏷';
-                    font-size: 12px;
-                    color: black;
-                    margin-top: -2px;
-                    margin-left: 4px;
-                    margin-right: -2px;
-                    order: 2;
-                    inline-size: unset;
-                }
+            svg {
+                display: none;
             }
+        }
+
+        &::after {
+            content: '⏷';
+            font-size: 12px;
+            color: black;
+            margin-top: -2px;
+            margin-left: 4px;
+            margin-right: -2px;
+            order: 2;
+            inline-size: unset;
         }
     }
 
@@ -151,7 +160,9 @@
         box-shadow: var(--wmp11-separator-light) 0 -1px 0 0, var(--wmp11-separator-shadow) 0 -2px 0 0;
         height: 25px;
         margin: 0;
-        padding: 0 16px;
+        padding: 0 32px 0 8px;
+        margin-top: 1px;
+        margin-left: var(--libx-sidebar-width);
 
         > span {
             height: 25px;
@@ -213,21 +224,165 @@
         }
     }
 
+    /* Custom header */
+    #wmpotify-libx-header {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 29px;
+        z-index: 1;
+        display: flex;
+        padding-top: 3px;
+        padding-left: 4px;
+
+        .wmpotify-libx-header-root-icon {
+            &::before {
+                content: '';
+                display: block;
+                width: 16px;
+                height: 16px;
+                margin-left: -2px;
+                background: url('resources/library/music.png') no-repeat;
+            }
+        }
+
+        > div,
+        > button {
+            display: flex;
+            padding-left: 1px;
+
+            &:not(:last-child)::after {
+                content: '⏵';
+                font-size: 12px;
+                color: black;
+                margin-top: -2px;
+                margin-left: 4px;
+                margin-right: -2px;
+            }
+        }
+
+        > div {
+            pointer-events: none;
+        }
+    }
+
     /* Custom sidebar */
     #wmpotify-libx-sidebar {
-        width: 100px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        min-width: var(--libx-sidebar-width);
         border-right: solid 1px var(--wmp11-separator-light);
         outline: solid 1px var(--wmp11-separator-shadow);
+        padding-top: 1px;
+        padding-left: 20px;
+        margin-top: -26px;
 
         .wmpotify-libx-sidebar-item {
+            display: flex;
             appearance: none;
             border: solid 1px transparent;
+            border-radius: 3px;
             background: none;
+            font-size: 12px;
+            color: black;
+            text-align: left;
+            height: 18px;
+            padding-right: 5px;
 
             &:hover {
                 background: var(--item-hover-background);
                 border-color: var(--item-hover-border);
             }
+
+            &.active {
+                background: var(--item-hover-background);
+                border-color: #95dbfd;
+            }
+
+            &::before {
+                content: '';
+                display: block;
+                width: 16px;
+                height: 16px;
+                margin-left: 1px;
+                margin-right: 6px;
+                background: url('resources/library/library.png') no-repeat;
+            }
+
+            &[data-identifier="playlist"]::before {
+                background-image: url('resources/library/playlist.png');
+            }
+
+            &[data-identifier="artist"]::before {
+                background-image: url('resources/library/artist.png');
+            }
+
+            &[data-identifier="album"]::before {
+                background-image: url('resources/library/album.png');
+            }
+
+            &[data-identifier="by-you"]::before {
+                background-image: url('resources/library/playlist_user2.png');
+            }
+
+            &[data-identifier="by-spotify"]::before {
+                background-image: url('resources/library/playlist_auto.png');
+            }
+
+            &:has(input:checked) + .wmpotify-libx-sidebar-downlevel {
+                display: flex;
+            }
+        }
+
+        &.rootCollapsed {
+            .wmpotify-libx-sidebar-item-container,
+            .wmpotify-libx-sidebar-downlevel {
+                display: none;
+            }
+        }
+
+        .wmpotify-libx-sidebar-item-container {
+            margin-left: 19px;
+
+            .wmpotify-libx-sidebar-chevron {
+                position: absolute;
+                margin-top: 3px;
+                margin-left: -15px;
+                width: 15px;
+                height: 15px;
+                background: url('resources/library/chevron.png') no-repeat;
+
+                &:hover {
+                    background-image: url('resources/library/chevron_hover.png');
+                }
+            }
+        }
+
+        &.rootCollapsed, .collapsed {
+            .wmpotify-libx-sidebar-chevron {
+                background-image: url('resources/library/chevron_collapsed.png');
+
+                &:hover {
+                    background-image: url('resources/library/chevron_collapsed_hover.png');
+                }
+            }
+        }
+
+        .wmpotify-libx-sidebar-item-container:first-child {
+            display: block !important;
+            margin-left: 0;
+        }
+
+        .wmpotify-libx-sidebar-downlevel {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            margin-left: 38px;
+        }
+
+        .collapsed + .wmpotify-libx-sidebar-downlevel {
+            display: none;
         }
     }
 }
@@ -239,7 +394,6 @@
         }
     }
 }
-
 
 body[data-wmpotify-lib-page-open]:not(#Prio1):not(#Prio2):not(#Prio3) { /* dirty hack to increase specificity */
     #wmpotify-library-button {
@@ -270,6 +424,10 @@ body[data-wmpotify-lib-page-open]:not(#Prio1):not(#Prio2):not(#Prio3) { /* dirty
         }
 
         .LayoutResizer__resize-bar {
+            display: none;
+        }
+
+        .search-searchCategory-contentArea {
             display: none;
         }
     }
