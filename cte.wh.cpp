@@ -521,9 +521,12 @@ LRESULT CALLBACK SubclassProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam
             break;
         case WM_GETMINMAXINFO:
             if (g_minWidth != -1 && g_minHeight != -1) {
+                RECT windowRect, clientRect;
+                GetWindowRect(hWnd, &windowRect);
+                GetClientRect(hWnd, &clientRect);
                 MINMAXINFO* mmi = (MINMAXINFO*)lParam;
-                mmi->ptMinTrackSize.x = g_minWidth;
-                mmi->ptMinTrackSize.y = g_minHeight;
+                mmi->ptMinTrackSize.x = g_minWidth + (windowRect.right - windowRect.left) - (clientRect.right - clientRect.left);
+                mmi->ptMinTrackSize.y = g_minHeight + (windowRect.bottom - windowRect.top) - (clientRect.bottom - clientRect.top);
                 return 0;
             } else if (cte_settings.ignoreminsize == TRUE) {
                 MINMAXINFO* mmi = (MINMAXINFO*)lParam;

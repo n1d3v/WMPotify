@@ -433,7 +433,7 @@ body[data-wmpotify-lib-page-open]:not(#Prio1):not(#Prio2):not(#Prio3) { /* dirty
     }
     
     .Root:has(.Root__right-sidebar aside) #Desktop_LeftSidebar_Id {
-        width: calc(100vw - var(--panel-width) * 1px - 2px);
+        width: calc(100vw - var(--right-sidebar-width, var(--panel-width)) * 1px - 2px);
         margin-right: calc(var(--panel-gap) * -2 + 2px);
     }
 
@@ -455,7 +455,7 @@ body[data-wmpotify-lib-page-open]:not(#Prio1):not(#Prio2):not(#Prio3) { /* dirty
         }
 
         .Root:has(.Root__right-sidebar aside) #Desktop_LeftSidebar_Id {
-            width: calc(100vw - var(--panel-width) * 1px - var(--panel-gap) * 2 - 2px);
+            width: calc(100vw - var(--right-sidebar-width, var(--panel-width)) * 1px - var(--panel-gap) * 2 - 2px);
         }
     }
 }

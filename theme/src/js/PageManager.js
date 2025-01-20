@@ -1,4 +1,5 @@
 import DirectUserStorage from "./DirectUserStorage";
+import SidebarManager from "./SidebarManager";
 import CustomLibX from "./libx";
 import { updatePlayPauseButton } from "./playerbar";
 import { initDiscographyPage } from "./discography";
@@ -29,8 +30,10 @@ const PageManager = {
             return;
         }
 
-        if (location.pathname === '/wmpotify-standalone-libx') {
+        if (location.pathname.startsWith('/wmpotify-standalone-libx')) {
             document.body.dataset.wmpotifyLibPageOpen = true;
+
+            SidebarManager.updateSidebarWidth();
 
             // Use Spicetify.LocalStorageAPI for immediate effect, then revert the underlying localStorage values to prevent persistence
             const origSidebarState = DirectUserStorage.getItem("ylx-sidebar-state");
@@ -40,7 +43,13 @@ const PageManager = {
             DirectUserStorage.setItem("ylx-sidebar-state", origSidebarState); // make the previous setItem temporary
             DirectUserStorage.setItem("ylx-expanded-state-nav-bar-width", origSidebarWidth);
 
-            CustomLibX.init();
+            if (!(await CustomLibX.init())) {
+                // Already initialized
+                if (Spicetify.Platform.History.action === 'POP') {
+                    // User navigation with back/forward buttons
+                    CustomLibX.go();
+                }
+            }
         } else if (document.body.dataset.wmpotifyLibPageOpen) {
             delete document.body.dataset.wmpotifyLibPageOpen;
 

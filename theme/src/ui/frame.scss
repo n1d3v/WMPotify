@@ -42,12 +42,17 @@
     }
 
     #wmpotify-title-bar {
+        --controls-width: 140px;
         position: fixed;
         top: 0;
         left: 0;
         width: 100%;
         height: 25px;
         z-index: 999;
+        display: flex;
+        justify-content: space-between;
+        padding-top: 3px;
+        padding-right: var(--controls-width);
         -webkit-app-region: drag !important;
 
         &::before {
@@ -62,12 +67,18 @@
             z-index: -1;
         }
 
-        &:has(#wmpotify-title-buttons)::before {
-            border-image-source: url('resources/frame/titlebar_closeonly.png');
+        &:has(#wmpotify-title-buttons) {
+            --controls-width: 43px;
+            ::before {
+                border-image-source: url('resources/frame/titlebar_closeonly.png');
+            }
         }
 
-        &:has(#wmpotify-minimize-button)::before {
-            border-image-source: url('resources/frame/titlebar.png');
+        &:has(#wmpotify-minimize-button) {
+            --controls-width: 106px;
+            ::before {
+                border-image-source: url('resources/frame/titlebar.png');
+            }
         }
 
         #wmpotify-title-buttons {
@@ -168,6 +179,17 @@
         font-family: Tahoma, sans-serif;
         color: white;
         margin-left: 33px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .wmpotify-time-text {
+        font-size: 14px;
+        font-weight: 300;
+        font-family: Tahoma, sans-serif;
+        flex-shrink: 0;
+        -webkit-app-region: no-drag !important;
     }
 
     &[data-wmpotify-title-style="spotify"],
@@ -199,6 +221,56 @@
         #main {
             margin-top: 0;
             height: 100%;
+        }
+    }
+
+    &:not([data-wmpotify-style="xp"]) {
+        #main {
+            margin-top: 24px;
+            height: calc(100% - 24px);
+        }
+
+        #wmpotify-title-bar {
+            height: 24px;
+
+            &::before {
+                height: 24px;
+                border-image-source: url('resources/frame/titlebar_nocontrols_noedge.png');
+            }
+
+            &:has(#wmpotify-title-buttons)::before {
+                border-image-source: url('resources/frame/titlebar_closeonly_noedge.png');
+            }
+    
+            &:has(#wmpotify-minimize-button)::before {
+                border-image-source: url('resources/frame/titlebar_noedge.png');
+            }
+        }
+    }
+}
+
+@media (max-height: 125px) {
+    :root:not([data-wmpotify-title-style="native"]) {
+        #main {
+            margin-top: 24px;
+            height: calc(100% - 24px);
+        }
+    
+        #wmpotify-title-bar {
+            height: 24px;
+    
+            &::before {
+                height: 24px;
+                border-image-source: url('resources/frame/titlebar_nocontrols_noedge.png');
+            }
+    
+            &:has(#wmpotify-title-buttons)::before {
+                border-image-source: url('resources/frame/titlebar_closeonly_noedge.png');
+            }
+    
+            &:has(#wmpotify-minimize-button)::before {
+                border-image-source: url('resources/frame/titlebar_noedge.png');
+            }
         }
     }
 }

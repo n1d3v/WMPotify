@@ -5,6 +5,7 @@ import WindhawkComm from './WindhawkComm';
 
 let playPauseButton, volumeButton, volumeBarProgress, timeTexts, timeTextMode, timeText;
 let longPressTimer = null;
+let titleSet = false;
 
 export function setupPlayerbar() {
     const playerBar = document.querySelector('.main-nowPlayingBar-nowPlayingBar');
@@ -67,13 +68,16 @@ export function setupPlayerbar() {
     const volPopup = volSlider.children[0];
     volSlider.addEventListener('click', () => {
         if (window.innerWidth < 750) {
-            volPopup.classList.add('visible');
-            volPopup.addEventListener('pointerup', () => {
-                volPopup.classList.remove('visible');
-            }, { once: true });
-            setTimeout(() => {
-                volPopup.classList.remove('visible');
+            volPopup.dataset.visible = true;
+            const autoClose = setTimeout(() => {
+                delete volPopup.dataset.visible;
             }, 5000);
+            volPopup.addEventListener('pointerup', () => {
+                clearTimeout(autoClose);
+                setTimeout(() => {
+                    delete volPopup.dataset.visible;
+                }, 100);
+            }, { once: true });
         }
     });
 
@@ -94,6 +98,32 @@ export function setupPlayerbar() {
     playerBar.insertAdjacentElement('afterbegin', timeTextContainer);
     Spicetify.Player.addEventListener("onprogress", updateTimeText);
 
+    const titlebar = document.querySelector('#wmpotify-title-bar');
+    const titleButtons = document.querySelector('#wmpotify-title-buttons');
+    if (titlebar) {
+        updateTimeTextMiniMode();
+        window.addEventListener('resize', updateTimeTextMiniMode);
+    }
+
+    if (whStatus) {
+        const pipButton = document.querySelector('.main-nowPlayingBar-extraControls button[data-testid="pip-toggle-button"]');
+        if (pipButton) {
+            pipButton.addEventListener('click', (event) => {
+                if (window.innerWidth < 360 && window.innerHeight < 262) {
+                    const lastSize = localStorage.wmpotifyPreMiniModeSize?.split(',');
+                    if (lastSize && lastSize.length === 2) {
+                        window.resizeTo(parseInt(lastSize[0]), parseInt(lastSize[1]));
+                    }
+                } else {
+                    localStorage.wmpotifyPreMiniModeSize = [window.innerWidth, window.innerHeight];
+                    WindhawkComm.resizeTo(358, 60);
+                }
+                event.preventDefault();
+                event.stopPropagation();
+            });
+        }
+    }
+
     // Shuffle button is often removed and re-added, so we need this to keep it in place
     const observer = new MutationObserver(() => {
         const childLength = playerControlsLeft.children.length;
@@ -105,10 +135,32 @@ export function setupPlayerbar() {
         observer.observe(playerControlsLeft, { childList: true });
     });
     observer.observe(playerControlsLeft, { childList: true });
+
+    function updateTimeTextMiniMode() {
+        if (window.innerWidth < 750) {
+            if (!titlebar.contains(timeText)) {
+                if (titleButtons) {
+                    titlebar.insertBefore(timeText, titleButtons);
+                } else {
+                    titlebar.appendChild(timeText);
+                }
+            }
+        } else {
+            if (!playerBar.contains(timeText)) {
+                timeTextContainer.appendChild(timeText);
+            }
+        }
+    }
 }
 
-function setupTrackInfoWidget() {
+async function setupTrackInfoWidget() {
+    console.log('setupTrackInfoWidget');
     updatePlayPauseButton();
+    const isCustomTitlebar = !!document.querySelector('#wmpotify-title-bar');
+    const whAvailable = WindhawkComm.available();
+    const origDefaultTitle = await Spicetify.AppTitle.get();
+    const titlebarText = document.querySelector('#wmpotify-title-text');
+
     const trackInfoWidget = document.querySelector('.main-nowPlayingWidget-trackInfo');
     if (!trackInfoWidget || document.querySelector('.wmpotify-track-info')) {
         return;
@@ -117,6 +169,14 @@ function setupTrackInfoWidget() {
     trackInfoText.classList.add('wmpotify-track-info');
     trackInfoText.textContent = document.querySelector('.main-trackInfo-name')?.textContent || '';
     trackInfoWidget.appendChild(trackInfoText);
+    if (window.innerWidth < 420 && window.innerHeight < (isCustomTitlebar ? 92 : 62)) {
+        if (isCustomTitlebar) {
+            titlebarText.textContent = trackInfoText.textContent;
+        } else if (whAvailable) {
+            WindhawkComm.setTitle(trackInfoText.textContent);
+        }
+        titleSet = true;
+    }
 
     let trackInfoCurrent = 1; // 0: title, 1: artist, 2: album
     setInterval(() => {
@@ -135,10 +195,42 @@ function setupTrackInfoWidget() {
             trackInfoText.textContent = trackInfo.album_title;
         }
         trackInfoCurrent = (trackInfoCurrent + 1) % 3;
+
+        // Mini mode
+        if (window.innerWidth < 420 && window.innerHeight < (isCustomTitlebar ? 92 : 62)) {
+            if (isCustomTitlebar) {
+                titlebarText.textContent = trackInfoText.textContent;
+            } else if (whAvailable) {
+                WindhawkComm.lockTitle(true);
+                WindhawkComm.setTitle(trackInfoText.textContent);
+            }
+            titleSet = true;
+        } else {
+            if (titleSet) {
+                titleSet = false;
+                if (isCustomTitlebar) {
+                    titlebarText.textContent = origDefaultTitle;
+                }
+                WindhawkComm.lockTitle(false);
+                if (Spicetify.Player.isPlaying()) {
+                    WindhawkComm.setTitle(trackInfo.artist_name + ' - ' + trackInfo.title);
+                } else {
+                    WindhawkComm.setTitle(origDefaultTitle);
+                }
+            }
+        }
     }, 3000);
     Spicetify.Player.addEventListener("songchange", () => {
         trackInfoCurrent = 0;
         trackInfoText.textContent = Spicetify.Player.data?.item.metadata.title;
+        if (window.innerWidth < 420 && window.innerHeight < (isCustomTitlebar ? 92 : 62)) {
+            if (isCustomTitlebar) {
+                titlebarText.textContent = trackInfoText.textContent;
+            } else if (whAvailable) {
+                WindhawkComm.setTitle(trackInfoText.textContent);
+            }
+            titleSet = true;
+        }
     });
 }
 

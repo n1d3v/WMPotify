@@ -28,7 +28,6 @@ echo.
 
 ## TODO
 * Full screen mode theme
-* Mini mode for small window sizes
 * Support more versions of Spotify
     * Older versions support, possibly down to 1.2.49?
 * Add installation script + guide

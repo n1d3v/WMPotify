@@ -34,6 +34,11 @@
     --vol-low: url('resources/playerbar/vol_low.png');
     --vol-mid: url('resources/playerbar/vol_mid.png');
     --vol-high: url('resources/playerbar/vol_high.png');
+    --vol-mini-expand: url('resources/playerbar/vol_mini_expand.png');
+    --vol-mini-expand-hover: url('resources/playerbar/vol_mini_expand_hover.png');
+    --vol-mini-expand-extrahover: url('resources/playerbar/vol_mini_expand_extrahover.png');
+    --vol-mini-expand-pressed: url('resources/playerbar/vol_mini_expand_pressed.png');
+    --vol-mini-hover: url('resources/playerbar/vol_mini_hover.png');
 }
 
 .Root__now-playing-bar {
@@ -634,6 +639,11 @@ div[data-testid='now-playing-widget'] {
     --vol-low: url('resources/playerbar/xp/vol_low.png');
     --vol-mid: url('resources/playerbar/xp/vol_mid.png');
     --vol-high: url('resources/playerbar/xp/vol_high.png');
+    --vol-mini-expand: url('resources/playerbar/xp/vol_mini_expand.png');
+    --vol-mini-expand-hover: url('resources/playerbar/xp/vol_mini_expand_hover.png');
+    --vol-mini-expand-extrahover: url('resources/playerbar/xp/vol_mini_expand_extrahover.png');
+    --vol-mini-expand-pressed: url('resources/playerbar/xp/vol_mini_expand_pressed.png');
+    --vol-mini-hover: url('resources/playerbar/xp/vol_mini_hover.png');
 
     .Root__now-playing-bar {
         position: relative;
@@ -712,10 +722,86 @@ div[data-testid='now-playing-widget'] {
     }
 }
 
+@media (max-width: 920px) {
+    :root[data-wmpotify-style="xp"] {
+        .main-nowPlayingBar-left [data-testid="now-playing-widget"] {
+            > * {
+                display: none;
+            }
+    
+            > div:first-child {
+                display: unset;
+            }
+        }
+
+        .main-nowPlayingBar-extraControls {
+            > * {
+                display: none;
+            }
+    
+            button[data-testid="pip-toggle-button"],
+            button[data-testid="fullscreen-mode-button"],
+            #BeautifulLyricsFullscreenButton {
+                display: unset;
+            }
+        }
+    }
+}
+
+@media (max-width: 850px) {
+    .main-nowPlayingBar-left [data-testid="now-playing-widget"] {
+        > * {
+            display: none;
+        }
+
+        > div:first-child {
+            display: unset;
+        }
+    }
+
+    .main-nowPlayingBar-extraControls {
+        > * {
+            display: none;
+        }
+
+        button[data-testid="pip-toggle-button"],
+        button[data-testid="fullscreen-mode-button"],
+        #BeautifulLyricsFullscreenButton {
+            display: unset;
+        }
+    }
+}
+
 @media (max-width: 750px) {
+    .wmpotify-time-text-container {
+        display: none;
+    }
+}
+
+@media (max-width: 636px) {
     .player-controls__buttons {
         width: 268px;
         background-image: url('resources/playerbar/bg_small.png');
+    }
+
+    .Root__now-playing-bar {
+        padding-right: 0;
+        width: 100%;
+    }
+
+    .main-nowPlayingBar-container {
+        min-width: 0;
+    }
+
+    .main-nowPlayingBar-left,
+    .main-nowPlayingBar-right {
+        min-width: 0;
+        width: 64px;
+    }
+
+    .playback-bar {
+        margin-left: 15px;
+        width: calc(100% - 12px);
     }
 
     .player-controls__left {
@@ -740,7 +826,7 @@ div[data-testid='now-playing-widget'] {
         .volume-bar__slider-container {
             width: 19px !important;
             height: 25px;
-            background: url('resources/playerbar/vol_mini_expand.png') no-repeat;
+            background: var(--vol-mini-expand) no-repeat;
 
             .playback-progressbar {
                 display: none;
@@ -757,17 +843,17 @@ div[data-testid='now-playing-widget'] {
                     margin-left: 13px;
                 }
 
-                &.visible {
+                &[data-visible] {
                     display: block;
                 }
             }
 
             &:hover:not(:has(.playback-progressbar:hover)) {
-                background-image: url('resources/playerbar/vol_mini_expand_extrahover.png');
+                background-image: var(--vol-mini-expand-extrahover);
             }
 
-            &:active {
-                background-image: url('resources/playerbar/vol_mini_expand_pressed.png');
+            &:active:not(:has(.playback-progressbar:active)) {
+                background-image: var(--vol-mini-expand-pressed);
             }
         }
 
@@ -793,12 +879,78 @@ div[data-testid='now-playing-widget'] {
             }
 
             &:hover + .volume-bar__slider-container {
-                background-image: url('resources/playerbar/vol_mini_expand_hover.png');
+                background-image: var(--vol-mini-expand-hover);
             }
         }
 
         &:has(.volume-bar__slider-container:hover:not(:has(.playback-progressbar:hover))) .volume-bar__icon-button::before {
-            background-image: url('resources/playerbar/vol_mini_hover.png');
+            background-image: var(--vol-mini-hover);
+        }
+    }
+
+    :root[data-wmpotify-style="xp"] {
+        .Root__now-playing-bar {
+            width: calc(100% + var(--panel-gap) * 2);
+            
+            &::before {
+                border-image-source: url('resources/playerbar/xp/bottom_texture_mini.png') !important;
+            }
+
+            &::after {
+                width: 274px;
+                left: calc(50% - var(--panel-gap) - 3px);
+                background-image: url('resources/playerbar/xp/bg_small.png');
+            }
+        }
+    }
+}
+
+@media (max-width: 418px) {
+    .main-nowPlayingBar-left,
+    .main-nowPlayingBar-right {
+        width: 40px;
+    }
+
+    .main-nowPlayingBar-right {
+        margin-right: -21px;
+        margin-bottom: -7px;
+
+        .main-nowPlayingBar-extraControls {
+            flex-direction: column-reverse;
+
+            > * {
+                min-height: 0;
+            }
+        }
+    }
+
+    .playback-bar {
+        margin-left: 0;
+    }
+
+    :root[data-wmpotify-style="xp"] {
+        .Root__now-playing-bar::after {
+            margin-left: 11px;
+        }
+    }
+}
+
+@media (max-height: 125px) {
+    .Root__top-container {
+        gap: 0;
+
+        > *:not(.Root__now-playing-bar) {
+            display: none;
+        }
+    }
+
+    :root[data-wmpotify-style="xp"] {
+        .Root__now-playing-bar {
+            margin-top: -12px;
+
+            &::before {
+                border-image-source: url('resources/playerbar/xp/bottom_texture_minheight.png');
+            }
         }
     }
 }

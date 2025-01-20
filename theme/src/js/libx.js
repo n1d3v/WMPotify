@@ -12,11 +12,12 @@ const folderObserver = new MutationObserver(() => {
 });
 let inFolder = false;
 let lastCategories = [];
+let lastCategoriesIdentifier = [];
 
 const CustomLibX = {
     async init() {
         if (document.querySelector('#wmpotify-libx-sidebar')) {
-            return;
+            return false;
         }
 
         const filterKeys = Object.keys(Spicetify.Platform.Translations).filter(key => key.startsWith('shared.library.filter.'));
@@ -62,6 +63,9 @@ const CustomLibX = {
 
         // Whole category buttons container gets re-rendered when entering and exiting a playlist folder
         folderObserver.observe(document.querySelector('.main-yourLibraryX-filterArea'), { childList: true });
+
+        go(Spicetify.Platform.History.location.pathname.split('/').slice(2));
+        return true;
     },
 
     uninit() {
@@ -70,6 +74,16 @@ const CustomLibX = {
         categoryButtonsObserver.disconnect();
         folderObserver.disconnect();
     },
+
+    go(identifiers) {
+        if (!identifiers) {
+            identifiers = Spicetify.Platform.History.location.pathname.split('/').slice(2);
+        }
+        if (!identifiers[0]) {
+            return;
+        }
+        go(identifiers);
+    }
 };
 
 function renderHeader() {
@@ -106,6 +120,10 @@ function renderHeader() {
                 goToRootCategory();
                 await waitForCategoryButtonsUpdate();
             } else {
+                if (!currentCategory) {
+                    return;
+                }
+
                 const parentCategory = categoryButtonsHierarchy.find(cat => cat.localized === currentCategories[index - 1]);
 
                 if (!isInParentCategory(parentCategory) || !document.contains(currentCategory.elem)) {
@@ -181,6 +199,16 @@ function parseCategoryButtons() {
     }
     renderHeader();
     renderSidebar();
+
+    const currentCategories = getCurrentCategories(true);
+    inFolder = document.querySelector('.main-yourLibraryX-collapseButton').childElementCount > 1;
+    if (inFolder) {
+        folderName = document.querySelector('.main-yourLibraryX-collapseButton > div').textContent;
+        currentCategories.push('/folder:' + folderName);
+    }
+    Spicetify.Platform.History.push({
+        pathname: '/wmpotify-standalone-libx/' + currentCategories.join('/'),
+    });
 }
 
 // Refresh the element reference in the category object
@@ -219,25 +247,116 @@ function exitFolder() {
     document.querySelectorAll('.main-yourLibraryX-collapseButton button')?.[1]?.click();
 }
 
-function getCurrentCategories() {
+function getCurrentCategories(identifier = false) {
     const currentCategories = [];
     inFolder = document.querySelector('.main-yourLibraryX-collapseButton').childElementCount > 1;
     if (inFolder) {
+        if (identifier) {
+            return lastCategoriesIdentifier;
+        }
         return lastCategories;
     } else if (isInRootCategory()) {
         lastCategories = [];
+        lastCategoriesIdentifier = [];
         return currentCategories;
     } else {
         const buttons = Array.from(categoryButtons.querySelectorAll('button')).slice(1);
         let currentParent = buttons[0].textContent;
+        if (identifier) {
+            currentParent = Object.keys(categoryLocalizations).find(key => categoryLocalizations[key].value === currentParent);
+        }
         currentCategories.push(currentParent);
         const activeChild = categoryButtons.querySelector('button[class*="secondary-selected"]');
         if (activeChild) {
-            currentCategories.push(activeChild.textContent);
+            if (identifier) {
+                currentCategories.push(Object.keys(categoryLocalizations).find(key => categoryLocalizations[key].value === activeChild.textContent));
+            } else {
+                currentCategories.push(activeChild.textContent);
+            }
         }
-        lastCategories = structuredClone(currentCategories);
+        if (identifier) {
+            lastCategoriesIdentifier = structuredClone(currentCategories);
+        } else {
+            lastCategories = structuredClone(currentCategories);
+        }
     }
     return currentCategories;
+}
+
+async function go(identifiers) {
+    if (inFolder) {
+        exitFolder();
+        await waitForFolderChange();
+    }
+    categoryButtonsObserver.disconnect();
+    if (!isInRootCategory()) {
+        goToRootCategory();
+        if (identifiers.length === 0) {
+            return;
+        }
+        await waitForCategoryButtonsUpdate();
+    }
+    // for (const identifier of identifiers) {
+    //     if (identifier.startsWith('/folder:')) {
+    //         // Must be last in the loop
+    //         const folderName = identifier.slice(8);
+    //         await waitForListRender();
+    //         const listItems = Array.from(document.querySelectorAll('.main-yourLibraryX-libraryRootlist .main-rootlist-wrapper [role="presentation"]:not([class]) li'));
+    //         const folderItem = listItems.find(item => {
+    //             item.querySelector('div > div')?.textContent === folderName;
+    //         });
+    //         if (!folderItem) {
+    //             break;
+    //         }
+    //         folderItem.click();
+    //         break;
+    //     }
+    //     const category = categoryButtonsHierarchy.find(cat => cat.identifier === identifier);
+    //     if (!category) {
+    //         return;
+    //     }
+    //     refreshElement(category);
+    //     category.elem.click();
+    //     await waitForCategoryButtonsUpdate();
+    // }
+    for (let i = 0; i < identifiers.length; i++) {
+        if (i === 0) {
+            const category = categoryButtonsHierarchy.find(cat => cat.identifier === identifiers[i]);
+            if (!category) {
+                return;
+            }
+            refreshElement(category);
+            category.elem.click();
+            await waitForCategoryButtonsUpdate();
+        } else if (identifiers[i].startsWith('folder:')) {
+            const folderName = identifiers[i].slice(7);
+            await waitForListRender();
+            const listItems = Array.from(document.querySelectorAll('.main-yourLibraryX-libraryRootlist .main-rootlist-wrapper [role="presentation"]:not([class]) li'));
+            const folderItem = listItems.find(item => {
+                return item.querySelector('div > div').textContent === folderName;
+            });
+            if (!folderItem) {
+                return;
+            }
+            folderItem.click();
+            await waitForFolderChange();
+        } else {
+            const parentCategory = categoryButtonsHierarchy.find(cat => cat.identifier === identifiers[i - 1]);
+            if (!parentCategory) {
+                return;
+            }
+            const category = parentCategory.children.find(cat => cat.identifier === identifiers[i]);
+            if (!category) {
+                return;
+            }
+            refreshElement(category);
+            category.elem.click();
+            await waitForCategoryButtonsUpdate();
+        }
+    }
+    renderHeader();
+    renderSidebar();
+    categoryButtonsObserver.observe(categoryButtons, { childList: true });
 }
 
 function renderSidebar() {
@@ -370,6 +489,20 @@ function waitForFolderChange() {
         });
         observer.observe(document.querySelector('.main-yourLibraryX-filterArea'), { childList: true });
     });
+}
+
+function waitForListRender() {
+    if (!document.querySelector('.main-yourLibraryX-libraryRootlist .main-rootlist-wrapper [role="presentation"]:not([class])')) {
+        return new Promise((resolve) => {
+            const observer = new MutationObserver(() => {
+                if (document.querySelector('.main-yourLibraryX-libraryRootlist .main-rootlist-wrapper [role="presentation"]:not([class])')) {
+                    resolve();
+                    observer.disconnect();
+                }
+            });
+            observer.observe(document.querySelector('.main-yourLibraryX-libraryRootlist'), { childList: true, subtree: true });
+        });
+    }
 }
 
 export default CustomLibX;

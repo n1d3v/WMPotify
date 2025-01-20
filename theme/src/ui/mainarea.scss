@@ -115,7 +115,7 @@ body[data-hide-libx] {
 .Root {
     --main-area-right: 0px;
     &:has(.Root__right-sidebar aside) {
-        --main-area-right: calc(var(--panel-width) * 1px + 3px);
+        --main-area-right: calc(var(--right-sidebar-width, var(--panel-width)) * 1px + 3px);
     }
 }
 
@@ -130,7 +130,7 @@ body[data-hide-libx] {
     .Root {
         --main-area-right: var(--panel-gap);
         &:has(.Root__right-sidebar aside) {
-            --main-area-right: calc(var(--panel-width) * 1px + var(--panel-gap) + 3px);
+            --main-area-right: calc(var(--right-sidebar-width, var(--panel-width)) * 1px + var(--panel-gap) + 3px);
 
             .Root__main-view {
                 width: calc(100% + var(--panel-gap) - 3px);

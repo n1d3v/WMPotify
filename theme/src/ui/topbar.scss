@@ -253,14 +253,14 @@
 }
 
 #main:has(.Root__right-sidebar aside) #wmpotify-search-container {
-    width: calc(100vw - var(--panel-width) * 1px - 1px);
+    width: calc(100vw - var(--right-sidebar-width, var(--panel-width)) * 1px - 1px);
 }
 
 :root[data-wmpotify-style="xp"] {
     width: calc(100vw - var(--panel-gap) * 2 - 1px);
 
     #main:has(.Root__right-sidebar aside) #wmpotify-search-container {
-        width: calc(100vw - var(--panel-gap) * 2 - var(--panel-width) * 1px - 1px);
+        width: calc(100vw - var(--panel-gap) * 2 - var(--right-sidebar-width, var(--panel-width)) * 1px - 1px);
     }
 }
 

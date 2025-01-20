@@ -89,7 +89,7 @@ function earlyInit() {
     if (localStorage.wmpotifyStyle && ['xp', 'aero', 'basic'].includes(localStorage.wmpotifyStyle)) {
         style = localStorage.wmpotifyStyle;
     }
-    WindhawkComm.setMinSize(358, 60); // mini mode
+    WindhawkComm.setMinSize(358, titleStyle === 'native' ? 60 : 90); // mini mode
     WindhawkComm.setBackdrop('mica'); // win11
     switch (style) {
         case 'xp':
@@ -98,7 +98,11 @@ function earlyInit() {
         case 'aero':
             WindhawkComm.extendFrame(0, 0, 0, 60);
             window.addEventListener('resize', () => {
-                WindhawkComm.extendFrame(0, 0, 0, 60);
+                if (window.innerHeight < 62) {
+                    WindhawkComm.extendFrame(-1, -1, -1, -1);
+                } else {
+                    WindhawkComm.extendFrame(0, 0, 0, 60);
+                }
             });
             break;
         case 'basic':
