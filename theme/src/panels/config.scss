@@ -167,6 +167,7 @@
     }
 }
 
-:root[data-wmpotify-style="xp"] body[data-hide-libx] #wmpotify-config {
+:root[data-wmpotify-style="xp"] body[data-hide-libx] #wmpotify-config,
+:root[data-wmpotify-style="xp"]:fullscreen #wmpotify-config {
     margin-left: var(--panel-gap);
 }

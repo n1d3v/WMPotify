@@ -5,6 +5,7 @@ import WindhawkComm from './WindhawkComm';
 
 let playPauseButton, volumeButton, volumeBarProgress, timeTexts, timeTextMode, timeText;
 let longPressTimer = null;
+let fullscreenHideControlTimer = null;
 let titleSet = false;
 
 export function setupPlayerbar() {
@@ -115,6 +116,9 @@ export function setupPlayerbar() {
                         window.resizeTo(parseInt(lastSize[0]), parseInt(lastSize[1]));
                     }
                 } else {
+                    if (document.fullscreenElement) {
+                        document.exitFullscreen();
+                    }
                     localStorage.wmpotifyPreMiniModeSize = [window.innerWidth, window.innerHeight];
                     WindhawkComm.resizeTo(358, 60);
                 }
@@ -122,6 +126,42 @@ export function setupPlayerbar() {
                 event.stopPropagation();
             });
         }
+    }
+
+    const fullscreenButton = document.querySelector('.main-nowPlayingBar-extraControls button[data-testid="fullscreen-mode-button"]');
+    if (fullscreenButton) {
+        fullscreenButton.addEventListener('click', (event) => {
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+                exitFullscreen();
+            } else {
+                if (Spicetify.Config.custom_apps.includes('wmpvis')) {
+                    Spicetify.Platform.History.push('/wmpvis');
+                } else {
+                    const lyricsButton = document.querySelector('.main-nowPlayingBar-extraControls button[data-testid="lyrics-button"]');
+                    if (lyricsButton) {
+                        lyricsButton.click();
+                    }
+                }
+                document.documentElement.requestFullscreen();
+                document.body.classList.add('wmpotify-playerbar-visible');
+                setTimeout(() => {
+                    document.addEventListener('pointermove', fullscreenMouseMoveListener);
+                    fullscreenMouseMoveListener();
+                }, 200);
+            }
+            document.addEventListener('fullscreenchange', () => {
+                if (!document.fullscreenElement) {
+                    exitFullscreen();
+                }
+            }, { once: true });
+            // Somehow fullscreenchange event doesn't fire when exiting fullscreen with Esc key in Spotify
+            document.addEventListener('resize', () => {
+                exitFullscreen();
+            }, { once: true });
+            event.preventDefault();
+            event.stopPropagation();
+        });
     }
 
     // Shuffle button is often removed and re-added, so we need this to keep it in place
@@ -151,10 +191,26 @@ export function setupPlayerbar() {
             }
         }
     }
+
+    function fullscreenMouseMoveListener() {
+        if (!document.fullscreenElement) {
+            exitFullscreen();
+            return;
+        }
+        document.body.classList.add('wmpotify-playerbar-visible');
+        clearTimeout(fullscreenHideControlTimer);
+        fullscreenHideControlTimer = setTimeout(() => {
+            document.body.classList.remove('wmpotify-playerbar-visible');
+        }, 2000);
+    }
+
+    function exitFullscreen() {
+        document.body.classList.remove('wmpotify-playerbar-visible');
+        document.removeEventListener('pointermove', fullscreenMouseMoveListener);
+    }
 }
 
 async function setupTrackInfoWidget() {
-    console.log('setupTrackInfoWidget');
     updatePlayPauseButton();
     const isCustomTitlebar = !!document.querySelector('#wmpotify-title-bar');
     const whAvailable = WindhawkComm.available();

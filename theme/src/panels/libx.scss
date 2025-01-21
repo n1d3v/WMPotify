@@ -32,83 +32,6 @@
         overflow: hidden;
         margin: 0;
 
-        [role="search"] {
-            margin: 2px;
-            width: 225px;
-            height: 24px;
-            border: solid 1px #f4f7fc;
-            background: linear-gradient(to bottom, #5e5f61, #c0c3c6);
-            margin-top: -1px;
-
-            .x-filterBox-filterInput {
-                position: absolute;
-                top: 0;
-                margin: 1px;
-                width: calc(100% - 2px);
-                height: 20px;
-                border: solid 1px white;
-                background-color: #f6f9fc;
-                font-size: 12px;
-                border-radius: 0;
-                min-height: 0;
-                padding-inline: 4px;
-                box-shadow: none;
-                opacity: 1;
-            }
-
-            .x-filterBox-overlay {
-                opacity: 1;
-
-                .x-filterBox-searchIconContainer {
-                    position: absolute;
-                    top: 1px;
-                    right: 0px;
-                    width: 26px;
-                    height: 20px;
-                    border: none;
-                    background: url('resources/topbar/search.png') no-repeat;
-                }
-
-                &:has(.x-filterBox-clearButton) .x-filterBox-searchIconContainer {
-                    display: none;
-                }
-
-                .x-filterBox-clearButton {
-                    position: absolute;
-                    top: 1px;
-                    right: 0px;
-                    width: 26px;
-                    height: 20px;
-                    border: none;
-                    background: url('resources/topbar/clear.png') no-repeat;
-
-                    &:hover {
-                        background: url('resources/topbar/clear_hover.png') no-repeat;
-                    }
-
-                    &:active {
-                        background: url('resources/topbar/clear_pressed.png') no-repeat;
-                    }
-                }
-
-                svg {
-                    display: none;
-                }
-            }
-
-            .x-filterBox-expandButton {
-                display: none;
-            }
-
-            span, svg, input {
-                color: var(--text-subdued);
-            }
-            input::placeholder {
-                color: var(--gray-text);
-                font-style: italic;
-            }
-        }
-
         [role="presentation"] {
             order: -1;
         }
@@ -162,7 +85,6 @@
         margin: 0;
         padding: 0 32px 0 8px;
         margin-top: 1px;
-        margin-left: var(--libx-sidebar-width);
 
         > span {
             height: 25px;
@@ -322,6 +244,10 @@
                 background-image: url('resources/library/album.png');
             }
 
+            &[data-identifier="downloaded"]::before {
+                background-image: url('resources/library/download.png');
+            }
+
             &[data-identifier="by-you"]::before {
                 background-image: url('resources/library/playlist_user2.png');
             }
@@ -429,6 +355,10 @@ body[data-wmpotify-lib-page-open]:not(#Prio1):not(#Prio2):not(#Prio3) { /* dirty
 
         .search-searchCategory-contentArea {
             display: none;
+        }
+   
+        .main-yourLibraryX-filterArea + div {
+            margin-left: var(--libx-sidebar-width);
         }
     }
     

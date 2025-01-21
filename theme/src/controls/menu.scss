@@ -185,6 +185,10 @@
     > div:last-child {
       background: transparent;
     }
+
+    [role="search"] {
+      width: 100%;
+    }
   }
 }
 

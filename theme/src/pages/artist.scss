@@ -176,7 +176,8 @@ section[data-testid="artist-page"] {
     }
 }
 
-:root[data-wmpotify-style="xp"] body[data-hide-libx] {
+:root[data-wmpotify-style="xp"] body[data-hide-libx],
+:root[data-wmpotify-style="xp"]:fullscreen {
     .Root__main-view:has(section[data-testid="artist-page"]) {
         header {
             left: var(--panel-gap);

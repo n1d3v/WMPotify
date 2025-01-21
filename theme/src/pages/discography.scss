@@ -18,6 +18,10 @@ section[data-testid="artist-page"] {
             font-family: var(--ui-font);
         }
 
+        .x-sortBox-sortDropdown {
+            order: 0;
+        }
+
         .artist-artistDiscography-button {
             width: 28px;
             margin-left: 0;
@@ -275,7 +279,7 @@ section[data-testid="artist-page"] {
     }
 }
 
-:root body:not([data-hide-libx]) section[data-testid="artist-page"] {
+:root:not(:fullscreen) body:not([data-hide-libx]) section[data-testid="artist-page"] {
     .artist-artistDiscography-topBar {
         margin-left: calc(var(--panel-gap) * 2 + var(--left-sidebar-width) * 1px);
         width: calc(100% - var(--main-area-right) - var(--panel-gap) * 2 - var(--left-sidebar-width) * 1px);
@@ -289,7 +293,7 @@ section[data-testid="artist-page"] {
     }
 }
 
-:root[data-wmpotify-style="xp"] body:not([data-hide-libx]) section[data-testid="artist-page"] {
+:root[data-wmpotify-style="xp"]:not(:fullscreen) body:not([data-hide-libx]) section[data-testid="artist-page"] {
     .artist-artistDiscography-topBar {
         margin-left: calc(var(--panel-gap) * 3 + var(--left-sidebar-width) * 1px);
         width: calc(100% - var(--main-area-right) - var(--panel-gap) * 3 - var(--left-sidebar-width) * 1px);

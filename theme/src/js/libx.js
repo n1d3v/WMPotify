@@ -1,15 +1,16 @@
 'use strict';
 
+// This script implements the custom sidebar, header and navigation for the stock Spotify LibraryX
+// It's implemented with parsing and clicking various elements in the DOM, so it's not the most efficient way to do it
+// Seems direct navigation is possible with Spicetify.Platform.LocalStorageAPI.setItem('ylx-active-filter-ids', {"": ["1", ...]})
+// But unfortunately it's quite unreliable and doesn't work in all cases (and those not working cases are not known)
+// So this script is implemented in the inefficient way
+
 let categoryButtons;
 const categoryButtonsHierarchy = [];
 const categoryLocalizations = {};
 const categoryButtonsObserver = new MutationObserver(parseCategoryButtons);
-const folderObserver = new MutationObserver(() => {
-    categoryButtonsObserver.disconnect();
-    categoryButtons = document.querySelector('.main-yourLibraryX-filterArea .search-searchCategory-categoryGrid [role="presentation"]');
-    parseCategoryButtons();
-    categoryButtonsObserver.observe(categoryButtons, { childList: true });
-});
+const folderObserver = new MutationObserver(onFolderChange);
 let inFolder = false;
 let lastCategories = [];
 let lastCategoriesIdentifier = [];
@@ -64,7 +65,6 @@ const CustomLibX = {
         // Whole category buttons container gets re-rendered when entering and exiting a playlist folder
         folderObserver.observe(document.querySelector('.main-yourLibraryX-filterArea'), { childList: true });
 
-        go(Spicetify.Platform.History.location.pathname.split('/').slice(2));
         return true;
     },
 
@@ -79,7 +79,7 @@ const CustomLibX = {
         if (!identifiers) {
             identifiers = Spicetify.Platform.History.location.pathname.split('/').slice(2);
         }
-        if (!identifiers[0]) {
+        if (identifiers[0] === undefined) {
             return;
         }
         go(identifiers);
@@ -154,6 +154,21 @@ function renderHeader() {
 
 function parseCategoryButtons() {
     inFolder = document.querySelector('.main-yourLibraryX-collapseButton').childElementCount > 1;
+
+    const currentCategories = getCurrentCategories(true);
+    if (inFolder) {
+        const folderId = Spicetify.Platform.LocalStorageAPI.getItem('opened-folder-uri');
+        currentCategories.push(folderId);
+    }
+    const pathname = '/wmpotify-standalone-libx/' + currentCategories.join('/');
+    if (Spicetify.Platform.History.location.pathname === '/wmpotify-standalone-libx') {
+        Spicetify.Platform.History.location.pathname = pathname;
+    } else if (Spicetify.Platform.History.location.pathname !== pathname) {
+        Spicetify.Platform.History.push({
+            pathname: '/wmpotify-standalone-libx/' + currentCategories.join('/'),
+        });
+    }
+
     if (inFolder) {
         // In a playlist folder, etc. Not the real root category
         renderHeader();
@@ -199,16 +214,13 @@ function parseCategoryButtons() {
     }
     renderHeader();
     renderSidebar();
+}
 
-    const currentCategories = getCurrentCategories(true);
-    inFolder = document.querySelector('.main-yourLibraryX-collapseButton').childElementCount > 1;
-    if (inFolder) {
-        folderName = document.querySelector('.main-yourLibraryX-collapseButton > div').textContent;
-        currentCategories.push('/folder:' + folderName);
-    }
-    Spicetify.Platform.History.push({
-        pathname: '/wmpotify-standalone-libx/' + currentCategories.join('/'),
-    });
+function onFolderChange() {
+    categoryButtonsObserver.disconnect();
+    categoryButtons = document.querySelector('.main-yourLibraryX-filterArea .search-searchCategory-categoryGrid [role="presentation"]');
+    parseCategoryButtons();
+    categoryButtonsObserver.observe(categoryButtons, { childList: true });
 }
 
 // Refresh the element reference in the category object
@@ -296,31 +308,10 @@ async function go(identifiers) {
         }
         await waitForCategoryButtonsUpdate();
     }
-    // for (const identifier of identifiers) {
-    //     if (identifier.startsWith('/folder:')) {
-    //         // Must be last in the loop
-    //         const folderName = identifier.slice(8);
-    //         await waitForListRender();
-    //         const listItems = Array.from(document.querySelectorAll('.main-yourLibraryX-libraryRootlist .main-rootlist-wrapper [role="presentation"]:not([class]) li'));
-    //         const folderItem = listItems.find(item => {
-    //             item.querySelector('div > div')?.textContent === folderName;
-    //         });
-    //         if (!folderItem) {
-    //             break;
-    //         }
-    //         folderItem.click();
-    //         break;
-    //     }
-    //     const category = categoryButtonsHierarchy.find(cat => cat.identifier === identifier);
-    //     if (!category) {
-    //         return;
-    //     }
-    //     refreshElement(category);
-    //     category.elem.click();
-    //     await waitForCategoryButtonsUpdate();
-    // }
     for (let i = 0; i < identifiers.length; i++) {
-        if (i === 0) {
+        if (identifiers[i].startsWith('spotify:user:')) {
+            Spicetify.Platform.LocalStorageAPI.setItem('opened-folder-uri', identifiers[i]);
+        } else if (i === 0) {
             const category = categoryButtonsHierarchy.find(cat => cat.identifier === identifiers[i]);
             if (!category) {
                 return;
@@ -328,18 +319,6 @@ async function go(identifiers) {
             refreshElement(category);
             category.elem.click();
             await waitForCategoryButtonsUpdate();
-        } else if (identifiers[i].startsWith('folder:')) {
-            const folderName = identifiers[i].slice(7);
-            await waitForListRender();
-            const listItems = Array.from(document.querySelectorAll('.main-yourLibraryX-libraryRootlist .main-rootlist-wrapper [role="presentation"]:not([class]) li'));
-            const folderItem = listItems.find(item => {
-                return item.querySelector('div > div').textContent === folderName;
-            });
-            if (!folderItem) {
-                return;
-            }
-            folderItem.click();
-            await waitForFolderChange();
         } else {
             const parentCategory = categoryButtonsHierarchy.find(cat => cat.identifier === identifiers[i - 1]);
             if (!parentCategory) {

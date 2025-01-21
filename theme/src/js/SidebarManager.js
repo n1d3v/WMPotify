@@ -1,16 +1,27 @@
 'use strict';
 
 const widthObserver = new MutationObserver(updateSidebarWidth);
+const widthObserver2 = new ResizeObserver(updateSidebarWidth.bind(null, true));
 
 const SidebarManager = {
     init() {
         widthObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['style'] });
+        widthObserver2.observe(document.querySelector('.Root__right-sidebar'));
+        window.addEventListener('resize', updateSidebarWidth);
+        window.addEventListener('load', updateSidebarWidth);
     },
     updateSidebarWidth,
 };
 
-function updateSidebarWidth() {
-    if (Spicetify.Platform.History.location.pathname !== '/wmpotify-standalone-libx') {
+function updateSidebarWidth(force) {
+    if (!Spicetify.Platform.History.location.pathname.startsWith('/wmpotify-standalone-libx') && !force) {
+        // 1.2.53 changed --panel-width to --right-sidebar-width, so sync them for multi version compatibility
+        const rightSidebarWidth = getComputedStyle(document.documentElement).getPropertyValue("--right-sidebar-width");
+        if (rightSidebarWidth) {
+            SidebarManager.widthManager.disconnect();
+            document.documentElement.style.setProperty("--panel-width", rightSidebarWidth);
+            SidebarManager.widthManager.observe(document.documentElement, { attributes: true, attributeFilter: ['style'] });
+        }
         return;
     }
     // Prevent Spotify from wrongly setting the panel width CSS variable
@@ -19,7 +30,11 @@ function updateSidebarWidth() {
     // So just get the real width and set it back
     widthObserver.disconnect();
     const rightSidebar = document.querySelector('.Root__right-sidebar aside');
-    document.documentElement.style.setProperty("--right-sidebar-width", rightSidebar ? rightSidebar.offsetWidth : 8);
+    document.documentElement.style.setProperty("--panel-width", rightSidebar ? rightSidebar.offsetWidth : 8);
+    const rightSidebarWidth = getComputedStyle(document.documentElement).getPropertyValue("--right-sidebar-width");
+    if (rightSidebarWidth) {
+        document.documentElement.style.setProperty("--right-sidebar-width", rightSidebar ? rightSidebar.offsetWidth : 8);
+    }
     widthObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['style'] });
 }
 

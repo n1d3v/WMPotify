@@ -29,7 +29,8 @@
     width: calc(100% + var(--panel-gap) - 3px);
 }
 
-body[data-hide-libx] {
+body[data-hide-libx],
+:root:fullscreen {
     #Desktop_LeftSidebar_Id {
         display: none;
     }
@@ -119,6 +120,16 @@ body[data-hide-libx] {
     }
 }
 
+.main-loadingIndicator-loadingIcon {
+    width: 32px;
+    height: 32px;
+    background: url('resources/icon/spinner.gif') no-repeat;
+
+    svg {
+        display: none;
+    }
+}
+
 :root[data-wmpotify-style="xp"] {
     /* Add panel gaps again to show frames there */
     /* And extra 8px on the left if LibX is shown */
@@ -151,7 +162,8 @@ body[data-hide-libx] {
         margin-right: 0;
     }
 
-    body[data-hide-libx] {
+    body[data-hide-libx],
+    :root:fullscreen {
         .Root__main-view {
             margin-left: calc(var(--panel-gap) * -2);
             width: calc(100% + var(--panel-gap) * 2);

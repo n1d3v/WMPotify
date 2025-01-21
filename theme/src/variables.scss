@@ -1,6 +1,5 @@
 
 :root {
-    --font: 9pt "Segoe UI", "SegoeUI", "Noto Sans", sans-serif;
     --surface: #f0f0f0;
 
     --active-border: #B4B4B4;
@@ -38,6 +37,7 @@
     --scrollbar-size: 17px;
     --menu-height: 19px;
     --ui-font: "Segoe UI", "SegoeUI", "Noto Sans", sans-serif;
+    --font: 9pt var(--ui-font);
     --caption-font: 9pt/1.2 var(--ui-font);
     --menu-font: 9pt/0.9 var(--ui-font);
     --message-font: 9pt var(--ui-font);
@@ -127,6 +127,7 @@
 
     --logo-16: url('resources/frame/spotify_16.png');
     --logo-32: url('resources/icon/wmpotify.png');
+    --logo-48: url('resources/icon/wmpotify_48.png');
 }
 
 .encore-dark-theme {

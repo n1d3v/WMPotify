@@ -1,0 +1,75 @@
+
+[role="search"] {
+    margin: 2px;
+    width: 225px;
+    height: 24px;
+    border: solid 1px #f4f7fc;
+    background: linear-gradient(to bottom, #5e5f61, #c0c3c6);
+    margin-top: -1px;
+
+    .x-filterBox-filterInput {
+        position: absolute;
+        top: 0;
+        margin: 1px;
+        width: calc(100% - 2px);
+        height: 20px;
+        border: solid 1px white;
+        background-color: #f6f9fc;
+        font-size: 12px;
+        border-radius: 0;
+        min-height: 0;
+        padding-inline: 4px;
+        box-shadow: none;
+        color: black;
+        opacity: 1;
+
+        &::placeholder {
+            color: var(--gray-text);
+            font-style: italic;
+        }
+    }
+
+    .x-filterBox-overlay {
+        opacity: 1;
+
+        .x-filterBox-searchIconContainer {
+            position: absolute;
+            top: 1px;
+            right: 0px;
+            width: 26px;
+            height: 20px;
+            border: none;
+            background: url('resources/topbar/search.png') no-repeat;
+        }
+
+        &:has(.x-filterBox-clearButton) .x-filterBox-searchIconContainer {
+            display: none;
+        }
+
+        .x-filterBox-clearButton {
+            position: absolute;
+            top: 1px;
+            right: 0px;
+            width: 26px;
+            height: 20px;
+            border: none;
+            background: url('resources/topbar/clear.png') no-repeat;
+
+            &:hover {
+                background: url('resources/topbar/clear_hover.png') no-repeat;
+            }
+
+            &:active {
+                background: url('resources/topbar/clear_pressed.png') no-repeat;
+            }
+        }
+
+        svg {
+            display: none;
+        }
+    }
+
+    .x-filterBox-expandButton {
+        display: none;
+    }
+}

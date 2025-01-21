@@ -4,14 +4,17 @@
 @import "controls/menu.scss";
 @import "controls/scrollbar.scss";
 @import "controls/button.scss";
+@import "controls/search.scss";
 @import "controls/checkbox.scss";
 @import "controls/dropdown.scss";
 @import "controls/slider.scss";
 @import "controls/dialog.scss";
+@import "controls/tooltip.scss";
 @import "ui/frame.scss";
 @import "ui/topbar.scss";
 @import "ui/mainarea.scss";
 @import "ui/playerbar.scss";
+@import "ui/fullscreen.scss";
 @import "panels/queue.scss";
 @import "panels/npv.scss";
 @import "panels/libx.scss";
@@ -21,5 +24,6 @@
 @import "pages/artist.scss";
 @import "pages/discography.scss";
 @import "pages/album.scss";
+@import "pages/search.scss";
 @import "pages/settings.scss";
 @import "tinting.scss";

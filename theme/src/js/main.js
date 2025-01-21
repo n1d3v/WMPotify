@@ -97,13 +97,6 @@ function earlyInit() {
             break;
         case 'aero':
             WindhawkComm.extendFrame(0, 0, 0, 60);
-            window.addEventListener('resize', () => {
-                if (window.innerHeight < 62) {
-                    WindhawkComm.extendFrame(-1, -1, -1, -1);
-                } else {
-                    WindhawkComm.extendFrame(0, 0, 0, 60);
-                }
-            });
             break;
         case 'basic':
             WindhawkComm.extendFrame(0, 0, 0, 0);
@@ -121,6 +114,17 @@ function earlyInit() {
             break;
     }
     document.documentElement.dataset.wmpotifyStyle = style;
+
+    window.addEventListener('resize', () => {
+        if (style === 'aero') {
+            if (window.innerHeight < 62) {
+                WindhawkComm.extendFrame(-1, -1, -1, -1);
+            } else {
+                WindhawkComm.extendFrame(0, 0, 0, 60);
+            }
+        }
+        WindhawkComm.setMinSize(358, titleStyle === 'native' ? 60 : 90);
+    });
 }
 
 earlyInit();

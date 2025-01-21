@@ -69,14 +69,14 @@
 
         &:has(#wmpotify-title-buttons) {
             --controls-width: 43px;
-            ::before {
+            &::before {
                 border-image-source: url('resources/frame/titlebar_closeonly.png');
             }
         }
 
         &:has(#wmpotify-minimize-button) {
             --controls-width: 106px;
-            ::before {
+            &::before {
                 border-image-source: url('resources/frame/titlebar.png');
             }
         }

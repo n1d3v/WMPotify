@@ -74,6 +74,7 @@ const WindhawkComm = {
     // (int, int)
     setMinSize(width, height) {
         if (windhawkModule?.setMinSize) {
+            [width, height] = [width, height].map(v => Math.round(v * window.devicePixelRatio));
             windhawkModule.setMinSize(width, height);
         }
     },

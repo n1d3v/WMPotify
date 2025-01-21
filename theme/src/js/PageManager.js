@@ -30,10 +30,10 @@ const PageManager = {
             return;
         }
 
+        SidebarManager.updateSidebarWidth();
+
         if (location.pathname.startsWith('/wmpotify-standalone-libx')) {
             document.body.dataset.wmpotifyLibPageOpen = true;
-
-            SidebarManager.updateSidebarWidth();
 
             // Use Spicetify.LocalStorageAPI for immediate effect, then revert the underlying localStorage values to prevent persistence
             const origSidebarState = DirectUserStorage.getItem("ylx-sidebar-state");

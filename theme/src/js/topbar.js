@@ -66,6 +66,7 @@ export function setupTopbar() {
     handleTabOverflow();
     setTimeout(handleTabOverflow, 1000);
     window.addEventListener('resize', handleTabOverflow);
+    document.addEventListener('fullscreenchange', handleTabOverflow);
 
     const accountButton = document.querySelector('.main-topBar-topbarContentRight > button:last-child');
     const accountLabel = document.createElement('span');
