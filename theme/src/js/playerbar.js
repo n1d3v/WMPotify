@@ -22,7 +22,7 @@ export function setupPlayerbar() {
     const prevButton = document.querySelector('.player-controls__buttons button[data-testid="control-button-skip-back"]');
     const nextButton = document.querySelector('.player-controls__buttons button[data-testid="control-button-skip-forward"]');
     const repeatButton = document.querySelector('.player-controls__buttons button[data-testid="control-button-repeat"]');
-    playerControlsLeft.insertBefore(repeatButton, prevButton);
+    playerControlsLeft.appendChild(repeatButton);
 
     const whStatus = WindhawkComm.query();
     if (whStatus?.speedModSupported && whStatus.immediateSpeedChange) {
@@ -164,17 +164,17 @@ export function setupPlayerbar() {
         });
     }
 
-    // Shuffle button is often removed and re-added, so we need this to keep it in place
-    const observer = new MutationObserver(() => {
-        const childLength = playerControlsLeft.children.length;
-        if (childLength === 4) {
-            return;
-        }
-        observer.disconnect();
-        playerControlsLeft.insertBefore(playerControlsLeft.children[childLength - 2], repeatButton);
-        observer.observe(playerControlsLeft, { childList: true });
-    });
-    observer.observe(playerControlsLeft, { childList: true });
+    // // Shuffle button is often removed and re-added, so we need this to keep it in place
+    // const observer = new MutationObserver(() => {
+    //     const childLength = playerControlsLeft.children.length;
+    //     if (childLength === 4) {
+    //         return;
+    //     }
+    //     observer.disconnect();
+    //     playerControlsLeft.insertBefore(playerControlsLeft.children[childLength - 2], repeatButton);
+    //     observer.observe(playerControlsLeft, { childList: true });
+    // });
+    // observer.observe(playerControlsLeft, { childList: true });
 
     function updateTimeTextMiniMode() {
         if (window.innerWidth < 750) {

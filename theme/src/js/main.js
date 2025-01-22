@@ -18,7 +18,7 @@ const elementsRequired = [
     '.main-globalNav-searchSection',
     '.main-globalNav-searchContainer > button',
     '.main-globalNav-searchContainer div form button',
-    '.main-topBar-searchBar',
+    '.main-globalNav-searchContainer div form input[type="search"]',
     '.main-topBar-topbarContentRight > .main-actionButtons > button',
     '.main-topBar-topbarContentRight > button:last-child',
     '.Root__main-view',
@@ -175,12 +175,12 @@ window.addEventListener('load', () => {
             try {
                 await init();
             } catch (e) {
-                (Spicetify.showNotification || window.alert)('[WMPotify] An error occurred during initialization. Please check the console for more information.');
+                (window.Spicetify?.showNotification || window.alert)('[WMPotify] An error occurred during initialization. Please check the console for more information.');
                 console.error('WMPotify: Error during init:', e);
             }
             console.log('WMPotify: Theme loaded');
         } else if (cnt++ > 80) {
-            (Spicetify.showNotification || window.alert)('[WMPotify] Theme loading failed. Please refresh the page to try again. Please make sure you have compatible Spoitfy version.');
+            (window.Spicetify?.showNotification || window.alert)('[WMPotify] Theme loading failed. Please refresh the page to try again. Please make sure you have compatible Spoitfy version.');
             clearInterval(interval);
             const missing = [];
             for (const selector of elementsRequired) {

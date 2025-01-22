@@ -4,6 +4,7 @@
     border-image: url('resources/topbar/bg.png') 2 / 2px 1px 2px 1px;
     justify-content: center;
     padding-inline: 8px !important;
+    margin: calc(var(--panel-gap) * -1); /* For Spotify 1.2.46 and below compatibility, present by default in xpui.css on 1.2.47+ */
 }
 
 .main-globalNav-historyButtons {
@@ -211,7 +212,7 @@
         border: solid 1px #f4f7fc;
         background: linear-gradient(to bottom, #5e5f61, #c0c3c6);
 
-        .main-topBar-searchBar {
+        input[type="search"] {
             margin: 1px;
             width: calc(100% - 2px);
             height: 20px;
@@ -240,7 +241,7 @@
             background: url('resources/topbar/search.png') no-repeat;
         }
 
-        &:has(.main-topBar-searchBar:not(:placeholder-shown)) #wmpotify-search-clear-button {
+        &:has(input[type="search"]:not(:placeholder-shown)) #wmpotify-search-clear-button {
             background: url('resources/topbar/clear.png') no-repeat;
 
             &:hover {

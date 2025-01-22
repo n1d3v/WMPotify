@@ -20,14 +20,15 @@ let idle = false;
 let visConfig = {};
 
 const arraySize = 96;
+const arraySizeReduced = 48;
 
 const fps = 30;
 let interval;
 
 const lastAud = new Array(arraySize).fill(0);
-const lastBar = new Array(arraySize).fill(0);
-const lastTop = new Array(arraySize).fill(0);
-const topSpeed = new Array(arraySize).fill(0);
+const lastBar = new Array(arraySizeReduced).fill(0);
+const lastTop = new Array(arraySizeReduced).fill(0);
+const topSpeed = new Array(arraySizeReduced).fill(0);
 
 let lastIndex = 0;
 
@@ -79,12 +80,16 @@ async function wallpaperAudioListener() {
         }
         idle = false;
     }
+    
+    for (let i = 0; i < audioArray.length; i += 2) {
+        audioArray[i / 2] = (audioArray[i] + audioArray[i + 1]) / 2;
+    }
 
     // Clear the canvas
     visBarCtx.clearRect(0, 0, visBar.width, visBar.height);
 
     // Render bars along the full width of the canvas
-    const barWidth = visConfig.barWidth || Math.max(Math.round(1.0 / arraySize * visBar.width), 6);
+    const barWidth = visConfig.barWidth || Math.max(Math.round(1.0 / arraySizeReduced * visBar.width), 6);
     const gap = 1;
 
     visBarCtx.fillStyle = visConfig.barColor;
@@ -95,8 +100,8 @@ async function wallpaperAudioListener() {
     }
 
     let leftMargin = 0;
-    if (barWidth * arraySize < visBar.width) {
-        leftMargin = Math.round((visBar.width - barWidth * arraySize) / 2);
+    if (barWidth * arraySizeReduced < visBar.width) {
+        leftMargin = Math.round((visBar.width - barWidth * arraySizeReduced) / 2);
     }
     let allZero = true;
     for (var i = 0; i < audioArray.length; ++i) {
@@ -166,8 +171,8 @@ function updateVisConfig() {
         topColor: localStorage.wmpotifyVisTopColor || '#dfeaf7',
         useSchemeColors: localStorage.wmpotifyVisUseSchemeColors,
         followAlbumArt: localStorage.wmpotifyVisFollowAlbumArt,
-        barWidth: parseInt(localStorage.wmpotifyVisBarWidth || 8),
-        decSpeed: parseFloat(localStorage.wmpotifyVisDecSpeed || 3),
+        barWidth: parseInt(localStorage.wmpotifyVisBarWidth || 6),
+        decSpeed: parseFloat(localStorage.wmpotifyVisDecSpeed || 2),
         primaryScale: parseFloat(localStorage.wmpotifyVisPrimaryScale || 1.0),
         diffScale: parseFloat(localStorage.wmpotifyVisDiffScale || 0.07)
     };

@@ -138,6 +138,7 @@ div[data-testid='now-playing-widget'] {
         }
 
         &[data-testid='control-button-skip-back'] {
+            order: 99;
             width: 52px;
             height: 25px;
             margin-right: -1px;
@@ -299,6 +300,7 @@ div[data-testid='now-playing-widget'] {
     }
 
     #wmpotify-stop-button {
+        order: 98;
         position: relative;
         display: inline-flex;
         width: 25px;

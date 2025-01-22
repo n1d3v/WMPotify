@@ -78,7 +78,7 @@ export function setupTopbar() {
     searchContainer.id = 'wmpotify-search-container';
     const searchBarWrapper = document.createElement('div');
     searchBarWrapper.id = 'wmpotify-search-wrapper';
-    const searchBar = document.querySelector('.main-topBar-searchBar');
+    const searchBar = document.querySelector('.main-globalNav-searchContainer div form input[type="search"]');
     searchBarWrapper.appendChild(searchBar);
     const searchClearButton = document.createElement('button');
     searchClearButton.id = 'wmpotify-search-clear-button';
