@@ -1,10 +1,9 @@
 # WMPotify
 * A Windows Media Player 11 inspired Spicetify theme for Spotify
 * Still WIP
-* Supported versions: 1.2.49 - 1.2.55
+* Supported versions: 1.2.45 - 1.2.55
     * Primarily tested on 1.2.52
-    * Kinda broken on 1.2.47-1.2.48 but works
-    * Fully broken on 1.2.46 and below
+    * 1.2.44 and below is not tested yet
 
 ## Installation
 * No proper installation guide yet
