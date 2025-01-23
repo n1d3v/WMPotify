@@ -8,7 +8,7 @@ import butterchurnPresets from './butterchurnPresets.min.js';
 import butterchurnPresetsExtra from './butterchurnPresetsExtra.min.js';
 import butterchurnPresetsExtra2 from './butterchurnPresetsExtra2.min.js';
 import FFT from './fft';
-import { findAudioArray, uninit } from '../wmpvis';
+import { findAudioArray } from '../wmpvis';
 
 let audioData = null;
 let lastIndex = 0;
