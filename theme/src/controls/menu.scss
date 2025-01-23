@@ -34,6 +34,7 @@
       box-shadow: 4px 4px 3px -2px rgba(0, 0, 0, 0.5);
       border-radius: 0;
       overflow-x: hidden;
+      animation: fade 0.2s;
 
       .main-contextMenu-filterPlaylistSearchContainer {
         height: unset;
@@ -105,6 +106,55 @@
 
           span {
             font: var(--menu-font);
+          }
+
+          /* Checkmark */
+          &:has(path[d="M15.53 2.47a.75.75 0 0 1 0 1.06L4.907 14.153.47 9.716a.75.75 0 0 1 1.06-1.06l3.377 3.376L14.47 2.47a.75.75 0 0 1 1.06 0z"]) {
+            > svg:first-child {
+              display: none;
+            }
+
+            &::after {
+              content: "";
+              background: var(--menu-item-hover-background);
+              box-shadow: 0 0 0 1px #b3d3f9;
+              border-radius: inherit;
+              box-sizing: border-box;
+              position: absolute;
+              top: 0;
+              left: 0;
+              width: 22px;
+              height: 22px;
+            }
+
+            > span::before {
+              content: "\2714";
+              color: rgb(12, 18, 161);
+              font-size: 10pt;
+              left: 6px;
+              top: 50%;
+              transform: translateY(-52%);
+              display: block;
+              font-weight: 700;
+              position: absolute;
+              z-index: 2;
+            }
+
+            &:has(svg.activeStyle) > span::before {
+              content: "";
+              left: 8px;
+              top: 50%;
+              transform: translateY(-50%);
+              background: radial-gradient(circle at 75% 25%, #d5d4ea, #333583);
+              border: 1px solid #1a1490;
+              box-shadow: none;
+              border-radius: 50%;
+              box-sizing: border-box;
+              height: 8px;
+              width: 8px;
+              position: absolute;
+              z-index: 2;
+            }
           }
         }
 

@@ -3,6 +3,7 @@
 * Still WIP
 * Supported versions: 1.2.45 - 1.2.55
     * Primarily tested on 1.2.52
+    * 1.2.45 and below: global navbar must be enabled in the experimental features
     * 1.2.44 and below is not tested yet
 
 ## Installation
@@ -25,12 +26,11 @@ echo.
 
 ## TODO
 * Support more versions of Spotify
-    * Older versions support, possibly down to 1.2.49?
+    * Older versions support
 * Add installation script + guide
 
 ### Things to be done after a proper beta release
 * Dark mode support + dynamic theme support
-* (Maybe) make a own library custom app to replace LibraryX and make it more WMP11-like
 
 ## Credits
 * [Spicetify](https://spicetify.app/)

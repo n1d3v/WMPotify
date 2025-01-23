@@ -164,18 +164,6 @@ export function setupPlayerbar() {
         });
     }
 
-    // // Shuffle button is often removed and re-added, so we need this to keep it in place
-    // const observer = new MutationObserver(() => {
-    //     const childLength = playerControlsLeft.children.length;
-    //     if (childLength === 4) {
-    //         return;
-    //     }
-    //     observer.disconnect();
-    //     playerControlsLeft.insertBefore(playerControlsLeft.children[childLength - 2], repeatButton);
-    //     observer.observe(playerControlsLeft, { childList: true });
-    // });
-    // observer.observe(playerControlsLeft, { childList: true });
-
     function updateTimeTextMiniMode() {
         if (window.innerWidth < 750) {
             if (!titlebar.contains(timeText)) {

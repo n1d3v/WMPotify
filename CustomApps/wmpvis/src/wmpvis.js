@@ -5,10 +5,13 @@
 
 'use strict';
 
+import ButterchurnAdaptor from './butterchurn/adaptor';
 import { spAudioDataToFrequencies } from './spadapter';
 
+let albumArt = null;
 let visBar = null;
 let visTop = null;
+let visBC = null;
 let visBarCtx = null;
 let visTopCtx = null;
 let debugView = null;
@@ -20,7 +23,7 @@ let idle = false;
 let visConfig = {};
 
 const arraySize = 96;
-const arraySizeReduced = 48;
+const arraySizeReduced = 49;
 
 const fps = 30;
 let interval;
@@ -32,7 +35,7 @@ const topSpeed = new Array(arraySizeReduced).fill(0);
 
 let lastIndex = 0;
 
-function findAudioArray(near) {
+export function findAudioArray(near) {
     if (!audioData) {
         return -1;
     }
@@ -65,6 +68,10 @@ async function wallpaperAudioListener() {
         return;
     }
 
+    if (visConfig.type !== 'bars') {
+        return;
+    }
+
     const index = findAudioArray(lastIndex);
     let audioArray = audioData[index]?.slice(1) || new Array(arraySize).fill(0);
     const same = index === lastIndex;
@@ -81,9 +88,11 @@ async function wallpaperAudioListener() {
         idle = false;
     }
     
-    for (let i = 0; i < audioArray.length; i += 2) {
+    for (let i = 0; i < audioArray.length - 2; i += 2) {
         audioArray[i / 2] = (audioArray[i] + audioArray[i + 1]) / 2;
     }
+    audioArray[arraySizeReduced - 2] = audioArray[arraySize - 2];
+    audioArray[arraySizeReduced - 1] = audioArray[arraySize - 1];
 
     // Clear the canvas
     visBarCtx.clearRect(0, 0, visBar.width, visBar.height);
@@ -94,10 +103,6 @@ async function wallpaperAudioListener() {
 
     visBarCtx.fillStyle = visConfig.barColor;
     visTopCtx.fillStyle = visConfig.topColor;
-    if (visConfig.followAlbumArt) {// && visStatus.lastAlbumArt?.textColor && visStatus.lastAlbumArt?.highContrastColor) {
-        // visBarCtx.fillStyle = visStatus.lastAlbumArt.textColor;
-        // visTopCtx.fillStyle = visStatus.lastAlbumArt.highContrastColor;
-    }
 
     let leftMargin = 0;
     if (barWidth * arraySizeReduced < visBar.width) {
@@ -165,12 +170,11 @@ function updateSize() {
     idle = false;
 }
 
-function updateVisConfig() {
+export function updateVisConfig() {
     visConfig = {
+        type: localStorage.wmpotifyVisType || 'bars',
         barColor: localStorage.wmpotifyVisBarColor || '#a4eb0c',
         topColor: localStorage.wmpotifyVisTopColor || '#dfeaf7',
-        useSchemeColors: localStorage.wmpotifyVisUseSchemeColors,
-        followAlbumArt: localStorage.wmpotifyVisFollowAlbumArt,
         barWidth: parseInt(localStorage.wmpotifyVisBarWidth || 6),
         decSpeed: parseFloat(localStorage.wmpotifyVisDecSpeed || 2),
         primaryScale: parseFloat(localStorage.wmpotifyVisPrimaryScale || 1.0),
@@ -178,6 +182,13 @@ function updateVisConfig() {
     };
     visTopCtx.clearRect(0, 0, visTop.width, visTop.height);
     idle = false;
+
+    if (visConfig.type === 'milkdrop') {
+        ButterchurnAdaptor.init(visBC);
+        ButterchurnAdaptor.setPaused(false);
+    } else {
+        ButterchurnAdaptor.setPaused(true);
+    }
 }
 
 async function setupListeners() {
@@ -192,7 +203,9 @@ async function setupListeners() {
     Spicetify.Player.addEventListener('songchange', async () => {
         audioData = await spAudioDataToFrequencies();
         lastIndex = 0;
+        albumArt.src = Spicetify.Player.data?.item?.album?.images?.[0]?.url?.replace('spotify:image:', 'https://i.scdn.co/image/');
     });
+    ButterchurnAdaptor.setAudioData(audioData);
     if (interval) {
         clearInterval(interval);
     }
@@ -202,20 +215,32 @@ async function setupListeners() {
 window.addEventListener('resize', updateSize);
 
 export async function init(elemRefs) {
+    console.log('Initializing wmpvis');
+    albumArt = elemRefs.albumArt.current;
     visBar = elemRefs.visBar.current;
     visTop = elemRefs.visTop.current;
+    visBC = elemRefs.visBC.current;
     debugView = elemRefs.debug.current;
+
     visBarCtx = visBar.getContext('2d');
     visTopCtx = visTop.getContext('2d');
+
     updateSize();
     lastTop.fill(visTop.height);
     setupListeners();
     updateVisConfig();
     new ResizeObserver(updateSize).observe(visBar);
+
+    albumArt.src = document.querySelector('.main-nowPlayingWidget-coverArt .cover-art img')?.src;
+
+    if (visConfig.type === 'milkdrop') {
+        ButterchurnAdaptor.init(visBC);
+    }
 }
 
-function uninit() {
+export function uninit() {
     if (interval) {
         clearInterval(interval);
     }
+    ButterchurnAdaptor.uninit();
 }
