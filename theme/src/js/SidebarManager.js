@@ -18,9 +18,9 @@ function updateSidebarWidth(force) {
         // 1.2.53 changed --panel-width to --right-sidebar-width, so sync them for multi version compatibility
         const rightSidebarWidth = getComputedStyle(document.documentElement).getPropertyValue("--right-sidebar-width");
         if (rightSidebarWidth) {
-            SidebarManager.widthManager.disconnect();
+            widthObserver.disconnect();
             document.documentElement.style.setProperty("--panel-width", rightSidebarWidth);
-            SidebarManager.widthManager.observe(document.documentElement, { attributes: true, attributeFilter: ['style'] });
+            widthObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['style'] });
         }
         return;
     }

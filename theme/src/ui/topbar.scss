@@ -145,6 +145,21 @@
         }
     }
 
+    > button:first-child {
+        position: relative;
+        margin-right: 9px;
+
+        &::after {
+            content: '';
+            position: absolute;
+            top: -6px;
+            right: -15px;
+            width: 2px;
+            height: 36px;
+            background: url('resources/topbar/separator.png') no-repeat;
+        }
+    }
+
     > #wmpotify-tabs-overflow-button {
         display: none;
         width: 19px;

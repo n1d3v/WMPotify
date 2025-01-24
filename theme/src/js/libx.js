@@ -12,6 +12,7 @@ const categoryLocalizations = {};
 const categoryButtonsObserver = new MutationObserver(parseCategoryButtons);
 const folderObserver = new MutationObserver(onFolderChange);
 let inFolder = false;
+let exittingFolder = false;
 let lastCategories = [];
 let lastCategoriesIdentifier = [];
 
@@ -160,13 +161,15 @@ function parseCategoryButtons() {
         const folderId = Spicetify.Platform.LocalStorageAPI.getItem('opened-folder-uri');
         currentCategories.push(folderId);
     }
-    const pathname = '/wmpotify-standalone-libx/' + currentCategories.join('/');
-    if (Spicetify.Platform.History.location.pathname === '/wmpotify-standalone-libx') {
-        Spicetify.Platform.History.location.pathname = pathname;
-    } else if (Spicetify.Platform.History.location.pathname !== pathname) {
-        Spicetify.Platform.History.push({
-            pathname: '/wmpotify-standalone-libx/' + currentCategories.join('/'),
-        });
+    if (!exittingFolder) {
+        const pathname = '/wmpotify-standalone-libx/' + currentCategories.join('/');
+        if (Spicetify.Platform.History.location.pathname === '/wmpotify-standalone-libx') {
+            Spicetify.Platform.History.location.pathname = pathname;
+        } else if (Spicetify.Platform.History.location.pathname !== pathname) {
+            Spicetify.Platform.History.push({
+                pathname: '/wmpotify-standalone-libx/' + currentCategories.join('/'),
+            });
+        }
     }
 
     if (inFolder) {
@@ -256,6 +259,7 @@ async function goToRootCategory() {
 };
 
 function exitFolder() {
+    exittingFolder = true;
     document.querySelectorAll('.main-yourLibraryX-collapseButton button')?.[1]?.click();
 }
 
@@ -310,7 +314,8 @@ async function go(identifiers) {
     }
     for (let i = 0; i < identifiers.length; i++) {
         if (identifiers[i].startsWith('spotify:user:')) {
-            Spicetify.Platform.LocalStorageAPI.setItem('opened-folder-uri', identifiers[i]);
+            await waitForListRender();
+            document.querySelector('.main-yourLibraryX-libraryRootlist .main-rootlist-wrapper div[role="button"][aria-labelledby*="listrow-title-' + identifiers[i] + '"]').click();
         } else if (i === 0) {
             const category = categoryButtonsHierarchy.find(cat => cat.identifier === identifiers[i]);
             if (!category) {
@@ -463,6 +468,7 @@ function waitForCategoryButtonsUpdate() {
 function waitForFolderChange() {
     return new Promise((resolve) => {
         const observer = new MutationObserver(() => {
+            exittingFolder = false;
             resolve();
             observer.disconnect();
         });

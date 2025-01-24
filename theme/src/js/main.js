@@ -192,3 +192,7 @@ window.addEventListener('load', () => {
         }
     }, 100);
 });
+
+document.addEventListener('scroll', function () {
+    document.documentElement.scrollTo(0, 0);
+});

@@ -6,37 +6,44 @@
 'use strict';
 
 import LRC from "./lrcparse";
+import madIdb from "./MadIdb";
 import lrcCache from "./caching";
+import { getSpotifyNowPlaying } from "./spotify";
 
 let lyricsView = null;
+
+let visStatus = {
+    lastMusic: null,
+    lastMusicEnglish: null
+};
 
 let lastLyrics = null;
 let lastSyncedLyricsParsed = null;
 let lastLyricsId = null;
-let lastMusic = null;
+let lastScrollIndex = -1;
 let lastFetchInfo = {}; // For debugging
-let autoScroll = true;
 let overrides = {};
 let abortController = new AbortController();
+let scrolling = false;
 
 const headers = {
     'Lrclib-Client': 'WMPotify/1.0 ModernActiveDesktop/3.4.0'
 };
 
-export async function loadLyricsExternal() {
+async function reloadLyrics() {
     const hash = await getSongHash(visStatus.lastMusic?.artist, visStatus.lastMusic?.title, visStatus.lastMusic?.albumTitle);
     if (overrides[hash]) {
         delete overrides[hash];
         madIdb.setItem('lyricsOverrides', overrides); // Doesn't need to wait for the promise to resolve
     }
     await lrcCache.delete(hash);
-    processProperties(true);
+    processProperties();
 };
 
 // lrcMenuItems[1].addEventListener('click', function () { // Search Lyrics button
-//     const artist = visStatus.lastSpotifyMusic?.artist || visStatus.lastMusic?.artist || '';
-//     const title = visStatus.lastSpotifyMusic?.title || visStatus.lastMusic?.title || '';
-//     const albumTitle = visStatus.lastSpotifyMusic?.albumTitle || visStatus.lastMusic?.albumTitle || '';
+//     const artist = visStatus.lastMusicEnglish?.artist || visStatus.lastMusic?.artist || '';
+//     const title = visStatus.lastMusicEnglish?.title || visStatus.lastMusic?.title || '';
+//     const albumTitle = visStatus.lastMusicEnglish?.albumTitle || visStatus.lastMusic?.albumTitle || '';
 //     const params = {
 //         artist: artist,
 //         title: title,
@@ -56,7 +63,7 @@ export async function loadLyricsExternal() {
 //     }, null, "window");
 // });
 
-export async function openLyricsFile() {
+async function openLyricsFile() {
     const pickerOpts = {
         types: [
             {
@@ -72,51 +79,35 @@ export async function openLyricsFile() {
     const file = await fileHandle.getFile();
     loadLyrics(file);
 
-    if (window.madIdb) {
-        const hash = await getSongHash(visStatus.lastMusic?.artist, visStatus.lastMusic?.title, visStatus.lastMusic?.albumTitle);
-        if (hash && await madConfirm(madGetString('VISLRC_CONFIRM_SAVE_LYRICS'), null, { icon: 'question', title: 'locid:VISLRC_TITLE' })) {
-            overrides[hash] = {
-                lrc: text
-            };
-            madIdb.setItem('lyricsOverrides', overrides);
-        }
+    const hash = await getSongHash(visStatus.lastMusic?.artist, visStatus.lastMusic?.title, visStatus.lastMusic?.albumTitle);
+    if (hash) {
+        overrides[hash] = {
+            lrc: await file.text()
+        };
+        madIdb.setItem('lyricsOverrides', overrides);
     }
 };
-
-// lrcMenuItems[5].addEventListener('click', function () { // Auto Scroll button
-//     if (!lastSyncedLyricsParsed) {
-//         return;
-//     }
-
-//     autoScroll = !autoScroll;
-//     if (autoScroll) {
-//         lrcMenuItems[5].classList.add('checkedItem');
-//         processTimeline();
-//     } else {
-//         lrcMenuItems[5].classList.remove('checkedItem');
-//     }
-// });
 
 // #region Functions
 
 // Load lyrics from the API
 // Priority:
-// 0. Local overrides
-// 1: Spotify data (if available, enabled, and premium)
-// 2. Cached results (includes remote overrides; ignore if unsynced, loaded while preferring unsynced, and it's not an override)
+// 1. Local overrides
+// 2. Cached results (includes remote overrides and Spotify data)
 // 3. Remote overrides
-// 4. Synced results (except for inaccurate search fallback with no album title data)
-//  4.1 Get (whatever succeeds first)
-//  4.2 Accurate search fallback
-//  4.3 Accurate search fallback without album title
-//  4.4 Accurate search fallback without artist name (only if album title is present)
-//  4.5 Inaccurate search fallback
-//  4.6 Inaccurate search fallback with parentheses stripped
-// 5. Unsynced results
-//  5.1 Same as 4.1-4.6
-// 6. Synced inaccurate search fallback with no album title data
-// 7. Unsynced inaccurate search fallback with no album title data
-// 8. No lyrics found
+// 4: Spotify data (if available, enabled, and premium)
+// 5. Synced results (except for inaccurate search fallback with no album title data)
+//  5.1 Get (whatever succeeds first)
+//  5.2 Accurate search fallback
+//  5.3 Accurate search fallback without album title
+//  5.4 Accurate search fallback without artist name (only if album title is present)
+//  5.5 Inaccurate search fallback
+//  5.6 Inaccurate search fallback with parentheses stripped
+// 6. Unsynced results
+//  6.1 Same as 5.1-5.6
+// 7. Synced inaccurate search fallback with no album title data
+// 8. Unsynced inaccurate search fallback with no album title data
+// 9. No lyrics found
 async function findLyrics(id) {
     if (id) {
         return await fetchLyrics('https://lrclib.net/api/get/' + id);
@@ -141,46 +132,51 @@ async function findLyrics(id) {
                 albumTitle: albumTitle,
                 duration: duration,
                 syncedLyrics: override.lrc,
-                plainLyrics: LRC.toPlain(override.lrc)
+                plainLyrics: LRC.toPlain(override.lrc),
+                provider: 'Local File'
             };
         } else {
             return {
                 synced: false,
                 id: null,
-                plainLyrics: override.lrc
+                plainLyrics: override.lrc,
+                provider: 'Local File'
             };
         }
     }
 
-    const spotifyData = await Spicetify.CosmosAsync.get(`https://spclient.wg.spotify.com/color-lyrics/v2/track/${Spicetify.Player.data?.item?.uri?.split(':').pop()}?format=json&vocalRemoval=false&market=from_token`);
-    if (spotifyData?.lyrics) {
-        if (spotifyData.lyrics.syncType === "LINE_SYNCED") {
-            return {
-                synced: true,
-                id: null,
-                title: visStatus.lastMusic?.title,
-                artist: visStatus.lastMusic?.artist,
-                albumTitle: visStatus.lastMusic?.albumTitle,
-                duration: visStatus.lastMusic?.duration,
-                syncedLyrics: spotifyData.lyrics.lines.map(line =>{ return {time: line.startTimeMs / 1000, text: line.words} }),
-                plainLyrics: null
-            }
+    const cache = !localStorage.wmpotifyVisLyricsNoCache && await lrcCache.get(hash);
+    if (cache) {
+        lastFetchInfo.cache = true;
+        if (override?.id) {
+            lastFetchInfo.override = override.id;
         }
+        return cache;
     }
 
-    const cache = !localStorage.madesktopVisLyricsNoCache && await lrcCache.get(hash);
-    if (cache) {
-        // Delete cache if cache is unsynced, cached while preferring unsynced, now preferring synced, and not an override
-        // As lyrics load logic is different when preferring unsynced
-        if (!cache.synced && cache.preferredUnsynced && !preferUnsynced && override?.id !== cache.id) {
-            log('Deleting no longer wanted unsynced cache: ' + hash, 'log', 'MADVisLrc');
-            await lrcCache.delete(hash);
-        } else {
-            lastFetchInfo.cache = true;
-            if (override?.id) {
-                lastFetchInfo.override = override.id;
+    if (!localStorage.wmpotifyVisLyricsNoSpotify && Spicetify.Player.data?.item?.uri?.startsWith('spotify:')) {
+        const spotifyData = await Spicetify.CosmosAsync.get(`https://spclient.wg.spotify.com/color-lyrics/v2/track/${Spicetify.Player.data?.item?.uri?.split(':').pop()}?format=json&vocalRemoval=false&market=from_token`);
+        if (spotifyData?.lyrics) {
+            if (spotifyData.lyrics.syncType === "LINE_SYNCED") {
+                return {
+                    synced: true,
+                    id: -1,
+                    title: visStatus.lastMusic?.title,
+                    artist: visStatus.lastMusic?.artist,
+                    albumTitle: visStatus.lastMusic?.albumTitle,
+                    duration: visStatus.lastMusic?.duration,
+                    syncedLyrics: spotifyData.lyrics.lines.map(line =>{ return {time: line.startTimeMs / 1000, text: line.words} }),
+                    plainLyrics: null,
+                    provider: spotifyData.lyrics.providerDisplayName + ' (Spotify)'
+                }
+            } else {
+                return {
+                    synced: false,
+                    id: -1,
+                    plainLyrics: spotifyData.lyrics.lyrics,
+                    provider: spotifyData.lyrics.providerDisplayName + ' (Spotify)'
+                }
             }
-            return cache;
         }
     }
 
@@ -193,8 +189,8 @@ async function findLyrics(id) {
     let urlsToTry = [];
 
     const url = new URL('https://lrclib.net/api/get');
-    if (localStorage.madesktopVisSpotifyEnabled && localStorage.madesktopVisSpotifyInfo && visStatus.lastSpotifyMusic) {
-        const { artist, title, albumTitle, duration } = visStatus.lastSpotifyMusic;
+    if (visStatus.lastMusicEnglish) {
+        const { artist, title, albumTitle, duration } = visStatus.lastMusicEnglish;
         const params = {
             artist_name: artist,
             track_name: title,
@@ -273,7 +269,7 @@ async function findLyrics(id) {
         }
     }
     urlsToTry = [...new Set(urlsToTry)];
-    log(urlsToTry, 'log', 'MADVisLrc');
+    console.log('MADVisLrc:', urlsToTry);
     lastFetchInfo.urls = urlsToTry;
     lastFetchInfo.attempt = new Array(urlsToTry.length).fill(0);
     lastFetchInfo.attempted = 0;
@@ -283,7 +279,7 @@ async function findLyrics(id) {
     for (const url of urlsToTry) {
         const lyrics = await fetchLyrics(url);
         if (lyrics) {
-            if (lyrics.synced || preferUnsynced) {
+            if (lyrics.synced) {
                 return lyrics;
             } else {
                 lastUnsyncedLyrics = lyrics;
@@ -312,7 +308,7 @@ async function findLyrics(id) {
 // Less tolerant than searchFallback (e.g. duplicated titles don't work here)
 async function searchFallbackAccurate(mode = 0) { // 0: Normal, 1: No album title, 2: No artist name
     lastFetchInfo.searchFallback = 1;
-    let artist = visStatus.lastSpotifyMusic?.artist || visStatus.lastMusic?.artist || '';
+    let artist = visStatus.lastMusicEnglish?.artist || visStatus.lastMusic?.artist || '';
     if (artist.includes(', ') || artist.includes(' & ')) {
         artist = artist.split(', ')[0].split(' & ')[0];
     }
@@ -320,16 +316,16 @@ async function searchFallbackAccurate(mode = 0) { // 0: Normal, 1: No album titl
     if (strippedArtist) {
         artist = strippedArtist;
     }
-    let title = visStatus.lastSpotifyMusic?.title || visStatus.lastMusic?.title || '';
+    let title = visStatus.lastMusicEnglish?.title || visStatus.lastMusic?.title || '';
     const strippedTitle = stripNonAlphaNumeric(title);
     if (strippedTitle) {
         title = strippedTitle;
     }
-    const albumTitle = visStatus.lastSpotifyMusic?.albumTitle || visStatus.lastMusic?.albumTitle || '';
+    const albumTitle = visStatus.lastMusicEnglish?.albumTitle || visStatus.lastMusic?.albumTitle || '';
     if (!albumTitle) {
         mode = 1;
     }
-    log('searchFallbackAccurate: ' + mode, 'log', 'MADVisLrc');
+    console.log('MADVisLrc: searchFallbackAccurate: ' + mode);
 
     const url = new URL('https://lrclib.net/api/search');
     const params = {
@@ -377,7 +373,8 @@ async function searchFallbackAccurate(mode = 0) { // 0: Normal, 1: No album titl
                     albumTitle: item.albumName,
                     duration: item.duration,
                     syncedLyrics: item.syncedLyrics,
-                    plainLyrics: item.plainLyrics || LRC.toPlain(item.syncedLyrics)
+                    plainLyrics: item.plainLyrics || LRC.toPlain(item.syncedLyrics),
+                    provider: 'LRCLIB'
                 };
             } else if (item.plainLyrics) {
                 lastUnsyncedLyrics = {
@@ -387,11 +384,9 @@ async function searchFallbackAccurate(mode = 0) { // 0: Normal, 1: No album titl
                     artist: item.artistName,
                     albumTitle: item.albumName,
                     duration: item.duration,
-                    plainLyrics: item.plainLyrics
+                    plainLyrics: item.plainLyrics,
+                    provider: 'LRCLIB'
                 };
-                if (preferUnsynced) {
-                    return lastUnsyncedLyrics;
-                }
             }
         }
         if (lastUnsyncedLyrics) {
@@ -403,7 +398,7 @@ async function searchFallbackAccurate(mode = 0) { // 0: Normal, 1: No album titl
                 case 1:
                     // Don't fall back to (inaccurate) search or accurate search without the artist name if the album title is not present and unsynced lyrics exist, as it may find a completely different song. Test case: "IVE - I WANT"
                     // In fact, "IVE" easily causes the inaccurate search fallback to return a completely different song, as LRCLIB doesn't care about punctuation so songs with "I've" in titles, albums, ... gets returned
-                    if (!visStatus.lastSpotifyMusic?.albumTitle && !visStatus.lastMusic?.albumTitle) {
+                    if (!visStatus.lastMusicEnglish?.albumTitle && !visStatus.lastMusic?.albumTitle) {
                         return lastUnsyncedLyrics;
                     }
                     searchResult = await searchFallbackAccurate(2);
@@ -426,7 +421,7 @@ async function searchFallbackAccurate(mode = 0) { // 0: Normal, 1: No album titl
             return await searchFallbackAccurate(1);
         case 1:
             // Don't try accurate search without artist name if the album title is not present, as it's too inaccurate at that point
-            if (!visStatus.lastSpotifyMusic?.albumTitle && !visStatus.lastMusic?.albumTitle) {
+            if (!visStatus.lastMusicEnglish?.albumTitle && !visStatus.lastMusic?.albumTitle) {
                 return await searchFallback();
             }
             return await searchFallbackAccurate(2);
@@ -442,10 +437,10 @@ async function searchFallbackAccurate(mode = 0) { // 0: Normal, 1: No album titl
 // So try both with and without parentheses stripped
 // Misc note: dropping punctuations and special characters also work ("youre" finds "you're" without issues), but dropping other arbitrary characters doesn't (e.g. "NewJean" doesn't find "NewJeans")
 async function searchFallback(stripParens) {
-    log('searchFallback' + (stripParens ? ' (stripped)' : ''), 'log', 'MADVisLrc');
+    console.log('MADVisLrc: searchFallback' + (stripParens ? ' (stripped)' : ''));
     lastFetchInfo.searchFallback = 4;
-    let artist = visStatus.lastSpotifyMusic?.artist || visStatus.lastMusic?.artist || '';
-    let title = visStatus.lastSpotifyMusic?.title || visStatus.lastMusic?.title || '';
+    let artist = visStatus.lastMusicEnglish?.artist || visStatus.lastMusic?.artist || '';
+    let title = visStatus.lastMusicEnglish?.title || visStatus.lastMusic?.title || '';
     if (stripParens) {
         lastFetchInfo.searchFallback = 5;
         let differenceExists = false;
@@ -466,7 +461,7 @@ async function searchFallback(stripParens) {
             return null;
         }
     }
-    const albumTitle = visStatus.lastSpotifyMusic?.albumTitle || visStatus.lastMusic?.albumTitle || '';
+    const albumTitle = visStatus.lastMusicEnglish?.albumTitle || visStatus.lastMusic?.albumTitle || '';
     const query = artist + ' ' + title + ' ' + albumTitle;
 
     abortController = new AbortController();
@@ -489,7 +484,8 @@ async function searchFallback(stripParens) {
                     albumTitle: item.albumName,
                     duration: item.duration,
                     syncedLyrics: item.syncedLyrics,
-                    plainLyrics: item.plainLyrics || LRC.toPlain(item.syncedLyrics)
+                    plainLyrics: item.plainLyrics || LRC.toPlain(item.syncedLyrics),
+                    provider: 'LRCLIB'
                 };
             } else if (item.plainLyrics) {
                 lastUnsyncedLyrics = {
@@ -499,11 +495,9 @@ async function searchFallback(stripParens) {
                     artist: item.artistName,
                     albumTitle: item.albumName,
                     duration: item.duration,
-                    plainLyrics: item.plainLyrics
+                    plainLyrics: item.plainLyrics,
+                    provider: 'LRCLIB'
                 };
-                if (preferUnsynced) {
-                    return lastUnsyncedLyrics;
-                }
             }
         }
         if (lastUnsyncedLyrics) {
@@ -552,7 +546,8 @@ async function fetchLyrics(url) {
                     albumTitle: json.albumName,
                     duration: json.duration,
                     syncedLyrics: json.syncedLyrics,
-                    plainLyrics: json.plainLyrics || LRC.toPlain(json.syncedLyrics)
+                    plainLyrics: json.plainLyrics || LRC.toPlain(json.syncedLyrics),
+                    provider: 'LRCLIB'
                 }
             } else if (json.plainLyrics) {
                 if (lastFetchInfo.attempt) {
@@ -565,7 +560,8 @@ async function fetchLyrics(url) {
                     artist: json.artistName,
                     albumTitle: json.albumName,
                     duration: json.duration,
-                    plainLyrics: json.plainLyrics
+                    plainLyrics: json.plainLyrics,
+                    provider: 'LRCLIB'
                 }
             } else {
                 if (lastFetchInfo.attempt) {
@@ -618,23 +614,21 @@ async function loadLyrics(idOrLrc, addOverride) {
                 albumTitle: albumTitle,
                 duration: duration,
                 syncedLyrics: text,
-                plainLyrics: LRC.toPlain(text)
+                plainLyrics: LRC.toPlain(text),
+                provider: 'Local File'
             }
         } else {
             lyrics = {
                 synced: false,
                 id: null,
                 title: getFilename(idOrLrc.name),
-                plainLyrics: text
+                plainLyrics: text,
+                provider: 'Local File'
             }
         }
     } else {
         try {
-            if (lyricsView.querySelector('mad-string')) {
-                lyricsView.innerHTML = `<mad-string data-locid="VISLRC_STATUS_LOADING">Loading...</mad-string>`;
-            } else {
-                loadingIndicator.style.display = 'block';
-            }
+            lyricsView.innerHTML = '<span>Loading...</span>';
             lyrics = await findLyrics(idOrLrc);
         } catch (error) {
             if (error.name === 'AbortError') {
@@ -645,212 +639,139 @@ async function loadLyrics(idOrLrc, addOverride) {
     }
 
     lastLyrics = lyrics;
-    loadingIndicator.style.display = 'none';
     if (lyrics) {
         lastLyricsId = lyrics.id;
-        saveLyricsBtn.classList.remove('disabled');
-        if (lyrics.id) {
-            publishLyricsBtn.classList.add('disabled');
-        } else {
-            publishLyricsBtn.classList.remove('disabled');
-        }
-        if (lyrics.synced && !preferUnsynced) {
-            saveMenuItems[0].classList.remove('disabled');
+        if (lyrics.synced) {
             lyricsView.innerHTML = '';
-            const lrc = LRC.parse(lyrics.syncedLyrics);
+            const lrc = typeof lyrics.syncedLyrics === 'string' ? LRC.parse(lyrics.syncedLyrics) : lyrics.syncedLyrics;
             lrc.forEach((line, index) => {
                 const p = document.createElement('p');
+                p.classList.add('wmpotify-lyrics-line');
                 p.textContent = line.text;
                 p.dataset.time = line.time;
+                p.addEventListener('click', () => {
+                    Spicetify.Player.seek(line.time * 1000);
+                });
                 lyricsView.appendChild(p);
             });
             lyricsView.scrollTop = 0;
             lastSyncedLyricsParsed = lrc;
-
-            autoScroll = true;
-            autoScrollBtn.classList.remove('disabled');
-            autoScrollBtn.classList.add('checkedItem');
-            processTimeline();
+            processTimeline(true);
         } else {
-            if (lyrics.synced) {
-                saveMenuItems[0].classList.remove('disabled');
-            } else {
-                saveMenuItems[0].classList.add('disabled');
-            }
             lyricsView.textContent = lyrics.plainLyrics;
             lastSyncedLyricsParsed = null;
-
-            autoScroll = false;
-            autoScrollBtn.classList.add('disabled');
-            autoScrollBtn.classList.remove('checkedItem');
         }
-        if (window.madIdb) {
-            const hash = await getSongHash(visStatus.lastMusic?.artist, visStatus.lastMusic?.title, visStatus.lastMusic?.albumTitle);
-            if (!hash) {
-                return;
+        const providerView = document.createElement('p');
+        providerView.classList.add('wmpotify-lyrics-provider');
+        providerView.textContent = 'Lyrics provided by ' + lyrics.provider;
+        providerView.style = 'font-size: 0.875rem; font-weight: 400; color: lightgray; padding: 20px 0;';
+        lyricsView.appendChild(providerView);
+        const hash = await getSongHash(visStatus.lastMusic?.artist, visStatus.lastMusic?.title, visStatus.lastMusic?.albumTitle);
+        if (!hash) {
+            return;
+        }
+        if (idOrLrc && !(idOrLrc instanceof File) && idOrLrc.length <= 10) {
+            if (addOverride) {
+                overrides[hash] = {
+                    id: lyrics.id
+                };
+                madIdb.setItem('lyricsOverrides', overrides);
+                await lrcCache.delete(hash);
+                lrcCache.add(hash, lyrics);
             }
-            if (idOrLrc && !(idOrLrc instanceof File) && idOrLrc.length <= 10) {
-                if (addOverride) {
-                    overrides[hash] = {
-                        id: lyrics.id
-                    };
-                    madIdb.setItem('lyricsOverrides', overrides);
-                    await lrcCache.delete(hash);
-                    lrcCache.add(hash, lyrics, preferUnsynced);
-                }
-            } else if (!lyrics.cachedAt) {
-                lrcCache.add(hash, lyrics, preferUnsynced);
-            }
+        } else if (!lyrics.cachedAt) {
+            lrcCache.add(hash, lyrics);
         }
     } else {
-        saveLyricsBtn.classList.add('disabled');
-        saveMenuItems[0].classList.add('disabled');
-        publishLyricsBtn.classList.add('disabled');
-        autoScrollBtn.classList.add('disabled');
-        autoScrollBtn.classList.remove('checkedItem');
         if (!navigator.onLine) {
-            lyricsView.innerHTML = '<mad-string data-locid="VISLRC_STATUS_OFFLINE"></mad-string>';
+            lyricsView.innerHTML = '<span>No internet connection.</span>';
         } else {
-            lyricsView.innerHTML = '<mad-string data-locid="VISLRC_STATUS_NOT_FOUND"></mad-string>';
+            lyricsView.innerHTML = '<span>No lyrics found.</span>';
         }
         lastSyncedLyricsParsed = null;
     }
 }
 
-async function processProperties(force, simulating) {
-    preferUnsynced = localStorage.madesktopVisLyricsForceUnsynced || !visStatus.mediaIntegrationAvailable || madRunningMode !== 1 || !connected;
-    if (preferUnsynced) {
-        syncAdjustBtn.classList.add('disabled');
+async function processProperties(simulating) {
+    lyricsView.innerHTML = '<span>Loading...</span>';
+    if (simulating === true) {
+        loadLyrics();
     } else {
-        syncAdjustBtn.classList.remove('disabled');
-    }
-    // Make sure the music has changed, as the event can be triggered multiple times
-    // E.g. when the WPE media listeners got invalidated by closing an iframe and listners got re-registered
-    if (force === true ||
-        !visStatus.lastMusic || // If no music is playing. Try Spotify if enabled anyway
-        (visStatus.lastMusic && // If music data is present, check if it has changed
-        (visStatus.lastMusic?.artist !== lastMusic?.artist ||
-        visStatus.lastMusic?.title !== lastMusic?.title ||
-        visStatus.lastMusic?.albumTitle !== lastMusic?.albumTitle ||
-        visStatus.lastMusic?.albumArtist !== lastMusic?.albumArtist))
-    ) {
-        if (lyricsView.querySelector('mad-string')) {
-            lyricsView.innerHTML = `<mad-string data-locid="VISLRC_STATUS_LOADING">Loading...</mad-string>`;
+        const spotifyNowPlayingLocal = await getSpotifyNowPlaying();
+        if (spotifyNowPlayingLocal && spotifyNowPlayingLocal.item) {
+            const artist = spotifyNowPlayingLocal.item.artists[0].name;
+            const title = spotifyNowPlayingLocal.item.name;
+            const albumTitle = spotifyNowPlayingLocal.item.album.name;
+            const duration = (spotifyNowPlayingLocal.item.duration?.milliseconds || spotifyNowPlayingLocal.item.duration_ms) / 1000;
+            visStatus.lastMusic = {
+                artist: artist,
+                title: title,
+                albumTitle: albumTitle,
+                duration: duration
+            };
         } else {
-            loadingIndicator.style.display = 'block';
+            delete visStatus.lastMusic;
         }
-        if (simulating) {
-            loadLyrics();
-        } else if (localStorage.madesktopVisSpotifyEnabled && localStorage.madesktopVisSpotifyInfo) {
-            const spotifyNowPlaying = await getSpotifyNowPlaying();
-            if (spotifyNowPlaying && spotifyNowPlaying.item) {
-                if (spotifyNowPlaying.item.album.artists.length > 0) {
-                    const artist = spotifyNowPlaying.item.artists[0].name;
-                    const title = spotifyNowPlaying.item.name;
-                    const albumTitle = spotifyNowPlaying.item.album.name;
-                    const duration = spotifyNowPlaying.item.duration_ms / 1000;
-                    visStatus.lastSpotifyMusic = {
-                        artist: artist,
-                        title: title,
-                        albumTitle: albumTitle,
-                        duration: duration
-                    };
-                    // Hidden localStorage flag to use album art from Spotify in MADVis, instead of the one from the media properties (SMTC with WPE's own cropping of the Spotify logo that doesn't work well with non-square images)
-                    // Run localStorage.madesktopVisSpotifyInfo = <preferred height> in the debug mode run js button / DevTools console to enable this
-                    if (localStorage.madesktopVisUseSpotifyAlbumArt) {
-                        const images = spotifyNowPlaying.item.album.images;
-                        const height = parseInt(localStorage.madesktopVisUseSpotifyAlbumArt) || 300; // Typically 64, 300, or 640
-                        let closest = images[0];
-                        for (const image of images) {
-                            if (image.height >= height && image.height < closest.height) {
-                                closest = image;
-                            }
-                        }
-                        const visDeskMover = top.visDeskMover;
-                        const current = visStatus.lastAlbumArt;
-                        visDeskMover.windowElement.contentWindow.wallpaperMediaThumbnailListener({
-                            thumbnail: closest.url,
-                            width: closest.width,
-                            height: closest.height,
-                            primaryColor: current?.primaryColor,
-                            secondaryColor: current?.secondaryColor,
-                            tertiaryColor: current?.tertiaryColor,
-                            textColor: current?.textColor,
-                            highContrastColor: current?.highContrastColor,
-                            fromSpotify: true
-                        });
-                    }
-                }
-                loadLyrics();
-            } else if (visStatus.lastMusic) {
-                delete visStatus.lastSpotifyMusic;
-                if (spotifyNowPlaying.errorCode) {
-                    lastFetchInfo = {
-                        spotifyResponse: spotifyNowPlaying.errorCode
-                    }
-                }
-                loadLyrics();
-            } else if (!connected) {
-                loadingIndicator.style.display = 'none';
-                lyricsView.innerHTML = '<mad-string data-locid="VISLRC_STATUS_NO_MADVIS"></mad-string>';
-            } else if (!visStatus.mediaIntegrationAvailable) {
-                loadingIndicator.style.display = 'none';
-                lyricsView.innerHTML = '<mad-string data-locid="VISLRC_STATUS_NO_MEDINT"></mad-string>';
-            } else {
-                loadingIndicator.style.display = 'none';
-                lyricsView.innerHTML = '<mad-string data-locid="VISLRC_STATUS_NO_MUSIC"></mad-string>';
-            }
-        } else if (visStatus.lastMusic) {
-            delete visStatus.lastSpotifyMusic;
-            loadLyrics();
-        } else if (!connected) {
-            loadingIndicator.style.display = 'none';
-            lyricsView.innerHTML = '<mad-string data-locid="VISLRC_STATUS_NO_MADVIS"></mad-string>';
-        } else if (!visStatus.mediaIntegrationAvailable) {
-            loadingIndicator.style.display = 'none';
-            lyricsView.innerHTML = '<mad-string data-locid="VISLRC_STATUS_NO_MEDINT"></mad-string>';
+        const spotifyNowPlayingEnglish = await getSpotifyNowPlaying('en');
+        if (spotifyNowPlayingEnglish && spotifyNowPlayingEnglish.item) {
+            const artist = spotifyNowPlayingEnglish.item.artists[0].name;
+            const title = spotifyNowPlayingEnglish.item.name;
+            const albumTitle = spotifyNowPlayingEnglish.item.album.name;
+            const duration = spotifyNowPlayingEnglish.item.duration_ms / 1000;
+            visStatus.lastMusicEnglish = {
+                artist: artist,
+                title: title,
+                albumTitle: albumTitle,
+                duration: duration
+            };
         } else {
-            loadingIndicator.style.display = 'none';
-            lyricsView.innerHTML = '<mad-string data-locid="VISLRC_STATUS_NO_MUSIC"></mad-string>';
+            delete visStatus.lastMusicEnglish;
         }
+        loadLyrics();
     }
-
-    lastMusic = visStatus.lastMusic;
 }
 
-function processTimeline() {
-    if (lastLyrics && lastSyncedLyricsParsed && visStatus.timeline) {
-        const nearestIndex = getNearestLyricIndex(visStatus.timeline.position);
-        if (nearestIndex !== -1) {
-            for (let i = 0; i < lyricsView.children.length; i++) {
-                const lyric = lyricsView.children[i];
-                if (i <= nearestIndex) {
-                    lyric.style.color = 'var(--button-text)';
-                    if (autoScroll && i === nearestIndex) {
-                        if (lyric.offsetTop < lyricsView.offsetHeight / 2) {
-                            // scrolling to the top of the lyricsView
-                            // don't use scrollIntoView with behavior: 'smooth' here as it causes jittering
-                            lyricsView.scrollTop = 0;
-                        } else if (lyric.offsetTop > lyricsView.scrollHeight - lyricsView.offsetHeight / 2) {
-                            // scrolling to the bottom of the lyricsView
-                            lyricsView.scrollTo({
-                                top: lyricsView.scrollHeight,
-                                behavior: localStorage.madesktopVisLyricsSmoothScroll ? 'smooth' : 'instant'
-                            });
-                        } else {
-                            lyric.scrollIntoView({
-                                block: 'center', 
-                                behavior: localStorage.madesktopVisLyricsSmoothScroll ? 'smooth' : 'instant'
-                            });
+function processTimeline(init) {
+    if (lastLyrics && lastSyncedLyricsParsed) {
+        const nearestIndex = getNearestLyricIndex(Spicetify.Player.getProgress() / 1000);
+        if (nearestIndex === -1) {
+            return;
+        }
+        for (let i = 0; i < lyricsView.children.length; i++) {
+            const lyric = lyricsView.children[i];
+            if (i <= nearestIndex) {
+                lyric.style.color = 'white';
+
+                if ((!scrolling || init === true) && i === nearestIndex) {
+                    const lyricTop = lyric.offsetTop;
+                    const lyricBottom = lyricTop + lyric.offsetHeight;
+                    const viewTop = lyricsView.parentElement.scrollTop;
+                    const viewBottom = viewTop + lyricsView.parentElement.clientHeight;
+                    const lyricInView = lyricTop >= viewTop && lyricBottom <= viewBottom;
+                    if (i !== lastScrollIndex) {
+                        if (lyricInView || init === true) {
+                            if (lyric.offsetTop < lyricsView.parentElement.offsetHeight / 2) {
+                                // scrolling to the top of the lyricsView
+                                // don't use scrollIntoView with behavior: 'smooth' here as it causes jittering
+                                lyricsView.parentElement.scrollTop = 0;
+                            } else if (lyric.offsetTop > lyricsView.scrollHeight - lyricsView.offsetHeight / 2) {
+                                // scrolling to the bottom of the lyricsView
+                                lyricsView.parentElement.scrollTo({
+                                    top: lyricsView.parentElement.scrollHeight,
+                                    behavior: 'smooth'
+                                });
+                            } else {
+                                lyric.scrollIntoView({
+                                    block: 'center', 
+                                    behavior: 'smooth'
+                                });
+                            }
                         }
+                        lastScrollIndex = i;
                     }
-                } else {
-                    lyric.style.color = 'var(--gray-text)';
                 }
-            }
-        } else {
-            if (autoScroll) {
-                lyricsView.scrollTop = 0;
+            } else {
+                lyric.style.color = 'lightgray';
             }
         }
     }
@@ -858,17 +779,17 @@ function processTimeline() {
 
 function getNearestLyricIndex(time) {
     if (lastSyncedLyricsParsed) {
-        time += syncDelay;
         if (time < lastSyncedLyricsParsed[0].time) {
-            return -1;
+            return 0;
         }
-        let nearestIndex = 0;
-        let nearestTime = Math.abs(lastSyncedLyricsParsed[0].time - time);
-        for (let i = 1; i < lastSyncedLyricsParsed.length; i++) {
-            const diff = Math.abs(lastSyncedLyricsParsed[i].time - time);
-            if (diff < nearestTime) {
+        let nearestIndex = -1;
+        if (time > lastSyncedLyricsParsed[lastSyncedLyricsParsed.length - 1].time) {
+            return lastSyncedLyricsParsed.length - 1;
+        }
+        for (let i = 0; i < lastSyncedLyricsParsed.length; i++) {
+            if (time > lastSyncedLyricsParsed[i].time && time < lastSyncedLyricsParsed[i + 1].time) {
                 nearestIndex = i;
-                nearestTime = diff;
+                break;
             }
         }
         return nearestIndex;
@@ -950,53 +871,58 @@ async function simulate(artist, title, album, isSpotify, spotifyArtist, spotifyT
         simulated: true
     };
     if (isSpotify) {
-        visStatus.lastSpotifyMusic = {
+        visStatus.lastMusicEnglish = {
             title: spotifyTitle || title,
             artist: spotifyArtist || artist,
             albumTitle: spotifyAlbum || album,
             duration: spotifyDuration || 1
         };
     } else {
-        delete visStatus.lastSpotifyMusic;
+        delete visStatus.lastMusicEnglish;
     }
-    processProperties(true, true);
+    processProperties(true);
     console.log('Hash:', await getSongHash(artist, title, album));
 }
-globalThis.wmpotifyMadVisLrcSimulate = simulate;
+globalThis.wmpotifyVisLyricsSimulate = simulate;
 
-function showDebugInfo() {
-    let msg = '';
+function copyDebugInfo() {
+    let msg = '== Debug info from MADVis Lyrics for WMPotify ==\n\n';
 
-    const msgInLyricsView = lyricsView.querySelector('mad-string');
+    const msgInLyricsView = lyricsView.querySelector('span');
     if (msgInLyricsView) {
-        msg = madGetString(msgInLyricsView.locId);
+        msg = msgInLyricsView.textContent;
     } else {
-        msg += 'Current track: ' + escapeHTML(visStatus.lastMusic?.artist) + ' - ' + escapeHTML(visStatus.lastMusic?.title) + ' (' + escapeHTML(visStatus.lastMusic?.albumTitle) + ')<br>';
-        msg += 'Current lyrics ID: ' + (lastLyricsId ?? 'Local lyrics') + '<br>';
-        msg += 'Song hash: ' + lastFetchInfo.hash + '<br>';
-        msg += 'Timeline: ' + visStatus.timeline?.position + 's / ' + visStatus.timeline?.duration + 's<br><br>';
-        msg += 'Track info from the loaded lyrics: ' + escapeHTML(lastLyrics?.artist) + ' - ' + escapeHTML(lastLyrics?.title) + ' (' + escapeHTML(lastLyrics?.albumTitle) + ')<br>';
-        msg += 'Duration of the loaded lyrics: ' + lastLyrics?.duration + 's<br><br>';
+        msg += 'Current track: ' + escapeHTML(visStatus.lastMusic?.artist) + ' - ' + escapeHTML(visStatus.lastMusic?.title) + ' (' + escapeHTML(visStatus.lastMusic?.albumTitle) + ')\n';
+        msg += 'Current lyrics ID: ';
+        if (lastLyricsId === null) {
+            msg += 'Local lyrics';
+        } else if (lastLyricsId === -1) {
+            msg += 'Spotify lyrics';
+        } else {
+            msg += lastLyricsId;
+        }
+        msg += '\nSong hash: ' + lastFetchInfo.hash + '\n';
+        msg += 'Timeline: ' + (Spicetify.Player.getProgress() / 1000) + 's / ' + (Spicetify.Player.data.item.duration.milliseconds / 1000) + 's\n\n';
+        msg += 'Track info from the loaded lyrics: ' + escapeHTML(lastLyrics?.artist) + ' - ' + escapeHTML(lastLyrics?.title) + ' (' + escapeHTML(lastLyrics?.albumTitle) + ')\n';
+        msg += 'Duration of the loaded lyrics: ' + lastLyrics?.duration + 's\n';
+        msg += 'Lyrics provider: ' + lastLyrics?.provider + '\n\n';
         if (lastFetchInfo.override === -1) {
-            msg += 'Override: Local lyrics<br>';
+            msg += 'Override: Local lyrics\n';
         } else if (lastFetchInfo.override || lastLyrics?.cachedAt) {
             if (lastFetchInfo.override) {
-                msg += 'Override ID: ' + lastFetchInfo.override + '<br>';
+                msg += 'Override ID: ' + lastFetchInfo.override + '\n';
             }
             if (lastLyrics?.cachedAt) {
-                msg += 'Lyrics loaded from cache<br>';
-                const cachedAtDate = new Date(lastLyrics.cachedAt).toLocaleString(window.madLang);
-                const expiryDays = parseInt(localStorage.madesktopVisLyricsCacheExpiry) || 21;
+                msg += 'Lyrics loaded from cache\n';
+                const cachedAtDate = new Date(lastLyrics.cachedAt).toLocaleString(navigator.language);
+                const expiryDays = parseInt(localStorage.wmpotifyVisLyricsCacheExpiry) || 21;
                 const expiryTime = expiryDays * 24 * 60 * 60 * 1000;
-                const expiryDate = new Date(lastLyrics.cachedAt + expiryTime).toLocaleString(window.madLang);
-                msg += 'Cache created at: ' + cachedAtDate + '<br>';
-                msg += 'Cache expiry: ' + expiryDate + '<br>';
-                if (lastLyrics.preferredUnsynced) {
-                    msg += 'Cached while preferring unsynced lyrics<br>';
-                }
+                const expiryDate = new Date(lastLyrics.cachedAt + expiryTime).toLocaleString(navigator.language);
+                msg += 'Cache created at: ' + cachedAtDate + '\n';
+                msg += 'Cache expiry: ' + expiryDate + '\n';
             }
         } else if (lastFetchInfo.urls) {
-            msg += 'URLs tried:<br>';
+            msg += 'URLs tried:\n';
             for (let i = 0; i < lastFetchInfo.urls.length; i++) {
                 msg += '- ' + escapeHTML(decodeURIComponent(lastFetchInfo.urls[i])) + ' (';
                 switch (lastFetchInfo.attempt[i]) {
@@ -1022,26 +948,26 @@ function showDebugInfo() {
                         msg += 'Unknown';
                         break;
                 }
-                msg += ')<br>';
+                msg += ')\n';
             }
-            msg += '<br>';
+            msg += '\n';
         }
         if (lastFetchInfo.searchFallback) {
             switch (lastFetchInfo.searchFallback) {
                 case 1:
-                    msg += 'Search fallback: Accurate<br>';
+                    msg += 'Search fallback: Accurate\n';
                     break;
                 case 2:
-                    msg += 'Search fallback: Accurate (no album)<br>';
+                    msg += 'Search fallback: Accurate (no album)\n';
                     break;
                 case 3:
-                    msg += 'Search fallback: Accurate (no artist)<br>';
+                    msg += 'Search fallback: Accurate (no artist)\n';
                     break;
                 case 4:
-                    msg += 'Search fallback: Normal<br>';
+                    msg += 'Search fallback: Normal\n';
                     break;
                 case 5:
-                    msg += 'Search fallback: Normal (stripped)<br>';
+                    msg += 'Search fallback: Normal (stripped)\n';
                     break;
             }
         }
@@ -1052,88 +978,86 @@ function showDebugInfo() {
         } else {
             msg += 'Loaded lyrics are not synced, synced lyrics are not available';
         }
-        if (preferUnsynced) {
-            msg += ', unsynced lyrics are preferred';
-        }
 
-        if (localStorage.madesktopVisSpotifyEnabled && localStorage.madesktopVisSpotifyInfo) {
-            const info = JSON.parse(localStorage.madesktopVisSpotifyInfo);
-            msg += '<br><br>';
-            if (visStatus.lastSpotifyMusic) {
-                msg += 'Current Spotify track: ' + escapeHTML(visStatus.lastSpotifyMusic?.artist) + ' - ' + escapeHTML(visStatus.lastSpotifyMusic?.title) + ' (' + escapeHTML(visStatus.lastSpotifyMusic?.albumTitle) + ')<br>';
-                msg += 'Spotify duration: ' + visStatus.lastSpotifyMusic?.duration + 's<br><br>';
-            } else {
-                msg += 'Current Spotify track: None<br>';
-                if (lastFetchInfo.spotifyResponse === -1) {
-                    msg += 'Spotify API last response: Error<br>';
-                } else if (lastFetchInfo.spotifyResponse) {
-                    msg += 'Spotify API last response code: ' + lastFetchInfo.spotifyResponse + '<br>';
-                }
+        msg += '\n\n';
+        if (visStatus.lastMusicEnglish) {
+            msg += 'Current track info in English: ' + escapeHTML(visStatus.lastMusicEnglish?.artist) + ' - ' + escapeHTML(visStatus.lastMusicEnglish?.title) + ' (' + escapeHTML(visStatus.lastMusicEnglish?.albumTitle) + ')\n';
+            msg += 'Duration: ' + visStatus.lastMusicEnglish?.duration + 's\n\n';
+        } else {
+            msg += 'Current Spotify track: None\n';
+            if (lastFetchInfo.spotifyResponse === -1) {
+                msg += 'Spotify API last response: Error\n';
+            } else if (lastFetchInfo.spotifyResponse) {
+                msg += 'Spotify API last response code: ' + lastFetchInfo.spotifyResponse + '\n';
             }
-            msg += 'Spotify client ID: ' + info.clientId + '<br>';
-            const fetchedAtDate = new Date(info.fetchedAt * 1000).toLocaleString(window.madLang);
-            const expiryDate = new Date((info.fetchedAt + info.expiresIn - 60) * 1000).toLocaleString(window.madLang);
-            msg += 'Spotify token fetched at: ' + fetchedAtDate + '<br>';
-            msg += 'Spotify token expiry: ' + expiryDate;
         }
 
         if (visStatus.lastMusic?.simulated) {
-            msg += '<br><br>This lyrics find was simulated. Click \'Setup listeners again\' to fetch the real lyrics.';
+            msg += 'This lyrics find was simulated.\n\n';
+        }
+
+        if (visStatus.lastMusicEnglish) {
+            msg += 'window.wmpotifyVisLyricsSimulate(' + JSON.stringify([visStatus.lastMusic?.artist, visStatus.lastMusic?.title, visStatus.lastMusic?.albumTitle, true, visStatus.lastMusicEnglish.artist, visStatus.lastMusicEnglish.title, visStatus.lastMusicEnglish.albumTitle, visStatus.lastMusicEnglish.duration]).slice(1, -1) + ')';
+        } else {
+            msg += 'window.wmpotifyVisLyricsSimulate(' + JSON.stringify([visStatus.lastMusic?.artist, visStatus.lastMusic?.title, visStatus.lastMusic?.albumTitle]).slice(1, -1) + ')';
         }
     }
-    let innerText = '';
-    madConfirm(msg, function(res) {
-        if (res === true) {
-            copyText(innerText);
-        } else if (res === null) {
-            top.visDeskMover.windowElement.contentWindow.setupMediaListeners();
-        }
-    }, {
-        icon: 'info',
-        title: 'locid:VISLRC_TITLE',
-        btn1: 'locid:UI_COPY',
-        btn2: 'locid:UI_OK',
-        btn3: '&Setup listeners again',
-        defaultBtn: 2,
-        cancelBtn: 2
-    });
-    innerText = top.document.getElementById('msgbox-msg').innerText;
-    innerText += '\n\n';
-    if (visStatus.lastSpotifyMusic) {
-        innerText += 'window.simulate(' + JSON.stringify([visStatus.lastMusic?.artist, visStatus.lastMusic?.title, visStatus.lastMusic?.albumTitle, true, visStatus.lastSpotifyMusic.artist, visStatus.lastSpotifyMusic.title, visStatus.lastSpotifyMusic.albumTitle, visStatus.lastSpotifyMusic.duration]).slice(1, -1) + ')';
-    } else {
-        innerText += 'window.simulate(' + JSON.stringify([visStatus.lastMusic?.artist, visStatus.lastMusic?.title, visStatus.lastMusic?.albumTitle]).slice(1, -1) + ')';
-    }
+
+    Spicetify.Platform.ClipboardAPI.copy(msg);
+}
+
+function escapeHTML(str) {
+    if (typeof str !== 'string') return str;
+    return str.replace(/[&<>'"]/g, tag => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        "'": '&#39;',
+        '"': '&quot;'
+    }[tag] || tag));
+}
+
+function getFilename (str) {
+    return str.split('/').pop().split('.').slice(0, -1).join('.');
 }
 // #endregion
 
 // #region Initialization
-export async function init() {
-    // if (top.visDeskMover) {
-    //     connected = true;
-    //     const visDeskMover = top.visDeskMover;
-    //     visStatus = visDeskMover.visStatus;
+async function init(lv) {
+    if (lyricsView) {
+        return;
+    }
 
-    //     overrides = await madIdb.lyricsOverrides;
-    //     if (!overrides) {
-    //         overrides = {};
-    //         madIdb.setItem('lyricsOverrides', overrides);
-    //     }
+    overrides = await madIdb.getItem('lyricsOverrides') || {};
+    lyricsView = lv;
+    processProperties();
+    Spicetify.Player.addEventListener('songchange', processProperties);
+    Spicetify.Player.addEventListener('onprogress', processTimeline);
 
-    //     processProperties(true);
-
-    //     visDeskMover.addEventListener('mediaProperties', processProperties);
-    //     visDeskMover.addEventListener('mediaTimeline', processTimeline);
-    //     visDeskMover.addEventListener('load', init, null, 'iframe');
-
-    //     if (!localStorage.madesktopVisLyricsRanOnce) {
-    //         await firstRun();
-    //         localStorage.madesktopVisLyricsRanOnce = true;
-    //     }
-    // } else if (madRunningMode !== 0) {
-    //     lyricsView.innerHTML = '<mad-string data-locid="VISLRC_STATUS_NO_MADVIS"></mad-string>';
-    // } else {
-    //     lyricsView.innerHTML = `<mad-string data-locid="VISLRC_STATUS_MANUAL_INFO"></mad-string>`;
-    // }
+    lyricsView.addEventListener('scroll', () => {
+        scrolling = true;
+        setTimeout(() => {
+            scrolling = false;
+        }, 1000);
+    });
 }
+
+function uninit() {
+    Spicetify.Player.removeEventListener('songchange', processProperties);
+    Spicetify.Player.removeEventListener('onprogress', processTimeline);
+    abortController.abort();
+    lyricsView = null;
+}
+
+const MadVisLyrics = {
+    init,
+    reloadLyrics,
+    openLyricsFile,
+    processTimeline,
+    copyDebugInfo,
+    simulate,
+    uninit
+};
+
+export default MadVisLyrics;
 // #endregion

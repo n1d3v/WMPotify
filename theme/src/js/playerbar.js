@@ -106,6 +106,22 @@ export function setupPlayerbar() {
         window.addEventListener('resize', updateTimeTextMiniMode);
     }
 
+    // const lyricsButton = document.querySelector('.main-nowPlayingBar-extraControls button[data-testid="lyrics-button"]');
+    // if (Spicetify.Config.custom_apps.includes('wmpvis') && lyricsButton) {
+    //     lyricsButton.addEventListener('click', (event) => {
+    //         event.preventDefault();
+    //         event.stopPropagation();
+    //         if (Spicetify.Platform.History.location.pathname === '/wmpvis') {
+    //             if (globalThis.setShowLyrics) {
+    //                 globalThis.setShowLyrics();
+    //             }
+    //         } else {
+    //             localStorage.wmpotifyVisShowLyrics = true;
+    //             Spicetify.Platform.History.push('/wmpvis');
+    //         }
+    //     });
+    // }
+
     if (whStatus) {
         const pipButton = document.querySelector('.main-nowPlayingBar-extraControls button[data-testid="pip-toggle-button"]');
         if (pipButton) {
@@ -138,7 +154,6 @@ export function setupPlayerbar() {
                 if (Spicetify.Config.custom_apps.includes('wmpvis')) {
                     Spicetify.Platform.History.push('/wmpvis');
                 } else {
-                    const lyricsButton = document.querySelector('.main-nowPlayingBar-extraControls button[data-testid="lyrics-button"]');
                     if (lyricsButton) {
                         lyricsButton.click();
                     }

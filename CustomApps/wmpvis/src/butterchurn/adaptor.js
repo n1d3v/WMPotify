@@ -19,6 +19,7 @@ let randomTimer = null;
 let renderTimer = null;
 
 let visualizer = null;
+let resizeObserver = null;
 
 const fps = 30;
 
@@ -56,7 +57,8 @@ export function init(canvas) {
     };
 
     setVisualizerSize();
-    new ResizeObserver(setVisualizerSize).observe(canvas);
+    resizeObserver = new ResizeObserver(setVisualizerSize);
+    resizeObserver.observe(canvas);
 
     let lastTime = +Date.now();
 
@@ -95,6 +97,8 @@ export function init(canvas) {
             audioArray = newAudioArray;
         }
 
+        audioArray = audioArray.map(value => value * 256);
+
         visualizer.render({
             elapsedTime: elapsedTime,
             audioLevels: {
@@ -112,7 +116,7 @@ export function init(canvas) {
     window.requestAnimationFrame(animationStep);
 
     if (localStorage.wmpotifyVisBCPreset) {
-        ButterchurnAdaptor.setPreset(localStorage.wmpotifyVisBCPreset);
+        visualizer.loadPreset(presets[localStorage.wmpotifyVisBCPreset]);
     } else {
         beginRandomTimer();
     }
@@ -122,11 +126,15 @@ export function init(canvas) {
 
 function beginRandomTimer() {
     clearInterval(randomTimer);
-    randomTimer = setInterval(() => {
+    random();
+    randomTimer = setInterval(random, 10000);
+
+    function random() {
         const presetNames = Object.keys(presets);
         const randomPreset = presetNames[Math.floor(Math.random() * presetNames.length)];
-        ButterchurnAdaptor.setPreset(randomPreset);
-    }, 6000);
+        visualizer.loadPreset(presets[randomPreset]);
+        console.log(`Random preset: ${randomPreset}`);
+    }
 }
 
 const ButterchurnAdaptor = {
@@ -151,6 +159,10 @@ const ButterchurnAdaptor = {
     uninit: () => {
         clearInterval(randomTimer);
         clearInterval(renderTimer);
+        if (resizeObserver) {
+            resizeObserver.disconnect();
+            resizeObserver = null;
+        }
         visualizer = null;
         inited = false;
     }

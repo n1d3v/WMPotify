@@ -9,7 +9,6 @@ let tabs = [];
 let overflowButton;
 
 const tabNameSubstitutes = {
-    'Your Library': 'Library',
     'Friend Activity': 'Friends',
 }
 
@@ -19,9 +18,22 @@ export function setupTopbar() {
     tabsContainer.id = 'wmpotify-tabs-container';
     topbar.insertBefore(tabsContainer, topbar.querySelector('.main-globalNav-searchSection'));
 
+    let nowPlayingButton = document.querySelector('.custom-navlinks-scrollable_container div[role="presentation"] > button[aria-label="Now Playing"]');
+    if (!nowPlayingButton) {
+        nowPlayingButton = document.createElement('button');
+        nowPlayingButton.setAttribute('aria-label', 'Now Playing');
+        nowPlayingButton.addEventListener('click', () => {
+            window.open('https://github.com/Ingan121/WMPotify/tree/master/CustomApps/wmpvis');
+            Spicetify.showNotification('Please install this!');
+        });
+    }
+    nowPlayingButton.dataset.identifier = 'now-playing';
+    addTab(nowPlayingButton);
     const homeButton = document.querySelector('.main-globalNav-searchContainer > button');
+    homeButton.dataset.identifier = 'home';
     addTab(homeButton);
     const searchButton = document.querySelector('.main-globalNav-searchContainer div form button');
+    searchButton.dataset.identifier = 'search';
     searchButton.addEventListener('click', (event) => {
         // This button behave differently from version to version
         // So just open the search page directly
@@ -32,12 +44,13 @@ export function setupTopbar() {
     addTab(searchButton);
     const libraryButton = document.createElement('button');
     libraryButton.id = 'wmpotify-library-button';
+    libraryButton.dataset.identifier = 'library';
     libraryButton.setAttribute('aria-label', 'Library');
     libraryButton.addEventListener('click', () => {
         Spicetify.Platform.History.push({ pathname: '/wmpotify-standalone-libx', });
     });
     addTab(libraryButton);
-    tabs = [homeButton, searchButton, libraryButton];
+    tabs = [nowPlayingButton, homeButton, searchButton, libraryButton];
     const customAppButtons = document.querySelectorAll('.custom-navlinks-scrollable_container div[role="presentation"] > button');
     for (const btn of customAppButtons) {
         addTab(btn);

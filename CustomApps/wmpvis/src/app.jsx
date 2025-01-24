@@ -3,6 +3,8 @@
 import React from 'react'
 import { init, updateVisConfig, uninit } from './wmpvis';
 import ButterchurnAdaptor from './butterchurn/adaptor';
+import MadVisLyrics from './lyrics/main';
+import lrcCache from './lyrics/caching';
 
 class App extends React.Component {
   constructor(props) {
@@ -21,11 +23,19 @@ class App extends React.Component {
       type: localStorage.wmpotifyVisType || "bars",
       bcPreset: localStorage.wmpotifyVisBCPreset || "Random",
       showLyrics: !!localStorage.wmpotifyVisShowLyrics,
+      enableSpotifyLyrics: !localStorage.wmpotifyVisLyricsNoSpotify,
+      enableLyricsCache: !localStorage.wmpotifyVisLyricsNoCache,
       isFullscreen: !!document.fullscreenElement
     };
   }
 
   componentDidMount() {
+    // 1.2.55 compatibility
+    const resizeTarget = document.querySelector('.Root__main-view > div:first-child:not(.main-view-container)');
+    if (resizeTarget) {
+      resizeTarget.style.height = '100%';
+    }
+
     init(this.elemRefs);
     const observer = new IntersectionObserver((entries) => {
       if (entries[0].isIntersecting) {
@@ -36,11 +46,13 @@ class App extends React.Component {
 
     observer.observe(this.elemRefs.visBar.current);
     document.addEventListener('fullscreenchange', this.handleFullscreenChange);
+    globalThis.setShowLyrics = this.setShowLyrics;
   }
 
   componentWillUnmount() {
     uninit();
     document.removeEventListener('fullscreenchange', this.handleFullscreenChange);
+    delete globalThis.setShowLyrics;
   }
 
   changeVisType = (type) => {
@@ -48,6 +60,20 @@ class App extends React.Component {
     updateVisConfig();
     this.setState({
       type: type
+    });
+  };
+
+  setShowLyrics = (show) => {
+    if (show === undefined) {
+      show = !this.state.showLyrics;
+    }
+    if (show) {
+      localStorage.wmpotifyVisShowLyrics = true;
+    } else {
+      delete localStorage.wmpotifyVisShowLyrics;
+    }
+    this.setState({
+      showLyrics: show
     });
   };
 
@@ -115,7 +141,7 @@ class App extends React.Component {
               delete localStorage.wmpotifyVisBCPreset;
               this.setState({ bcPreset: "Random" });
             }}
-            leadingIcon={this.state.bcPreset === "Random" ? <ActiveRadio /> : null}
+            leadingIcon={this.state.type === "milkdrop" && this.state.bcPreset === "Random" ? <ActiveRadio /> : null}
           >
             Random
           </Spicetify.ReactComponent.MenuItem>
@@ -129,7 +155,7 @@ class App extends React.Component {
                 localStorage.wmpotifyVisBCPreset = preset;
                 this.setState({ bcPreset: preset });
               }}
-              leadingIcon={this.state.bcPreset === preset ? <ActiveRadio /> : null}
+              leadingIcon={this.state.type === "milkdrop" && this.state.bcPreset === preset ? <ActiveRadio /> : null}
             >
               {preset}
             </Spicetify.ReactComponent.MenuItem>
@@ -149,6 +175,7 @@ class App extends React.Component {
                 localStorage.wmpotifyVisShowLyrics = "true";
               }
               this.setState({ showLyrics: !this.state.showLyrics });
+              MadVisLyrics.processTimeline(true);
             }}
             divider="after"
             leadingIcon={this.state.showLyrics ? <CheckMark /> : null}
@@ -157,14 +184,23 @@ class App extends React.Component {
           </Spicetify.ReactComponent.MenuItem>
           <Spicetify.ReactComponent.MenuItem
             label="Use Spotify Lyrics"
-            onClick={() => Spicetify.showNotification('Hello World')}
+            onClick={() => {
+              if (this.state.enableSpotifyLyrics) {
+                localStorage.wmpotifyVisLyricsNoSpotify = true;
+              } else {
+                delete localStorage.wmpotifyVisLyricsNoSpotify;
+              }
+              this.setState({ enableSpotifyLyrics: !this.state.enableSpotifyLyrics });
+              MadVisLyrics.reloadLyrics();
+            }}
             divider="after"
+            leadingIcon={this.state.enableSpotifyLyrics ? <CheckMark /> : null}
           >
             Use Spotify Lyrics
           </Spicetify.ReactComponent.MenuItem>
           <Spicetify.ReactComponent.MenuItem
             label="Load Lyrics"
-            onClick={() => Spicetify.showNotification('Hello World')}
+            onClick={() => MadVisLyrics.reloadLyrics()}
           >
             Load Lyrics
           </Spicetify.ReactComponent.MenuItem>
@@ -176,9 +212,45 @@ class App extends React.Component {
           </Spicetify.ReactComponent.MenuItem>
           <Spicetify.ReactComponent.MenuItem
             label="Open Lyrics File"
-            onClick={() => Spicetify.showNotification('Hello World')}
+            onClick={async () => {
+              try {
+                await MadVisLyrics.openLyricsFile()
+                Spicetify.showNotification('Click Load Lyrics in the right-click menu to remove the override.');
+              } catch (e) {
+                if (e.name === 'AbortError') {
+                  return;
+                }
+                console.error(e);
+                Spicetify.showNotification('Failed to open the lyrics file');
+              }
+            }}
+            divider="after"
           >
             Open Lyrics File
+          </Spicetify.ReactComponent.MenuItem>
+          <Spicetify.ReactComponent.MenuItem
+            label="Cache Lyrics"
+            onClick={() => {
+              if (this.state.enableLyricsCache) {
+                localStorage.wmpotifyVisLyricsNoCache = true;
+                lrcCache.clear();
+              } else {
+                delete localStorage.wmpotifyVisLyricsNoCache;
+              }
+              this.setState({ enableLyricsCache: !this.state.enableLyricsCache });
+            }}
+            leadingIcon={this.state.enableLyricsCache ? <CheckMark /> : null}
+          >
+            Cache Lyrics
+          </Spicetify.ReactComponent.MenuItem>
+          <Spicetify.ReactComponent.MenuItem
+            label="Copy Debug Info"
+            onClick={() => {
+              MadVisLyrics.copyDebugInfo();
+              Spicetify.showNotification('Debug info copied to clipboard');
+            }}
+          >
+            Copy Debug Info
           </Spicetify.ReactComponent.MenuItem>
         </Spicetify.ReactComponent.MenuSubMenuItem>
         <Spicetify.ReactComponent.MenuItem
@@ -192,8 +264,30 @@ class App extends React.Component {
     });
 
     return <>
+      <style>
+        {`
+        .wmpotify-lyrics-line:hover {
+          cursor: pointer;
+          text-decoration: underline;
+        }
+
+        @media(min-width: 1280px) {
+          .wmpvis-lyrics {
+            font-size: 2rem !important;
+          }
+        }
+
+        @media(min-width: 1920px) {
+          .wmpvis-lyrics {
+            font-size: 3rem !important;
+            margin: 64px 144px 0 144px !important;
+          }
+        }
+        `}
+      </style>
       <Spicetify.ReactComponent.ContextMenu
         trigger="right-click"
+        action="open"
         menu={<MenuWrapper />}
       >
         <section
@@ -202,6 +296,7 @@ class App extends React.Component {
             position: "absolute",
             height: "100%",
             backgroundColor: this.state.type === "albumArt" ? "var(--spice-main)" : "black",
+            overflow: "hidden",
           }}
           ref={this.elemRefs.root}
         >
@@ -262,20 +357,32 @@ class App extends React.Component {
             ref={this.elemRefs.debug}
           ></p>
           <div
-            className="wmpvis-lyrics"
+            className="wmpvis-lyrics-container"
             style={{
-              display: this.state.showLyrics ? "block" : "none",
-              backgroundColor: "rgba(0, 0, 0, 0.5)",
-              color: "white",
-              width: "100%",
-              height: "100%",
+              display: this.state.showLyrics ? "flex" : "none",
+              justifyContent: "center",
               position: "absolute",
               top: 0,
               left: 0,
-              zIndex: 4
+              zIndex: 4,
+              width: "100%",
+              height: "100%",
+              backgroundColor: "rgba(0, 0, 0, 0.5)",
+              overflow: "auto",
             }}
-            ref={this.elemRefs.lyrics}
-          ></div>
+          >
+            <div
+              className="wmpvis-lyrics"
+              style={{
+                color: "white",
+                margin: "64px 64px 0 64px",
+                fontSize: "1.5rem",
+                fontWeight: "700",
+                lineHeight: "1.5em",
+              }}
+              ref={this.elemRefs.lyrics}
+            ></div>
+          </div>
         </section>
       </Spicetify.ReactComponent.ContextMenu>
     </>

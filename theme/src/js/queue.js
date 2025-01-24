@@ -3,7 +3,18 @@
 import { formatTime } from "./functions";
 import { createMadMenu, MadMenu } from "./MadMenu";
 
+let extraQueuePanelObserver;
+
 export function initQueuePanel() {
+    console.log('WMPotify: Trying to initialize queue panel');
+
+    // 1.2.55(53?) changed something with the right sidebar, making the npv panel always open
+    const detectTarget = document.querySelector('.Root__right-sidebar > div > div > div:has(aside)');
+    if (detectTarget && !extraQueuePanelObserver) {
+        extraQueuePanelObserver = new MutationObserver(initQueuePanel);
+        extraQueuePanelObserver.observe(detectTarget, { childList: true });
+    }
+
     if (!document.querySelector('#queue-panel') ||
         document.querySelector('#wmpotify-queue-toolbar') ||
         document.querySelectorAll('div[data-encore-id="tabPanel"]').length > 2

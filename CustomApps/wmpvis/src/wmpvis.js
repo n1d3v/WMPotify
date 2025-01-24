@@ -6,6 +6,7 @@
 'use strict';
 
 import ButterchurnAdaptor from './butterchurn/adaptor';
+import MadVisLyrics from './lyrics/main';
 import { spAudioDataToFrequencies } from './spadapter';
 
 let albumArt = null;
@@ -236,6 +237,8 @@ export async function init(elemRefs) {
     if (visConfig.type === 'milkdrop') {
         ButterchurnAdaptor.init(visBC);
     }
+
+    MadVisLyrics.init(elemRefs.lyrics.current);
 }
 
 export function uninit() {
@@ -243,4 +246,5 @@ export function uninit() {
         clearInterval(interval);
     }
     ButterchurnAdaptor.uninit();
+    MadVisLyrics.uninit();
 }

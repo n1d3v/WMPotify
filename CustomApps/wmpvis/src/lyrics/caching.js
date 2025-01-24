@@ -20,14 +20,14 @@ export default lrcCache;
 
 const UNIX_1DAY = 86400000; // 24 * 60 * 60 * 1000
 
-async function addCache(hash, lyrics, preferUnsynced) {
-    if (!hash || localStorage.madesktopVisLyricsNoCache) {
+async function addCache(hash, lyrics) {
+    if (!hash || localStorage.wmpotifyVisLyricsNoCache) {
         return;
     }
-    const max = parseInt(localStorage.madesktopVisLyricsCacheMax) || 500;
+    const max = parseInt(localStorage.wmpotifyVisLyricsCacheMax) || 500;
     const count = await countCache();
     if (count >= max) {
-        log(`Cache is full. Deleting ${count - max + 1} oldest caches.`, "log", "MADVisLrc");
+        console.log(`MADVisLrc: Cache is full. Deleting ${count - max + 1} oldest caches.`);
         await deleteOldestCache(count - max + 1);
     }
 
@@ -35,7 +35,7 @@ async function addCache(hash, lyrics, preferUnsynced) {
     const estimate = await navigator.storage.estimate();
     const ratio = estimate.usage / estimate.quota;
     if (ratio > 0.9) {
-        log("Storage is almost full. Deleting 10 oldest caches. Cannot add a new cache.", "error", "MADVisLrc");
+        console.log("MADVisLrc: Storage is almost full. Deleting 10 oldest caches. Cannot add a new cache.");
         deleteOldestCache(10);
         resolve();
         return;
@@ -48,19 +48,18 @@ async function addCache(hash, lyrics, preferUnsynced) {
             resolve();
             return;
         }
-        lyrics.preferredUnsynced = preferUnsynced;
         const request = store.add({
             hash,
             lyrics,
             createdAt: Date.now()
         });
         request.onsuccess = function () {
-            log("Cache added: " + hash, "log", "MADVisLrc");
+            console.log("MADVisLrc: Cache added: " + hash);
             resolve();
         };
         request.onerror = function () {
             if (request.error.name === "ConstraintError") {
-                log("Cache already exists: " + hash, "log", "MADVisLrc");
+                console.log("MADVisLrc: Cache already exists: " + hash);
                 resolve();
             } else {
                 console.error(request.error);
@@ -71,18 +70,18 @@ async function addCache(hash, lyrics, preferUnsynced) {
 }
 
 async function getCache(hash) {
-    if (!hash || localStorage.madesktopVisLyricsNoCache) {
+    if (!hash || localStorage.wmpotifyVisLyricsNoCache) {
         return null;
     }
     const db = await madIdb.init();
     if (!db.objectStoreNames.contains("lrccache")) {
         // Not gonna handle this case more than this, versions with old DB structure did not officially release (existed for pretty long time though)
         madAlert("Outdated DB structure from pre-release version detected. Caching will be disabled. Please export the current config, reset hard, and re-import it to fix this issue.", null, "error", { title: "locid:VISLRC_TITLE" });
-        localStorage.madesktopVisLyricsNoCache = true;
+        localStorage.wmpotifyVisLyricsNoCache = true;
         madOpenConfig('misc');
         return null;
     }
-    const expiryDays = parseInt(localStorage.madesktopVisLyricsCacheExpiry) || 21;
+    const expiryDays = parseInt(localStorage.wmpotifyVisLyricsCacheExpiry) || 21;
     const expiryTime = expiryDays * UNIX_1DAY;
     return new Promise((resolve, reject) => {
         const transaction = db.transaction("lrccache", "readwrite");
@@ -178,7 +177,7 @@ async function deleteOldestCache(num = 1) {
 
 async function cleanExpiredCache() {
     const db = await madIdb.init();
-    const expiryDays = parseInt(localStorage.madesktopVisLyricsCacheExpiry) || 21;
+    const expiryDays = parseInt(localStorage.wmpotifyVisLyricsCacheExpiry) || 21;
     const expiryTime = expiryDays * UNIX_1DAY;
     return new Promise((resolve, reject) => {
         const transaction = db.transaction("lrccache", "readwrite");
@@ -195,7 +194,7 @@ async function cleanExpiredCache() {
                 }
                 cursor.continue();
             } else {
-                log(`Deleted ${cnt} expired caches.`, "log", "MADVisLrc");
+                console.log(`MADVisLrc: Deleted ${cnt} expired caches.`);
                 resolve();
             }
         };
@@ -238,12 +237,12 @@ async function clearCache() {
     });
 }
 
-if (localStorage.madesktopVisLyricsLastCacheClean) {
-    const lastClean = parseInt(localStorage.madesktopVisLyricsLastCacheClean);
+if (localStorage.wmpotifyVisLyricsLastCacheClean) {
+    const lastClean = parseInt(localStorage.wmpotifyVisLyricsLastCacheClean);
     if (Date.now() - lastClean >= UNIX_1DAY) {
         cleanExpiredCache();
-        localStorage.madesktopVisLyricsLastCacheClean = Date.now();
+        localStorage.wmpotifyVisLyricsLastCacheClean = Date.now();
     }
 } else {
-    localStorage.madesktopVisLyricsLastCacheClean = Date.now();
+    localStorage.wmpotifyVisLyricsLastCacheClean = Date.now();
 }

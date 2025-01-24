@@ -3,8 +3,8 @@
 * Still WIP
 * Supported versions: 1.2.45 - 1.2.55
     * Primarily tested on 1.2.52
-    * 1.2.45 and below: global navbar must be enabled in the experimental features
-    * 1.2.44 and below is not tested yet
+    * 1.2.45: global navbar must be enabled in the experimental features
+    * 1.2.44 and below are not supported
 
 ## Installation
 * No proper installation guide yet
