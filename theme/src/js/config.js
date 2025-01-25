@@ -1,5 +1,6 @@
 'use strict';
 
+import FontDetective from "./FontDetective";
 import { setTintColor } from "./tinting";
 import WindhawkComm from "./WindhawkComm";
 
@@ -29,13 +30,15 @@ function init() {
         <p id="wmpotify-config-title">Color Chooser</p>
         <button id="wmpotify-config-close"></button>
         <section class="wmpotify-config-tab-content" data-tab-title="Color Chooser" style="display: block;">
-            <a href="#" id="wmpotify-config-color-reset">Reset</a><br>
+            <section class="field-row">
+                <a href="#" id="wmpotify-config-color-reset">Reset</a>
+                <input type="checkbox" id="wmpotify-config-tint-playerbar" class="wmpotify-aero">
+                <label for="wmpotify-config-tint-playerbar">Apply color to the now playing bar buttons</label>
+            </section>
             <label>Hue</label><br>
             <input type="range" id="wmpotify-config-hue" class="wmpotify-aero no-track" min="0" max="360" step="1" value="180"><br>
             <label>Saturation</label><br>
             <input type="range" id="wmpotify-config-sat" class="wmpotify-aero no-track" min="0" max="354" step="1" value="121"><br>
-            <input type="checkbox" id="wmpotify-config-tint-playerbar" class="wmpotify-aero">
-            <label for="wmpotify-config-tint-playerbar">Apply color to the now playing bar buttons</label>
         </section>
         <section class="wmpotify-config-tab-content" data-tab-title="General">
             <label for="wmpotify-config-style">Style</label>
@@ -44,7 +47,7 @@ function init() {
                 <option value="xp">XP</option>
                 <option value="aero">Aero</option>
                 <option value="basic">Basic</option>
-            </select><br>
+            </select>
             <label for="wmpotify-config-title-style">Title style</label>
             <select id="wmpotify-config-title-style" class="wmpotify-aero">
                 <option value="auto">Auto</option>
@@ -52,6 +55,10 @@ function init() {
                 <option value="custom">Custom</option>
                 <option value="spotify">Spotify</option>
                 <option value="keepmenu">Keep Menu</option>
+            </select><br>
+            <label for="wmpotify-config-font">UI font</label>
+            <select id="wmpotify-config-font" class="wmpotify-aero">
+                <option value="custom">Custom</option>
             </select><br>
             <input type="checkbox" id="wmpotify-config-show-libx" class="wmpotify-aero">
             <label for="wmpotify-config-show-libx">Show Your Library X on the left sidebar</label><br>
@@ -74,6 +81,33 @@ function init() {
         </section>
     `;
 
+    elements.topborder = configWindow.querySelector('#wmpotify-config-topborder');
+    elements.fontSelector = configWindow.querySelector('#wmpotify-config-font');
+    elements.fontCustom = configWindow.querySelector('#wmpotify-config-font option');
+    elements.fontSelector.addEventListener('change', () => {
+        if (elements.fontSelector.value === 'custom') {
+            const fontName = prompt('Enter a valid CSS font-family name');
+            if (fontName) {
+                elements.fontCustom.textContent = fontName;
+                localStorage.wmpotifyFont = fontName;
+            }
+        } else {
+            elements.fontCustom.textContent = 'Custom';
+            localStorage.wmpotifyFont = elements.fontSelector.value;
+        }
+        document.documentElement.style.setProperty('--ui-font', localStorage.wmpotifyFont);
+    });
+    elements.showLibX = configWindow.querySelector('#wmpotify-config-show-libx');
+    elements.showLibX.addEventListener('change', () => {
+        if (elements.showLibX.checked) {
+            localStorage.wmpotifyShowLibX = true;
+            delete document.body.dataset.hideLibx;
+        } else {
+            delete localStorage.wmpotifyShowLibX;
+            document.body.dataset.hideLibx = true;
+            Spicetify.Platform.LocalStorageAPI.setItem("ylx-sidebar-state", 1);
+        }
+    });
     configWindow.querySelector('#wmpotify-config-close').addEventListener('click', close);
     configWindow.querySelector('#wmpotify-config-apply').addEventListener('click', apply);
     if (!WindhawkComm.query()?.speedModSupported) {
@@ -103,6 +137,20 @@ function init() {
     configWindow.querySelector('#wmpotify-config-prev').addEventListener('click', prevTab);
     configWindow.querySelector('#wmpotify-config-next').addEventListener('click', nextTab);
 
+    FontDetective.each(font => {
+        const option = document.createElement("option");
+        option.textContent = font.name;
+        option.value = font.name;
+        if (font.name === (localStorage.wmpotifyFont || 'Segoe UI')) {
+            option.selected = true;
+        }
+        if (font.name === 'Segoe UI') {
+            elements.fontSelector.insertBefore(option, elements.fontSelector.firstChild);
+        } else {
+            elements.fontSelector.insertBefore(option, elements.fontCustom);
+        }
+    });
+
     if (localStorage.wmpotifyStyle) {
         configWindow.querySelector('#wmpotify-config-style').value = localStorage.wmpotifyStyle;
     }
@@ -119,7 +167,28 @@ function init() {
     if (localStorage.wmpotifyShowLibX) {
         configWindow.querySelector('#wmpotify-config-show-libx').checked = true;
     }
+
     
+    let offset = 0, isDown = false;
+
+    elements.topborder.addEventListener('pointerdown', function () {
+        isDown = true;
+        offset = configWindow.getBoundingClientRect().bottom;
+        document.body.style.cursor = 'ns-resize';
+    }, true);
+
+    document.addEventListener('pointerup', function () {
+        isDown = false;
+        document.body.style.cursor = '';
+        localStorage.wmpotifyConfigHeight = configWindow.style.height;
+    }, true);
+
+    document.addEventListener('pointermove', function (event) {
+        if (isDown) {
+            configWindow.style.height = offset - event.clientY + 'px';
+        }
+    }, true);
+
     mainView.appendChild(configWindow);
 }
 
@@ -217,7 +286,7 @@ function setSpeed(speed) {
 function apply() {
     const style = configWindow.querySelector('#wmpotify-config-style').value;
     const titleStyle = configWindow.querySelector('#wmpotify-config-title-style').value;
-    const showLibX = configWindow.querySelector('#wmpotify-config-show-libx').checked;
+    const showLibX = elements.showLibX.checked;
     if (style !== 'auto') {
         localStorage.wmpotifyStyle = style;
     } else {

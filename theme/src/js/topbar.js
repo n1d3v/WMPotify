@@ -1,7 +1,6 @@
 'use strict';
 
 import { MadMenu, createMadMenu } from './MadMenu';
-import DirectUserStorage from './DirectUserStorage';
 import WindhawkComm from './WindhawkComm';
 
 let tabsContainer;
@@ -18,7 +17,7 @@ export function setupTopbar() {
     tabsContainer.id = 'wmpotify-tabs-container';
     topbar.insertBefore(tabsContainer, topbar.querySelector('.main-globalNav-searchSection'));
 
-    let nowPlayingButton = document.querySelector('.custom-navlinks-scrollable_container div[role="presentation"] > button[aria-label="Now Playing"]');
+    let nowPlayingButton = document.querySelector('.custom-navlinks-scrollable_container div[role="presentation"] > button:has(#wmpotify-nowplaying-icon)');
     if (!nowPlayingButton) {
         nowPlayingButton = document.createElement('button');
         nowPlayingButton.setAttribute('aria-label', 'Now Playing');

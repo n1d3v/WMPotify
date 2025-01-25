@@ -2,10 +2,10 @@
 
 import { formatTime } from './functions';
 import WindhawkComm from './WindhawkComm';
+import WindowManager from './WindowManager';
 
 let playPauseButton, volumeButton, volumeBarProgress, timeTexts, timeTextMode, timeText;
 let longPressTimer = null;
-let fullscreenHideControlTimer = null;
 let titleSet = false;
 
 export function setupPlayerbar() {
@@ -19,7 +19,6 @@ export function setupPlayerbar() {
     new MutationObserver(setupTrackInfoWidget).observe(document.querySelector('.main-nowPlayingBar-left'), { childList: true });
 
     const playerControlsLeft = document.querySelector('.player-controls__left');
-    const prevButton = document.querySelector('.player-controls__buttons button[data-testid="control-button-skip-back"]');
     const nextButton = document.querySelector('.player-controls__buttons button[data-testid="control-button-skip-forward"]');
     const repeatButton = document.querySelector('.player-controls__buttons button[data-testid="control-button-repeat"]');
     playerControlsLeft.appendChild(repeatButton);
@@ -48,6 +47,8 @@ export function setupPlayerbar() {
         });
     }
 
+    // Shuffle button is often re-added to right before the prev button
+    // so keep shuffle and prev at the first of the left controls in DOM and re-order our modified/custom buttons with CSS flex order
     const stopButton = document.createElement('button');
     stopButton.setAttribute('aria-label', 'Stop');
     stopButton.id = 'wmpotify-stop-button';
@@ -55,7 +56,7 @@ export function setupPlayerbar() {
         Spicetify.Platform.PlayerAPI.clearQueue();
         Spicetify.Player.playUri("");
     });
-    playerControlsLeft.insertBefore(stopButton, prevButton);
+    playerControlsLeft.appendChild(stopButton);
 
     const playerControlsRight = document.querySelector('.player-controls__right');
     const volumeBar = document.querySelector('.volume-bar');
@@ -82,7 +83,7 @@ export function setupPlayerbar() {
         }
     });
 
-    timeTexts = document.querySelectorAll('.playback-bar .encore-text'); // 0: elapsed, 1: total (both in HH:MM:SS format)
+    timeTexts = document.querySelectorAll('.playback-bar [class*=encore-text]'); // 0: elapsed, 1: total (both in HH:MM:SS format)
     const timeTextContainer = document.createElement('div');
     timeTextContainer.classList.add('wmpotify-time-text-container');
     timeText = document.createElement('span');
@@ -106,77 +107,38 @@ export function setupPlayerbar() {
         window.addEventListener('resize', updateTimeTextMiniMode);
     }
 
-    // const lyricsButton = document.querySelector('.main-nowPlayingBar-extraControls button[data-testid="lyrics-button"]');
-    // if (Spicetify.Config.custom_apps.includes('wmpvis') && lyricsButton) {
-    //     lyricsButton.addEventListener('click', (event) => {
-    //         event.preventDefault();
-    //         event.stopPropagation();
-    //         if (Spicetify.Platform.History.location.pathname === '/wmpvis') {
-    //             if (globalThis.setShowLyrics) {
-    //                 globalThis.setShowLyrics();
-    //             }
-    //         } else {
-    //             localStorage.wmpotifyVisShowLyrics = true;
-    //             Spicetify.Platform.History.push('/wmpvis');
-    //         }
-    //     });
-    // }
-
     if (whStatus) {
         const pipButton = document.querySelector('.main-nowPlayingBar-extraControls button[data-testid="pip-toggle-button"]');
         if (pipButton) {
             pipButton.addEventListener('click', (event) => {
-                if (window.innerWidth < 360 && window.innerHeight < 262) {
-                    const lastSize = localStorage.wmpotifyPreMiniModeSize?.split(',');
-                    if (lastSize && lastSize.length === 2) {
-                        window.resizeTo(parseInt(lastSize[0]), parseInt(lastSize[1]));
-                    }
-                } else {
-                    if (document.fullscreenElement) {
-                        document.exitFullscreen();
-                    }
-                    localStorage.wmpotifyPreMiniModeSize = [window.innerWidth, window.innerHeight];
-                    WindhawkComm.resizeTo(358, 60);
-                }
+                WindowManager.toggleMiniMode();
                 event.preventDefault();
                 event.stopPropagation();
             });
+        } else {
+            const miniModeButton = new Spicetify.Playbar.Button(
+                "Mini mode",
+                '', // SVG icon, not needed (image provided in CSS)
+                () => WindowManager.toggleMiniMode()
+            );
+            miniModeButton.element.id = 'wmpotify-mini-mode-button';
         }
     }
 
     const fullscreenButton = document.querySelector('.main-nowPlayingBar-extraControls button[data-testid="fullscreen-mode-button"]');
     if (fullscreenButton) {
         fullscreenButton.addEventListener('click', (event) => {
-            if (document.fullscreenElement) {
-                document.exitFullscreen();
-                exitFullscreen();
-            } else {
-                if (Spicetify.Config.custom_apps.includes('wmpvis')) {
-                    Spicetify.Platform.History.push('/wmpvis');
-                } else {
-                    if (lyricsButton) {
-                        lyricsButton.click();
-                    }
-                }
-                document.documentElement.requestFullscreen();
-                document.body.classList.add('wmpotify-playerbar-visible');
-                setTimeout(() => {
-                    document.addEventListener('pointermove', fullscreenMouseMoveListener);
-                    fullscreenMouseMoveListener();
-                }, 200);
-            }
-            document.addEventListener('fullscreenchange', () => {
-                if (!document.fullscreenElement) {
-                    exitFullscreen();
-                }
-            }, { once: true });
-            // Somehow fullscreenchange event doesn't fire when exiting fullscreen with Esc key in Spotify
-            document.addEventListener('resize', () => {
-                exitFullscreen();
-            }, { once: true });
+            WindowManager.toggleFullscreen();
             event.preventDefault();
             event.stopPropagation();
         });
+    } else {
+        const fullscreenButton2 = new Spicetify.Playbar.Button(
+            "Full screen",
+            '',
+            () => WindowManager.toggleFullscreen()
+        );
+        fullscreenButton2.element.id = 'wmpotify-fullscreen-button';
     }
 
     function updateTimeTextMiniMode() {
@@ -193,23 +155,6 @@ export function setupPlayerbar() {
                 timeTextContainer.appendChild(timeText);
             }
         }
-    }
-
-    function fullscreenMouseMoveListener() {
-        if (!document.fullscreenElement) {
-            exitFullscreen();
-            return;
-        }
-        document.body.classList.add('wmpotify-playerbar-visible');
-        clearTimeout(fullscreenHideControlTimer);
-        fullscreenHideControlTimer = setTimeout(() => {
-            document.body.classList.remove('wmpotify-playerbar-visible');
-        }, 2000);
-    }
-
-    function exitFullscreen() {
-        document.body.classList.remove('wmpotify-playerbar-visible');
-        document.removeEventListener('pointermove', fullscreenMouseMoveListener);
     }
 }
 

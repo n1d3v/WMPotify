@@ -128,7 +128,7 @@ function testWindhawk() {
         return;
     }
     try {
-        windhawkModule = window._getSpotifyModule("ctewh");
+        windhawkModule = window.cancelEsperantoCall("ctewh");
         lastDpi = windhawkModule.query().dpi / 96;
         const { version, initialOptions } = windhawkModule;
         console.log(`CEF/Spotify Tweaks Windhawk mod available, Version: ${version}`);

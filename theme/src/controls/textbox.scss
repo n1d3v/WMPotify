@@ -1,0 +1,30 @@
+input.wmpotify-aero {
+    &[type="text"],
+    &[type="email"],
+    &[type="number"],
+    &[type="password"] {
+        height: 23px;
+    }
+}
+  
+input.wmpotify-aero[type="text"],
+input.wmpotify-aero[type="email"],
+input.wmpotify-aero[type="number"],
+input.wmpotify-aero[type="password"],
+textarea.wmpotify-aero {
+    font: var(--font);
+    padding: 3px 4px 5px;
+    border: 1px solid #ccc;
+    border-top-color: var(--button-border-color);
+    border-radius: 2px;
+    background-color: var(--button-highlight);
+    box-sizing: border-box;
+    box-shadow: none;
+  
+    &:focus {
+        outline: none;
+        border-color: var(--button-shade-light-hovered);
+        border-top-color: var(--button-shade-light-active);
+    }
+}
+  

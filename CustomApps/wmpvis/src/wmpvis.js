@@ -204,7 +204,7 @@ async function setupListeners() {
     Spicetify.Player.addEventListener('songchange', async () => {
         audioData = await spAudioDataToFrequencies();
         lastIndex = 0;
-        albumArt.src = Spicetify.Player.data?.item?.album?.images?.[0]?.url?.replace('spotify:image:', 'https://i.scdn.co/image/');
+        albumArt.src = Spicetify.Player.data?.item?.album?.images?.[0]?.url?.replace('spotify:image:', 'https://i.scdn.co/image/') || '';
     });
     ButterchurnAdaptor.setAudioData(audioData);
     if (interval) {
@@ -232,7 +232,7 @@ export async function init(elemRefs) {
     updateVisConfig();
     new ResizeObserver(updateSize).observe(visBar);
 
-    albumArt.src = document.querySelector('.main-nowPlayingWidget-coverArt .cover-art img')?.src;
+    albumArt.src = document.querySelector('.main-nowPlayingWidget-coverArt .cover-art img')?.src || '';
 
     if (visConfig.type === 'milkdrop') {
         ButterchurnAdaptor.init(visBC);

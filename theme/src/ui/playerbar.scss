@@ -196,20 +196,21 @@ div[data-testid='now-playing-widget'] {
                 background-image: var(--play-pressed);
             }
 
-            &.playing {
+            &.playing,
+            &:has(path[d="M2.7 1a.7.7 0 0 0-.7.7v12.6a.7.7 0 0 0 .7.7h2.6a.7.7 0 0 0 .7-.7V1.7a.7.7 0 0 0-.7-.7H2.7zm8 0a.7.7 0 0 0-.7.7v12.6a.7.7 0 0 0 .7.7h2.6a.7.7 0 0 0 .7-.7V1.7a.7.7 0 0 0-.7-.7h-2.6z"]) {
                 background-image: var(--pause);
-            }
 
-            &.playing:disabled {
-                background-image: var(--pause-disabled) !important;
-            }
+                &:disabled {
+                    background-image: var(--pause-disabled) !important;
+                }
 
-            &.playing:hover {
-                background-image: var(--pause-hover);
-            }
+                &:hover {
+                    background-image: var(--pause-hover);
+                }
 
-            &.playing:active {
-                background-image: var(--pause-pressed);
+                &:active {
+                    background-image: var(--pause-pressed);
+                }
             }
         }
 
@@ -282,6 +283,7 @@ div[data-testid='now-playing-widget'] {
     }
 
     button[data-testid='control-button-repeat'] {
+        position: relative;
         width: 25px;
         height: 25px;
         border-radius: 0 !important;
@@ -372,6 +374,7 @@ div[data-testid='now-playing-widget'] {
             height: 13px;
             image-rendering: pixelated;
             visibility: visible !important;
+            display: flex !important;
 
             &:hover {
                 background-image: url('resources/playerbar/volhandle_hover.png');
@@ -430,8 +433,10 @@ div[data-testid='now-playing-widget'] {
         }
     }
 
-    button[data-testid='pip-toggle-button'] {
+    button[data-testid='pip-toggle-button'],
+    #wmpotify-mini-mode-button {
         background: var(--miniplayer) no-repeat center;
+        order: 98;
 
         svg {
             display: none;
@@ -452,10 +457,12 @@ div[data-testid='now-playing-widget'] {
     }
 
     button[data-testid='fullscreen-mode-button'],
-    #BeautifulLyricsFullscreenButton {
+    #BeautifulLyricsFullscreenButton,
+    #wmpotify-fullscreen-button {
         min-width: 0;
         background: var(--fullscreen) no-repeat center;
         scale: 1 !important;
+        order: 99;
 
         svg {
             display: none;
@@ -482,7 +489,7 @@ div[data-testid='now-playing-widget'] {
     width: calc(100% - 28px);
     margin-left: 17px;
 
-    .encore-text {
+    [class*=encore-text] {
         display: none;
     }
 }
@@ -743,6 +750,8 @@ div[data-testid='now-playing-widget'] {
     
             button[data-testid="pip-toggle-button"],
             button[data-testid="fullscreen-mode-button"],
+            #wmpotify-mini-mode-button,
+            #wmpotify-fullscreen-button,
             #BeautifulLyricsFullscreenButton {
                 display: unset;
             }
@@ -768,6 +777,8 @@ div[data-testid='now-playing-widget'] {
 
         button[data-testid="pip-toggle-button"],
         button[data-testid="fullscreen-mode-button"],
+        #wmpotify-mini-mode-button,
+        #wmpotify-fullscreen-button,
         #BeautifulLyricsFullscreenButton {
             display: unset;
         }

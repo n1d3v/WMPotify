@@ -10,7 +10,6 @@ import SidebarManager from './SidebarManager';
 import { initQueuePanel } from './queue';
 import WindhawkComm from './WindhawkComm';
 import PageManager from './PageManager';
-globalThis.WindhawkComm = WindhawkComm;
 
 const elementsRequired = [
     '.Root__globalNav',
@@ -25,16 +24,15 @@ const elementsRequired = [
     '.main-view-container__scroll-node-child main',
     '.main-nowPlayingBar-nowPlayingBar',
     '.player-controls__left',
-    '.player-controls__buttons button[data-testid="control-button-skip-back"]',
     '.player-controls__buttons button[data-testid="control-button-repeat"]',
     '.player-controls__buttons button[data-testid="control-button-playpause"]',
     '.player-controls__right',
-    '.playback-bar .encore-text',
+    '.playback-bar [class*=encore-text]',
     '.volume-bar',
     '.volume-bar__icon-button',
     '.volume-bar .progress-bar',
     '.main-nowPlayingBar-left',
-    '.Root__right-sidebar div[class]',
+    '.Root__right-sidebar > div > div[class]',
 ];
 
 let style = 'xp';
@@ -125,6 +123,10 @@ function earlyInit() {
         }
         WindhawkComm.setMinSize(358, titleStyle === 'native' ? 60 : 90);
     });
+
+    if (localStorage.wmpotifyFont) {
+        document.documentElement.style.setProperty('--ui-font', localStorage.wmpotifyFont);
+    }
 }
 
 earlyInit();
@@ -152,7 +154,12 @@ async function init() {
     setupPlayerbar();
 
     initQueuePanel();
-    new MutationObserver(initQueuePanel).observe(document.querySelector('.Root__right-sidebar div[class]'), { childList: true });
+    new MutationObserver(initQueuePanel).observe(
+        // Right panel has varying structure in different versions
+        document.querySelector('.XOawmCGZcQx4cesyNfVO') || // Seems same on .52-.56 but may change in future
+        document.querySelector('.Root__right-sidebar > div > div[class]:first-child') ||
+        document.querySelector('.Root__right-sidebar div[class]') // Works on .45-.52
+    , { childList: true });
 }
 
 function isReady() {

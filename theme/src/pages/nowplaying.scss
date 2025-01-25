@@ -1,0 +1,18 @@
+/* WMPotify NowPlaying is designed to be usable without the WMPotify theme (it's recommended tho) */
+/* So, don't include any critical styles here, those belong in the WMPotify NowPlaying codebase */
+/* Only include theme-specific styles here */
+
+.wmpvis-albumArt {
+    &[src=""],
+    &:not([src]) {
+        box-shadow: none !important;
+
+        &::before {
+            content: '';
+            display: block;
+            width: 200px;
+            height: 200px;
+            background: url('resources/icon/nowplaying_album_art_placeholder.png') no-repeat;
+        }
+    }
+}

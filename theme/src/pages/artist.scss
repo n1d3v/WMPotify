@@ -124,7 +124,7 @@ section[data-testid="artist-page"] {
         }
 
         > div:last-child {
-            p.encore-text {
+            p[class*=encore-text] {
                 color: black;
             }
         }

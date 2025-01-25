@@ -133,7 +133,7 @@ function beginRandomTimer() {
         const presetNames = Object.keys(presets);
         const randomPreset = presetNames[Math.floor(Math.random() * presetNames.length)];
         visualizer.loadPreset(presets[randomPreset]);
-        console.log(`Random preset: ${randomPreset}`);
+        console.debug(`Random preset: ${randomPreset}`);
     }
 }
 

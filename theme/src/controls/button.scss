@@ -37,7 +37,7 @@ button.x-sortBox-sortDropdown {
   gap: 0;
   order: -1;
 
-  .encore-text {
+  [class*=encore-text] {
       order: 1;
       font-size: 12px;
   }

@@ -16,6 +16,7 @@ const SidebarManager = {
 function updateSidebarWidth(force) {
     if (!Spicetify.Platform.History.location.pathname.startsWith('/wmpotify-standalone-libx') && !force) {
         // 1.2.53 changed --panel-width to --right-sidebar-width, so sync them for multi version compatibility
+        // AAAnd 1.2.56 completely removed the panel width variable (@property --right-sidebar-width exists but somehow it's always zero) so prefer --panel-width
         const rightSidebarWidth = getComputedStyle(document.documentElement).getPropertyValue("--right-sidebar-width");
         if (rightSidebarWidth) {
             widthObserver.disconnect();

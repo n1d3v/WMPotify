@@ -4,6 +4,7 @@
     color: white;
     font-size: 12px;
     height: 135px;
+    flex-shrink: 0;
     display: none;
 
     &-topborder {
@@ -19,6 +20,7 @@
             #282d39 84%,
             #14171d 100%
         );
+        cursor: ns-resize;
 
         &::before,
         &::after {
@@ -120,9 +122,11 @@
     }
 
     label[for="wmpotify-config-tint-playerbar"] {
-        position: absolute;
-        top: 100px;
-        left: 400px;
+        margin-left: 10px;
+    }
+
+    &-font {
+        margin-top: 3px;
     }
 
     &-speed {

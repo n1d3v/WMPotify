@@ -35,6 +35,19 @@ class App extends React.Component {
     if (resizeTarget) {
       resizeTarget.style.height = '100%';
     }
+    // Comfy theme compatibility
+    const resizeTarget2 = this.elemRefs.root.current.parentElement;
+    if (resizeTarget2) {
+      resizeTarget2.style.height = '100%';
+    }
+    const resizeTarget3 = resizeTarget2.parentElement;
+    if (resizeTarget3) {
+      resizeTarget3.style.height = '100%';
+    }
+    const hideTarget = document.querySelector('.main-topBar-container');
+    if (hideTarget) {
+      hideTarget.style.display = 'none';
+    }
 
     init(this.elemRefs);
     const observer = new IntersectionObserver((entries) => {
@@ -46,13 +59,27 @@ class App extends React.Component {
 
     observer.observe(this.elemRefs.visBar.current);
     document.addEventListener('fullscreenchange', this.handleFullscreenChange);
-    globalThis.setShowLyrics = this.setShowLyrics;
+    globalThis.wmpvisSetShowLyrics = this.setShowLyrics;
   }
 
   componentWillUnmount() {
     uninit();
     document.removeEventListener('fullscreenchange', this.handleFullscreenChange);
-    delete globalThis.setShowLyrics;
+    delete globalThis.wmpvisSetShowLyrics;
+
+    const resizeTarget = document.querySelector('.Root__main-view > div:first-child:not(.main-view-container)');
+    if (resizeTarget) {
+      resizeTarget.style.height = '';
+    }
+    const resizeTarget2 = this.elemRefs.root.current.parentElement;
+    if (resizeTarget2) {
+      resizeTarget2.style.height = '';
+    }
+    const resizeTarget3 = resizeTarget2.parentElement;
+    if (resizeTarget3) {
+      resizeTarget3.style.height = '';
+    }
+    // .main-topBar-container is always re-rendered on navigation
   }
 
   changeVisType = (type) => {
@@ -82,7 +109,7 @@ class App extends React.Component {
   };
 
   render() {
-    const bcPresets = ButterchurnAdaptor.getPresets();
+    const bcPresets = ButterchurnAdaptor.getPresets().sort();
 
     const SvgIcon = React.memo((props) => {
       return <svg class={props.class} height="16" width="16" viewBox="0 0 16 16" fill="currentColor"><path d={props.d}></path></svg>;
@@ -175,7 +202,6 @@ class App extends React.Component {
                 localStorage.wmpotifyVisShowLyrics = "true";
               }
               this.setState({ showLyrics: !this.state.showLyrics });
-              MadVisLyrics.processTimeline(true);
             }}
             divider="after"
             leadingIcon={this.state.showLyrics ? <CheckMark /> : null}
@@ -206,7 +232,7 @@ class App extends React.Component {
           </Spicetify.ReactComponent.MenuItem>
           <Spicetify.ReactComponent.MenuItem
             label="Search Lyrics"
-            onClick={() => Spicetify.showNotification('Hello World')}
+            onClick={() => MadVisLyrics.openSearchDialog()}
           >
             Search Lyrics
           </Spicetify.ReactComponent.MenuItem>
@@ -255,7 +281,14 @@ class App extends React.Component {
         </Spicetify.ReactComponent.MenuSubMenuItem>
         <Spicetify.ReactComponent.MenuItem
           label="Full Screen"
-          onClick={() => document.querySelector('.main-nowPlayingBar-extraControls button[data-testid="fullscreen-mode-button"]')?.click()}
+          onClick={() => {
+            if (Spicetify.Config.current_theme.toLowerCase() === 'wmpotify') {
+              document.querySelector('.main-nowPlayingBar-extraControls button[data-testid="fullscreen-mode-button"]')?.click();
+              document.querySelector('#wmpotify-fullscreen-button')?.click();
+            } else {
+              this.elemRefs.root.current.requestFullscreen();
+            }
+          }}
           leadingIcon={this.state.isFullscreen ? <CheckMark /> : null}
         >
           Full Screen
@@ -353,7 +386,13 @@ class App extends React.Component {
           ></canvas>
           <p
             className="wmpvis-debug"
-            style={{ position: "absolute", top: 0, left: 0, zIndex: 3 }}
+            style={{
+              display: "none",
+              position: "absolute",
+              top: 0,
+              left: 0,
+              zIndex: 3
+            }}
             ref={this.elemRefs.debug}
           ></p>
           <div
@@ -379,6 +418,7 @@ class App extends React.Component {
                 fontSize: "1.5rem",
                 fontWeight: "700",
                 lineHeight: "1.5em",
+                whiteSpace: "pre-wrap",
               }}
               ref={this.elemRefs.lyrics}
             ></div>
