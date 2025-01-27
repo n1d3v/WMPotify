@@ -1,5 +1,6 @@
 'use strict';
 
+import Strings from './strings';
 import { formatTime } from './functions';
 import WindhawkComm from './WindhawkComm';
 import WindowManager from './WindowManager';
@@ -110,39 +111,25 @@ export function setupPlayerbar() {
     if (whStatus) {
         const pipButton = document.querySelector('.main-nowPlayingBar-extraControls button[data-testid="pip-toggle-button"]');
         if (pipButton) {
-            pipButton.addEventListener('click', (event) => {
-                WindowManager.toggleMiniMode();
-                event.preventDefault();
-                event.stopPropagation();
-            });
-        } else {
-            const miniModeButton = new Spicetify.Playbar.Button(
-                "Mini mode",
-                '', // SVG icon, not needed (image provided in CSS)
-                () => WindowManager.toggleMiniMode()
-            );
-            miniModeButton.element.id = 'wmpotify-mini-mode-button';
+            pipButton.style.display = 'none';
         }
+        const miniModeButton = new Spicetify.Playbar.Button(
+            Strings['PB_BTN_MINI_MODE'],
+            '', // SVG icon, not needed (image provided in CSS)
+            () => WindowManager.toggleMiniMode()
+        );
+        miniModeButton.element.id = 'wmpotify-mini-mode-button';
     }
 
-    const fullscreenButton = document.querySelector('.main-nowPlayingBar-extraControls button[data-testid="fullscreen-mode-button"]');
-    if (fullscreenButton) {
-        fullscreenButton.addEventListener('click', (event) => {
-            WindowManager.toggleFullscreen();
-            event.preventDefault();
-            event.stopPropagation();
-        });
-    } else {
-        const fullscreenButton2 = new Spicetify.Playbar.Button(
-            "Full screen",
-            '',
-            () => WindowManager.toggleFullscreen()
-        );
-        fullscreenButton2.element.id = 'wmpotify-fullscreen-button';
-    }
+    const fullscreenButton = new Spicetify.Playbar.Button(
+        Strings['PB_BTN_FULLSCREEN'],
+        '',
+        () => WindowManager.toggleFullscreen()
+    );
+    fullscreenButton.element.id = 'wmpotify-fullscreen-button';
 
     function updateTimeTextMiniMode() {
-        if (window.innerWidth < 750) {
+        if (window.innerWidth < 800) {
             if (!titlebar.contains(timeText)) {
                 if (titleButtons) {
                     titlebar.insertBefore(timeText, titleButtons);

@@ -1,5 +1,6 @@
 'use strict';
 
+import Strings from './strings';
 import { MadMenu, createMadMenu } from './MadMenu';
 import WindhawkComm from './WindhawkComm';
 
@@ -20,12 +21,48 @@ export function setupTopbar() {
     let nowPlayingButton = document.querySelector('.custom-navlinks-scrollable_container div[role="presentation"] > button:has(#wmpotify-nowplaying-icon)');
     if (!nowPlayingButton) {
         nowPlayingButton = document.createElement('button');
-        nowPlayingButton.setAttribute('aria-label', 'Now Playing');
         nowPlayingButton.addEventListener('click', () => {
-            window.open('https://github.com/Ingan121/WMPotify/tree/master/CustomApps/wmpvis');
-            Spicetify.showNotification('Please install this!');
+            if (Spicetify.Config.custom_apps.includes('wmpvis')) {
+                // Somehow Spicetify didn't create CustomApps buttons but it's still installed
+                Spicetify.Platform.History.push({ pathname: '/wmpvis' });
+            } else {
+                const dialogContent = document.createElement('div');
+                dialogContent.id = 'wmpotify-wmpvis-install-dialog';
+                dialogContent.innerHTML = `
+                    <p>${Strings['WMPVIS_INSTALL_DESC']}</p><br>
+                    <img src="https://www.ingan121.com/files3/Spotify_aVCKRF1XOt.png" alt="WMPotify NowPlaying screenshot"><br><br>
+                    <p>${Strings['WMPVIS_INSTALL_STEPS']}</p><br>
+                    <ol>
+                        <li>1. ${Strings['WMPVIS_INSTALL_STEP1']}</li>
+                        <div class="wmpotify-code-container">
+                            <button id="wmpotify-copy-code">
+                                <svg viewBox="0 0 16 16" fill="currentColor" width="16" height="16">
+                                    ${Spicetify.SVGIcons.copy}
+                                </svg>
+                            </button>
+                            <code>powershell -command "$install=\\"wmpvis\\";iwr -useb <a href='https://raw.githubusercontent.com/Ingan121/WMPotify/master/install/install.ps1'>https://raw.githubusercontent.com/Ingan121/WMPotify/master/install/install.ps1</a> | iex"</code>
+                        </div>
+                        <li>2. ${Strings['WMPVIS_INSTALL_STEP2']}</li>
+                        <li>3. ${Strings['WMPVIS_INSTALL_STEP3']}</li>
+                    </ol><br>
+                    <p>${Strings.getString('WMPVIS_INSTALL_MORE_INFO', `<a href="https://github.com/Ingan121/WMPotify">${Strings['UI_CLICK_HERE']}</a>`)}</p>
+                    <p>${Strings.getString('WMPVIS_INSTALL_HIDE', `<a href="javascript:localStorage.wmpotifyNoWmpvis=true;document.querySelector('#wmpotify-tabs-container button[data-identifier=now-playing]').dataset.hidden=true;Spicetify.PopupModal.hide()">${Strings['UI_CLICK_HERE']}</a>`)}</p>
+                `;
+                Spicetify.PopupModal.display({
+                    title: Strings['WMPVIS_INSTALL_TITLE'],
+                    content: dialogContent
+                });
+                document.querySelector('#wmpotify-copy-code').addEventListener('click', () => {
+                    Spicetify.Platform.ClipboardAPI.copy('powershell -command "$install=\\"wmpvis\\";iwr -useb https://raw.githubusercontent.com/Ingan121/WMPotify/master/install/install.ps1 | iex"');
+                    Spicetify.showNotification('Code copied to clipboard!');
+                });
+            }
         });
+        if (localStorage.wmpotifyNoWmpvis && !Spicetify.Config.custom_apps.includes('wmpvis')) {
+            nowPlayingButton.dataset.hidden = true;
+        }
     }
+    nowPlayingButton.setAttribute('aria-label', Strings['TAB_NOW_PLAYING']);
     nowPlayingButton.dataset.identifier = 'now-playing';
     addTab(nowPlayingButton);
     const homeButton = document.querySelector('.main-globalNav-searchContainer > button');
@@ -44,7 +81,7 @@ export function setupTopbar() {
     const libraryButton = document.createElement('button');
     libraryButton.id = 'wmpotify-library-button';
     libraryButton.dataset.identifier = 'library';
-    libraryButton.setAttribute('aria-label', 'Library');
+    libraryButton.setAttribute('aria-label', Strings['TAB_LIBRARY']);
     libraryButton.addEventListener('click', () => {
         Spicetify.Platform.History.push({ pathname: '/wmpotify-standalone-libx', });
     });

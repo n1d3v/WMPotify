@@ -24,11 +24,9 @@ async function buildCSS() {
   const result = await parser.process(input, {
     from: "src/index.scss",
     to: targetFile,
-    map: { inline: false },
   });
 
   fs.writeFileSync(targetFile, result.css);
-  fs.writeFileSync(targetFile + ".map", result.map.toString());
 }
 
 async function buildJS() {

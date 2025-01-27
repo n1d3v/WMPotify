@@ -53,14 +53,18 @@ window.SpotEx = {
 window.addEventListener("load", function() {
     const interval = setInterval(() => {
         if (window.Spicetify) {
-            new Spicetify.Menu.Item(
-                "Manage Chrome Extensions",
-                false, 
-                () => {
-                    window.SpotEx.openWindow({ url: "chrome://extensions", type: "popup" });
-                }
-            ).register();
-            clearInterval(interval);
+            try {
+                new Spicetify.Menu.Item(
+                    "Manage Chrome Extensions",
+                    false, 
+                    () => {
+                        window.SpotEx.openWindow({ url: "chrome://extensions", type: "popup" });
+                    }
+                ).register();
+                clearInterval(interval);
+            } catch {
+                // Not ready
+            }
         }
     }, 100);
 });

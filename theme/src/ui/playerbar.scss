@@ -456,8 +456,10 @@ div[data-testid='now-playing-widget'] {
         }
     }
 
-    button[data-testid='fullscreen-mode-button'],
-    #BeautifulLyricsFullscreenButton,
+    button[data-testid='fullscreen-mode-button'] {
+        display: none;
+    }
+
     #wmpotify-fullscreen-button {
         min-width: 0;
         background: var(--fullscreen) no-repeat center;
@@ -731,6 +733,24 @@ div[data-testid='now-playing-widget'] {
     }
 }
 
+@media (max-width: 1024px) {
+    :root[data-wmpotify-style="xp"] {
+        .main-nowPlayingBar-left [data-testid="now-playing-widget"] {
+            button:not([data-testid="cover-art-button"]) {
+                display: none;
+            }
+        }
+    }
+}
+
+@media (max-width: 980px) {
+    .main-nowPlayingBar-left [data-testid="now-playing-widget"] {
+        button:not([data-testid="cover-art-button"]) {
+            display: none;
+        }
+    }
+}
+
 @media (max-width: 920px) {
     :root[data-wmpotify-style="xp"] {
         .main-nowPlayingBar-left [data-testid="now-playing-widget"] {
@@ -745,21 +765,13 @@ div[data-testid='now-playing-widget'] {
 
         .main-nowPlayingBar-extraControls {
             > * {
-                display: none;
-            }
-    
-            button[data-testid="pip-toggle-button"],
-            button[data-testid="fullscreen-mode-button"],
-            #wmpotify-mini-mode-button,
-            #wmpotify-fullscreen-button,
-            #BeautifulLyricsFullscreenButton {
-                display: unset;
+                margin: 0 2px !important;
             }
         }
     }
 }
 
-@media (max-width: 850px) {
+@media (max-width: 800px) {
     .main-nowPlayingBar-left [data-testid="now-playing-widget"] {
         > * {
             display: none;
@@ -772,22 +784,40 @@ div[data-testid='now-playing-widget'] {
 
     .main-nowPlayingBar-extraControls {
         > * {
-            display: none;
+            margin: 0 2px !important;
         }
+    }
 
-        button[data-testid="pip-toggle-button"],
-        button[data-testid="fullscreen-mode-button"],
-        #wmpotify-mini-mode-button,
-        #wmpotify-fullscreen-button,
-        #BeautifulLyricsFullscreenButton {
-            display: unset;
+    :root[data-wmpotify-style="xp"] {
+        .main-nowPlayingBar-extraControls {
+            > * {
+                display: none;
+            }
+
+            button[data-testid="pip-toggle-button"],
+            #wmpotify-mini-mode-button,
+            #wmpotify-fullscreen-button {
+                display: unset;
+            }
         }
     }
 }
 
-@media (max-width: 750px) {
+@media (max-width: 720px) {
     .wmpotify-time-text-container {
         display: none;
+    }
+
+    .main-nowPlayingBar-extraControls {
+        > * {
+            display: none;
+        }
+
+        button[data-testid="pip-toggle-button"],
+        #wmpotify-mini-mode-button,
+        #wmpotify-fullscreen-button {
+            display: unset;
+        }
     }
 }
 

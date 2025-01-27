@@ -6,6 +6,7 @@
 'use strict';
 
 import React from "react";
+import Strings from "../strings";
 import MadVisLyrics, { headers } from "./main";
 
 const SearchDialog = React.memo(({ artist, title, albumTitle }) => {
@@ -26,18 +27,18 @@ const SearchDialog = React.memo(({ artist, title, albumTitle }) => {
             }
 
             [class^="field-row"] + [class^="field-row"] {
-                margin-top: var(--grouped-element-spacing);
+                margin-top: 6px;
             }
 
             .field-row > * + * {
-                margin-left: var(--grouped-element-spacing);
+                margin-left: 6px;
             }
 
             .wmpvis-lyrics-row {
-                display: flex;
-                flex-direction: row;
-                align-items: center;
-                margin-bottom: 5px;
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    margin-bottom: 5px;
             }
 
             .wmpvis-lyrics-row label {
@@ -75,11 +76,6 @@ const SearchDialog = React.memo(({ artist, title, albumTitle }) => {
                 margin-bottom: 4px;
             }
 
-            #wmpvis-lyrics-addOverrideChkBox:disabled + label + br + mad-string {
-                color: var(--button-shadow);
-                text-shadow: 1px 1px 0 var(--button-hilight);
-            }
-
             .wmpvis-lyrics-bottomButtons {
                 margin-top: 8px;
                 justify-content: flex-end;
@@ -96,32 +92,32 @@ const SearchDialog = React.memo(({ artist, title, albumTitle }) => {
         </style>
         <div style={{ fontSize: '11px' }}>
             <section class="field-row wmpvis-lyrics-normalSearch">
-                <label for="wmpvis-lyrics-searchBar">Search lyrics:</label>
+                <label for="wmpvis-lyrics-searchBar">{Strings['LRCFIND_SEARCH_LABEL']}</label>
                 <input id="wmpvis-lyrics-searchBar" type="text" class="wmpvis-lyrics-searchBar wmpotify-aero" defaultValue={(artist + ' ' + title + ' ' + albumTitle).trim()} />
-                <button id="wmpvis-lyrics-searchBtn" class="wmpotify-aero" accesskey="s"><u>S</u>earch</button>
+                <button id="wmpvis-lyrics-searchBtn" class="wmpotify-aero" accesskey="s">{Strings['LRCFIND_SEARCH']}</button>
             </section>
             <section class="wmpvis-lyrics-row wmpvis-lyrics-advancedSearch">
-                <label for="wmpvis-lyrics-artistBar">Artist:</label>
+                <label for="wmpvis-lyrics-artistBar">{Strings['LRCFIND_ARTIST_LABEL']}</label>
                 <input id="wmpvis-lyrics-artistBar" type="text" class="wmpvis-lyrics-searchBar wmpotify-aero" defaultValue={artist} />
-                <button id="wmpvis-lyrics-searchBtnAdvanced" class="wmpotify-aero" accesskey="s"><u>S</u>earch</button>
+                <button id="wmpvis-lyrics-searchBtnAdvanced" class="wmpotify-aero" accesskey="s">{Strings['LRCFIND_SEARCH']}</button>
             </section>
             <section class="wmpvis-lyrics-row wmpvis-lyrics-advancedSearch">
-                <label for="wmpvis-lyrics-titleBar">Title:</label>
+                <label for="wmpvis-lyrics-titleBar">{Strings['LRCFIND_TITLE_LABEL']}</label>
                 <input id="wmpvis-lyrics-titleBar" type="text" class="wmpvis-lyrics-searchBar wmpotify-aero" defaultValue={title} />
             </section>
             <section class="wmpvis-lyrics-row wmpvis-lyrics-advancedSearch">
-                <label for="wmpvis-lyrics-albumBar">Album:</label>
+                <label for="wmpvis-lyrics-albumBar">{Strings['LRCFIND_ALBUM_LABEL']}</label>
                 <input id="wmpvis-lyrics-albumBar" type="text" class="wmpvis-lyrics-searchBar wmpotify-aero" defaultValue={albumTitle} />
             </section>
             <select id="wmpvis-lyrics-searchResults" class="wmpotify-aero" disabled></select>
             <input id="wmpvis-lyrics-addOverrideChkBox" type="checkbox" name="addOverride" class="wmpotify-aero" />
-            <label for="wmpvis-lyrics-addOverrideChkBox">Always use this lyrics for this song</label><br />
-            Click Lyrics -&gt; Load Lyrics to remove the override.<br />
+            <label for="wmpvis-lyrics-addOverrideChkBox">{Strings['LRCFIND_ADD_OVERRIDE']}</label><br />
+            {Strings['LRCFIND_OVERRIDE_INFO']}<br />
             <section class="wmpvis-lyrics-bottomButtons field-row">
-                <button id="wmpvis-lyrics-okBtn" class="wmpotify-aero">OK</button>
-                <button id="wmpvis-lyrics-cancelBtn" class="wmpotify-aero">Cancel</button>
-                <button id="wmpvis-lyrics-applyBtn" class="wmpotify-aero"><u>A</u>pply</button>
-                <button id="wmpvis-lyrics-advancedBtn" class="wmpotify-aero">A<u>d</u>vanced &gt;&gt;</button>
+                <button id="wmpvis-lyrics-okBtn" class="wmpotify-aero">{Strings['UI_OK']}</button>
+                <button id="wmpvis-lyrics-cancelBtn" class="wmpotify-aero">{Strings['UI_CANCEL']}</button>
+                <button id="wmpvis-lyrics-applyBtn" class="wmpotify-aero">{Strings['UI_APPLY']}</button>
+                <button id="wmpvis-lyrics-advancedBtn" class="wmpotify-aero">{Strings['LRCFIND_ADVANCED_EXPAND']}</button>
             </section>
         </div>
     </>
@@ -129,7 +125,7 @@ const SearchDialog = React.memo(({ artist, title, albumTitle }) => {
 
 export function openSearchDialog(artist, title, albumTitle, currentId) {
     Spicetify.PopupModal.display({
-        title: 'Search Lyrics',
+        title: Strings['LRCFIND_TITLE'],
         content: <SearchDialog artist={artist} title={title} albumTitle={albumTitle} currentId={currentId} />,
     })
 
@@ -175,7 +171,7 @@ async function init(currentId) {
 
     advancedBtn.addEventListener('click', () => {
         advancedMode = !advancedMode;
-        advancedBtn.innerHTML = advancedMode ? 'Advanced <<' : 'Advanced >>';
+        advancedBtn.innerHTML = Strings[advancedMode ? 'LRCFIND_ADVANCED_COLLAPSE' : 'LRCFIND_ADVANCED_EXPAND'];
         if (advancedMode) {
             normalSearchSection.style.display = 'none';
             for (const section of advancedSections) {
@@ -195,12 +191,12 @@ async function init(currentId) {
     } else {
         // No music loaded
         addOverrideChkBox.disabled = true;
-        searchResults.innerHTML = '<option value="">Enter the artist and title of the song you want to search for.</option>';
+        searchResults.innerHTML = `<option value="">${Strings['LRCFIND_MANUAL_INFO']}</option>`;
     }
 
     async function search() {
         searchResults.disabled = true;
-        searchResults.innerHTML = '<option value="">Searching...</option>';
+        searchResults.innerHTML = `<option value="">${Strings['LRCFIND_SEARCHING']}</option>`;
 
         const response = await fetch(`https://lrclib.net/api/search?q=${searchBar.value}`, {
             method: 'GET',
@@ -213,7 +209,7 @@ async function init(currentId) {
 
     async function advancedSearch() {
         searchResults.disabled = true;
-        searchResults.innerHTML = '<option value="">Searching...</option>';
+        searchResults.innerHTML = `<option value="">${Strings['LRCFIND_SEARCHING']}</option>`;
 
         const response = await fetch(`https://lrclib.net/api/search?artist_name=${artistBar.value}&track_name=${titleBar.value}&album_name=${albumBar.value}`, {
             method: 'GET',
@@ -226,7 +222,7 @@ async function init(currentId) {
 
     function processResults(result) {
         if (result.length === 0) {
-            searchResults.innerHTML = '<option value="">No lyrics found.</option>';
+            searchResults.innerHTML = `<option value="">${Strings['LRC_STATUS_NOT_FOUND']}</option>`;
             searchResults.disabled = true;
             return;
         }
@@ -252,7 +248,7 @@ async function init(currentId) {
         }
         if (searchResults.options.length === 0) {
             // Everything is instrumental!
-            searchResults.innerHTML = '<option value="">No lyrics found.</option>';
+            searchResults.innerHTML = `<option value="">${Strings['LRC_STATUS_NOT_FOUND']}</option>`;
             searchResults.disabled = true;
             return;
         }

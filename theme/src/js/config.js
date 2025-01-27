@@ -1,5 +1,7 @@
 'use strict';
 
+import Strings from "./strings";
+import { promptModal } from "./functions";
 import FontDetective from "./FontDetective";
 import { setTintColor } from "./tinting";
 import WindhawkComm from "./WindhawkComm";
@@ -27,56 +29,56 @@ function init() {
         <div id="wmpotify-config-topborder" class="wmpotify-tintable"></div>
         <button id="wmpotify-config-prev"></button>
         <button id="wmpotify-config-next"></button>
-        <p id="wmpotify-config-title">Color Chooser</p>
+        <p id="wmpotify-config-title">${Strings['CONF_COLOR_TITLE']}</p>
         <button id="wmpotify-config-close"></button>
-        <section class="wmpotify-config-tab-content" data-tab-title="Color Chooser" style="display: block;">
+        <section class="wmpotify-config-tab-content" data-tab-title="${Strings['CONF_COLOR_TITLE']}" style="display: block;">
             <section class="field-row">
-                <a href="#" id="wmpotify-config-color-reset">Reset</a>
+                <a href="#" id="wmpotify-config-color-reset">${Strings['UI_RESET']}</a>
                 <input type="checkbox" id="wmpotify-config-tint-playerbar" class="wmpotify-aero">
-                <label for="wmpotify-config-tint-playerbar">Apply color to the now playing bar buttons</label>
+                <label for="wmpotify-config-tint-playerbar">${Strings['CONF_COLOR_TINTPB']}</label>
             </section>
-            <label>Hue</label><br>
+            <label>${Strings['CONF_COLOR_HUE']}</label><br>
             <input type="range" id="wmpotify-config-hue" class="wmpotify-aero no-track" min="0" max="360" step="1" value="180"><br>
-            <label>Saturation</label><br>
+            <label>${Strings['CONF_COLOR_SAT']}</label><br>
             <input type="range" id="wmpotify-config-sat" class="wmpotify-aero no-track" min="0" max="354" step="1" value="121"><br>
         </section>
-        <section class="wmpotify-config-tab-content" data-tab-title="General">
-            <label for="wmpotify-config-style">Style</label>
+        <section class="wmpotify-config-tab-content" data-tab-title="${Strings['CONF_GENERAL_TITLE']}">
+            <label for="wmpotify-config-style">${Strings['CONF_GENERAL_STYLE']}</label>
             <select id="wmpotify-config-style" class="wmpotify-aero">
-                <option value="auto">Auto</option>
+                <option value="auto">${Strings['UI_AUTO']}</option>
                 <option value="xp">XP</option>
                 <option value="aero">Aero</option>
                 <option value="basic">Basic</option>
             </select>
-            <label for="wmpotify-config-title-style">Title style</label>
+            <label for="wmpotify-config-title-style">${Strings['CONF_GENERAL_TITLE_STYLE']}</label>
             <select id="wmpotify-config-title-style" class="wmpotify-aero">
-                <option value="auto">Auto</option>
-                <option value="native">Native</option>
-                <option value="custom">Custom</option>
+                <option value="auto">${Strings['UI_AUTO']}</option>
+                <option value="native">${Strings['CONF_GENERAL_TITLE_STYLE_NATIVE']}</option>
+                <option value="custom">${Strings['CONF_GENERAL_TITLE_STYLE_CUSTOM']}</option>
                 <option value="spotify">Spotify</option>
-                <option value="keepmenu">Keep Menu</option>
+                <option value="keepmenu">${Strings['CONF_GENERAL_TITLE_STYLE_KEEPMENU']}</option>
             </select><br>
-            <label for="wmpotify-config-font">UI font</label>
+            <label for="wmpotify-config-font">${Strings['CONF_GENERAL_FONT']}</label>
             <select id="wmpotify-config-font" class="wmpotify-aero">
-                <option value="custom">Custom</option>
+                <option value="custom">${Strings['UI_CUSTOM']}</option>
             </select><br>
             <input type="checkbox" id="wmpotify-config-show-libx" class="wmpotify-aero">
-            <label for="wmpotify-config-show-libx">Show Your Library X on the left sidebar</label><br>
-            <button id="wmpotify-config-apply" class="wmpotify-aero">Apply</button>
+            <label for="wmpotify-config-show-libx">${Strings['CONF_GENERAL_SHOW_LIBX']}</label><br>
+            <button id="wmpotify-config-apply" class="wmpotify-aero">${Strings['UI_APPLY']}</button>
         </section>
-        <section class="wmpotify-config-tab-content" data-tab-title="Play speed settings" data-wh-speedmod-required="true">
-            <a href="#" id="wmpotify-config-speed-slow">Slow</a>
-            <a href="#" id="wmpotify-config-speed-normal">Normal</a>
-            <a href="#" id="wmpotify-config-speed-fast">Fast</a><br>
+        <section class="wmpotify-config-tab-content" data-tab-title="${Strings['CONF_SPEED_TITLE']}" data-wh-speedmod-required="true">
+            <a href="#" id="wmpotify-config-speed-slow">${Strings['CONF_SPEED_SLOW']}</a>
+            <a href="#" id="wmpotify-config-speed-normal">${Strings['CONF_SPEED_NORMAL']}</a>
+            <a href="#" id="wmpotify-config-speed-fast">${Strings['CONF_SPEED_FAST']}</a><br>
             <input type="range" id="wmpotify-config-speed" class="wmpotify-aero" min="0.5" max="2.0" step="0.1" value="1"><br>
-            Play speed: <span id="wmpotify-config-speed-value">1.0</span>
+            ${Strings['CONF_SPEED_CURRENT_LABEL']}: <span id="wmpotify-config-speed-value">1.0</span>
         </section>
-        <section class="wmpotify-config-tab-content" data-tab-title="About">
+        <section class="wmpotify-config-tab-content" data-tab-title="${Strings['CONF_ABOUT_TITLE']}">
             <div id="wmpotify-about-logo"></div>
             <p id="wmpotify-about-title">WMPotify</p><br>
-            <p>A Windows Media Player 11 inspired Spicetify theme for Spotify</p>
-            <p>Version: Pre-alpha</p>
-            <p>Made by Ingan121 - <a href="https://www.ingan121.com/" target="_blank">www.ingan121.com</a></p>
+            <p>${Strings['CONF_ABOUT_DESC']}</p>
+            <p>${Strings['CONF_ABOUT_VERSION']}: 1.0 Alpha 1</p>
+            <p>${Strings['CONF_ABOUT_AUTHOR']} - <a href="https://www.ingan121.com/" target="_blank">www.ingan121.com</a></p>
             <a href="https://github.com/Ingan121/WMPotify" target="_blank">GitHub</a>
         </section>
     `;
@@ -84,15 +86,17 @@ function init() {
     elements.topborder = configWindow.querySelector('#wmpotify-config-topborder');
     elements.fontSelector = configWindow.querySelector('#wmpotify-config-font');
     elements.fontCustom = configWindow.querySelector('#wmpotify-config-font option');
-    elements.fontSelector.addEventListener('change', () => {
+    elements.fontSelector.addEventListener('change', async () => {
         if (elements.fontSelector.value === 'custom') {
-            const fontName = prompt('Enter a valid CSS font-family name');
-            if (fontName) {
-                elements.fontCustom.textContent = fontName;
-                localStorage.wmpotifyFont = fontName;
+            const fontName = await promptModal(Strings['CONF_GENERAL_CUSTOM_FONT_DLG_TITLE'], Strings['CONF_GENERAL_CUSTOM_FONT_MSG'], '', localStorage.wmpotifyFont || 'Segoe UI');
+            if (!fontName) {
+                elements.fontSelector.value = localStorage.wmpotifyFont || 'Segoe UI';
+                return;
             }
+            elements.fontCustom.textContent = fontName;
+            localStorage.wmpotifyFont = fontName;
         } else {
-            elements.fontCustom.textContent = 'Custom';
+            elements.fontCustom.textContent = Strings['UI_CUSTOM'];
             localStorage.wmpotifyFont = elements.fontSelector.value;
         }
         document.documentElement.style.setProperty('--ui-font', localStorage.wmpotifyFont);
@@ -121,8 +125,11 @@ function init() {
         configWindow.querySelector('#wmpotify-config-speed-fast').addEventListener('click', setSpeed.bind(null, 1.4));
         const playbackSpeed = WindhawkComm.query()?.playbackSpeed || 1;
         elements.speedValue.textContent = Number.isInteger(playbackSpeed) ? playbackSpeed + '.0' : playbackSpeed;
-        elements.speedValue.addEventListener('click', () => {
-            setSpeed(parseFloat(prompt('Enter a playback speed (0.5 - 5.0)', playbackSpeed)));
+        elements.speedValue.addEventListener('click', async () => {
+            const speed = await promptModal(Strings['CONF_SPEED_CUSTOM_DLG_TITLE'], Strings['CONF_SPEED_CUSTOM_MSG'], playbackSpeed.toString(), '1.0');
+            if (speed) {
+                setSpeed(speed);
+            }
         });
     }
     tabs = configWindow.querySelectorAll('.wmpotify-config-tab-content');
@@ -270,7 +277,7 @@ function onSpeedChange() {
 
 function setSpeed(speed) {
     if (Spicetify.Platform.ConnectAPI.state.connectionStatus === 'connected') {
-        Spicetify.showNotification('Cannot change playback speed while playing from another device');
+        Spicetify.showNotification(Strings['CONF_SPEED_NO_CONNECT_MSG']);
         return;
     }
     speed = parseFloat(speed);
@@ -280,7 +287,11 @@ function setSpeed(speed) {
     }
     elements.speed.value = speed;
     elements.speedValue.textContent = Number.isInteger(speed) ? speed + '.0' : speed;
-    WindhawkComm.setPlaybackSpeed(speed);
+    try {
+        WindhawkComm.setPlaybackSpeed(speed);
+    } catch (e) {
+        Spicetify.showNotification(e.message);
+    }
 }
 
 function apply() {

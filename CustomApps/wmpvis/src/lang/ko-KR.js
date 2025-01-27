@@ -1,0 +1,52 @@
+const lang = {
+    identifier: 'ko-KR',
+
+    'UI_OK': '확인',
+    'UI_CANCEL': '취소',
+    'UI_APPLY': '적용',
+    'UI_RESET': '재설정',
+    'UI_AUTO': '자동',
+    'UI_CUSTOM': '사용자 정의',
+    'UI_CLICK_HERE': '여기를 클릭',
+
+    'MENU_TRACK_INFO': '정보 센터 보기(I): Spotify',
+    'MENU_NO_VIS': '시각화 없음',
+    'MENU_VIS_ALBUM_ART': '앨범 아트',
+    'MENU_VIS_BARS': '막대',
+    'MENU_VIS_BC_RANDOM': '무작위',
+    'MENU_LRC': '가사',
+    'MENU_LRC_SHOW': '가사 표시',
+    'MENU_LRC_USE_SPOTIFY': 'Spotify 가사 사용',
+    'MENU_LRC_LOAD': '가사 불러오기',
+    'MENU_LRC_SEARCH': '가사 검색',
+    'MENU_LRC_OPENFILE': '가사 파일 열기',
+    'MENU_LRC_CACHE': '가사 캐시 사용',
+    'MENU_LRC_COPY_DBG_INFO': '디버그 정보 복사',
+    'MENU_FULLSCREEN': '전체 화면',
+
+    "MSG_LOCAL_REMOVE_GUIDE": "불러온 가사를 제거하려면 오른쪽 클릭 메뉴에서 가사 불러오기를 클릭하세요.",
+    "MSG_LOCAL_LOAD_FAIL": "가사 파일을 열지 못했습니다.",
+    "MSG_DBG_INFO_COPIED": "디버그 정보가 클립보드에 복사되었습니다.",
+
+    "LRC_STATUS_LOADING": "불러오는 중...",
+    "LRC_STATUS_NOT_FOUND": "가사를 찾을 수 없습니다.",
+    "LRC_STATUS_OFFLINE": "인터넷에 연결되어 있지 않습니다.",
+    "LRC_STATUS_NO_MUSIC": "음악이 재생 중이 아닙니다.",
+    "LRC_PROVIDER_INFO": "가사 제공: ",
+    "LRC_PROVIDER_LOCAL": "로컬 파일",
+
+    "LRCFIND_TITLE": "가사 검색",
+    "LRCFIND_SEARCH_LABEL": "가사 검색:",
+    "LRCFIND_ARTIST_LABEL": "아티스트:",
+    "LRCFIND_TITLE_LABEL": "제목:",
+    "LRCFIND_ALBUM_LABEL": "앨범:",
+    "LRCFIND_SEARCH": "검색",
+    "LRCFIND_SEARCHING": "검색 중...",
+    "LRCFIND_MANUAL_INFO": "검색하려는 노래의 아티스트와 제목을 입력하세요.",
+    "LRCFIND_ADD_OVERRIDE": "이 노래에 항상 이 가사 사용",
+    "LRCFIND_OVERRIDE_INFO": "가사 -> 가사 불러오기를 클릭하여 이 설정을 제거하세요",
+    "LRCFIND_ADVANCED_EXPAND": "고급 >>",
+    "LRCFIND_ADVANCED_COLLAPSE": "고급 <<",
+};
+
+export default lang;

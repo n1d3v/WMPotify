@@ -1,5 +1,7 @@
 'use strict';
 
+import Strings from './strings';
+
 let controlHeight = 1;
 
 const ControlManager = {
@@ -10,7 +12,7 @@ const ControlManager = {
 	// From https://github.com/ohitstom/spicetify-extensions/tree/main/noControls
 	init() {
 		if (Spicetify.Config.extensions.includes("noControls.js")) {
-			Spicetify.showNotification("[WMPotify] Incompatible extension 'No Controls' detected! Some features of WMPotify will be disabled.");
+			Spicetify.showNotification("[WMPotify] " + Strings.getString("MAIN_MSG_ERROR_INCOMPAT_EXT", "No Controls"));
 			return;
 		}
 

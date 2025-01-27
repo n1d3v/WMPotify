@@ -1,5 +1,6 @@
 'use strict';
 
+import Strings from './strings'
 import ControlManager from './ControlManager';
 import { setTintColor } from './tinting';
 import { createTitlebar } from './titlebar';
@@ -32,7 +33,6 @@ const elementsRequired = [
     '.volume-bar__icon-button',
     '.volume-bar .progress-bar',
     '.main-nowPlayingBar-left',
-    '.Root__right-sidebar > div > div[class]',
 ];
 
 let style = 'xp';
@@ -148,7 +148,7 @@ async function init() {
     SidebarManager.init();
 
     Config.init();
-    new Spicetify.Menu.Item('WMPotify Properties', false, Config.open).register();
+    new Spicetify.Menu.Item(Strings['MENU_CONF'], false, Config.open).register();
 
     setupTopbar();
     setupPlayerbar();
@@ -182,12 +182,12 @@ window.addEventListener('load', () => {
             try {
                 await init();
             } catch (e) {
-                (window.Spicetify?.showNotification || window.alert)('[WMPotify] An error occurred during initialization. Please check the console for more information.');
+                (window.Spicetify?.showNotification || window.alert)('[WMPotify] ' + Strings['MAIN_MSG_ERROR_INIT']);
                 console.error('WMPotify: Error during init:', e);
             }
             console.log('WMPotify: Theme loaded');
         } else if (cnt++ > 80) {
-            (window.Spicetify?.showNotification || window.alert)('[WMPotify] Theme loading failed. Please refresh the page to try again. Please make sure you have compatible Spoitfy version.');
+            (window.Spicetify?.showNotification || window.alert)('[WMPotify] ' + Strings['MAIN_MSG_ERROR_LOAD_FAIL']);
             clearInterval(interval);
             const missing = [];
             for (const selector of elementsRequired) {

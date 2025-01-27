@@ -21,5 +21,91 @@ generic-modal {
             justify-content: flex-end;
             gap: 8px;
         }
+
+        .main-trackCreditsModal-header {
+            padding: 8px;
+
+            h1 {
+                font: var(--caption-font);
+            }
+
+            .main-trackCreditsModal-closeBtn {
+                width: 25px;
+                height: 15px;
+                background: url('resources/icon/close.png') no-repeat;
+                transform: none !important;
+
+                &:hover {
+                    background: url('resources/icon/close_hover.png') no-repeat;
+                }
+
+                &:active {
+                    background: url('resources/icon/close_pressed.png') no-repeat;
+                }
+
+                svg {
+                    display: none;
+                }
+            }
+        }
+
+        .main-trackCreditsModal-mainSection {
+            padding: 8px;
+            scrollbar-width: none;
+
+            * {
+                font: var(--message-font);
+            }
+        }
+
+        .main-trackCreditsModal-originalCredits {
+            padding-bottom: 0;
+        }
+
+        .wmpotify-modal-bottom-buttons {
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-end;
+            margin-top: 8px;
+            margin-bottom: 5px;
+        }
+    }
+}
+
+/* WMPotify NowPlaying install dialog */
+.main-trackCreditsModal-container:has(#wmpotify-wmpvis-install-dialog) {
+    min-width: 620px;
+
+    img {
+        width: 100%;
+        max-width: 400px;
+    }
+
+    .wmpotify-code-container {
+        display: flex;
+        background-color: lightgray;
+        padding: 10px;
+        margin: 10px 0;
+        overflow-x: scroll;
+
+        button {
+            width: 16px;
+            height: 16px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            margin-top: auto;
+            margin-right: 5px;
+        }
+
+        code {
+            display: block;
+            white-space: nowrap;
+            user-select: text;
+        }
+    }
+
+    a {
+        color: var(--hot-tracking-color);
     }
 }

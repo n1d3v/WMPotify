@@ -1,0 +1,52 @@
+const lang = {
+    identifier: 'en-US',
+
+    'UI_OK': 'OK',
+    'UI_CANCEL': 'Cancel',
+    'UI_APPLY': 'Apply',
+    'UI_RESET': 'Reset',
+    'UI_AUTO': 'Auto',
+    'UI_CUSTOM': 'Custom',
+    'UI_CLICK_HERE': 'click here',
+
+    'MENU_TRACK_INFO': 'Info Center View: Spotify',
+    'MENU_NO_VIS': 'No Visualization',
+    'MENU_VIS_ALBUM_ART': 'Album Art',
+    'MENU_VIS_BARS': 'Bars',
+    'MENU_VIS_BC_RANDOM': 'Random',
+    'MENU_LRC': 'Lyrics',
+    'MENU_LRC_SHOW': 'Show Lyrics',
+    'MENU_LRC_USE_SPOTIFY': 'Use Spotify Lyrics',
+    'MENU_LRC_LOAD': 'Load Lyrics',
+    'MENU_LRC_SEARCH': 'Search Lyrics',
+    'MENU_LRC_OPENFILE': 'Open Lyrics File',
+    'MENU_LRC_CACHE': 'Cache Lyrics',
+    'MENU_LRC_COPY_DBG_INFO': 'Copy Debug Info',
+    'MENU_FULLSCREEN': 'Full Screen',
+
+    'MSG_LOCAL_REMOVE_GUIDE': 'Click Load Lyrics in the right-click menu to remove the override.',
+    'MSG_LOCAL_LOAD_FAIL': 'Failed to open the lyrics file.',
+    'MSG_DBG_INFO_COPIED': 'Debug info copied to clipboard.',
+
+    "LRC_STATUS_LOADING": "Loading...",
+    "LRC_STATUS_NOT_FOUND": "No lyrics found.",
+    "LRC_STATUS_OFFLINE": "No internet connection.",
+    "LRC_STATUS_NO_MUSIC": "No music is playing.",
+    "LRC_PROVIDER_INFO": "Lyrics provided by ",
+    "LRC_PROVIDER_LOCAL": "Local File",
+
+    "LRCFIND_TITLE": "Search Lyrics",
+    "LRCFIND_SEARCH_LABEL": "Search:",
+    "LRCFIND_ARTIST_LABEL": "Artist:",
+    "LRCFIND_TITLE_LABEL": "Title:",
+    "LRCFIND_ALBUM_LABEL": "Album:",
+    "LRCFIND_SEARCH": "Search",
+    "LRCFIND_SEARCHING": "Searching...",
+    "LRCFIND_MANUAL_INFO": "Enter the artist and title of the song you want to search for.",
+    "LRCFIND_ADD_OVERRIDE": "Always use this lyrics for this song",
+    "LRCFIND_OVERRIDE_INFO": "Click Lyrics -> Load Lyrics to remove the override",
+    "LRCFIND_ADVANCED_EXPAND": "Advanced >>",
+    "LRCFIND_ADVANCED_COLLAPSE": "Advanced <<",
+};
+
+export default lang;

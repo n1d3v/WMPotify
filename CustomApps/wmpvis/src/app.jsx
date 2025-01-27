@@ -1,6 +1,7 @@
 'use strict';
 
 import React from 'react'
+import Strings from './strings';
 import { init, updateVisConfig, uninit } from './wmpvis';
 import ButterchurnAdaptor from './butterchurn/adaptor';
 import MadVisLyrics from './lyrics/main';
@@ -44,10 +45,6 @@ class App extends React.Component {
     if (resizeTarget3) {
       resizeTarget3.style.height = '100%';
     }
-    const hideTarget = document.querySelector('.main-topBar-container');
-    if (hideTarget) {
-      hideTarget.style.display = 'none';
-    }
 
     init(this.elemRefs);
     const observer = new IntersectionObserver((entries) => {
@@ -79,7 +76,6 @@ class App extends React.Component {
     if (resizeTarget3) {
       resizeTarget3.style.height = '';
     }
-    // .main-topBar-container is always re-rendered on navigation
   }
 
   changeVisType = (type) => {
@@ -130,7 +126,7 @@ class App extends React.Component {
           onClick={() => window.open(Spicetify.Player.data?.item?.uri)}
           divider="after"
         >
-          Info Center View: Spotify
+          {Strings['MENU_TRACK_INFO']}
         </Spicetify.ReactComponent.MenuItem>
         <Spicetify.ReactComponent.MenuItem
           label="No Visualization"
@@ -138,21 +134,21 @@ class App extends React.Component {
           divider="after"
           leadingIcon={this.state.type === "none" ? <ActiveRadio /> : null}
         >
-          No Visualization
+          {Strings['MENU_NO_VIS']}
         </Spicetify.ReactComponent.MenuItem>
         <Spicetify.ReactComponent.MenuItem
           label="Album Art"
           onClick={() => this.changeVisType("albumArt")}
           leadingIcon={this.state.type === "albumArt" ? <ActiveRadio /> : null}
         >
-          Album Art
+          {Strings['MENU_VIS_ALBUM_ART']}
         </Spicetify.ReactComponent.MenuItem>
         <Spicetify.ReactComponent.MenuItem
           label="Bars"
           onClick={() => this.changeVisType("bars")}
           leadingIcon={this.state.type === "bars" ? <ActiveRadio /> : null}
         >
-          Bars
+          {Strings['MENU_VIS_BARS']}
         </Spicetify.ReactComponent.MenuItem>
         <Spicetify.ReactComponent.MenuSubMenuItem
           displayText="MilkDrop"
@@ -170,7 +166,7 @@ class App extends React.Component {
             }}
             leadingIcon={this.state.type === "milkdrop" && this.state.bcPreset === "Random" ? <ActiveRadio /> : null}
           >
-            Random
+            {Strings['MENU_VIS_BC_RANDOM']}
           </Spicetify.ReactComponent.MenuItem>
           {bcPresets.map((preset) => (
             <Spicetify.ReactComponent.MenuItem
@@ -189,7 +185,7 @@ class App extends React.Component {
           ))}
         </Spicetify.ReactComponent.MenuSubMenuItem>
         <Spicetify.ReactComponent.MenuSubMenuItem
-          displayText="Lyrics"
+          displayText={Strings['MENU_LRC']}
           label="Lyrics"
           divider="after"
         >
@@ -206,7 +202,7 @@ class App extends React.Component {
             divider="after"
             leadingIcon={this.state.showLyrics ? <CheckMark /> : null}
           >
-            Show Lyrics
+            {Strings['MENU_LRC_SHOW']}
           </Spicetify.ReactComponent.MenuItem>
           <Spicetify.ReactComponent.MenuItem
             label="Use Spotify Lyrics"
@@ -222,37 +218,37 @@ class App extends React.Component {
             divider="after"
             leadingIcon={this.state.enableSpotifyLyrics ? <CheckMark /> : null}
           >
-            Use Spotify Lyrics
+            {Strings['MENU_LRC_USE_SPOTIFY']}
           </Spicetify.ReactComponent.MenuItem>
           <Spicetify.ReactComponent.MenuItem
             label="Load Lyrics"
             onClick={() => MadVisLyrics.reloadLyrics()}
           >
-            Load Lyrics
+            {Strings['MENU_LRC_LOAD']}
           </Spicetify.ReactComponent.MenuItem>
           <Spicetify.ReactComponent.MenuItem
             label="Search Lyrics"
             onClick={() => MadVisLyrics.openSearchDialog()}
           >
-            Search Lyrics
+            {Strings['MENU_LRC_SEARCH']}
           </Spicetify.ReactComponent.MenuItem>
           <Spicetify.ReactComponent.MenuItem
             label="Open Lyrics File"
             onClick={async () => {
               try {
                 await MadVisLyrics.openLyricsFile()
-                Spicetify.showNotification('Click Load Lyrics in the right-click menu to remove the override.');
+                Spicetify.showNotification(Strings['MSG_LOCAL_REMOVE_GUIDE']);
               } catch (e) {
                 if (e.name === 'AbortError') {
                   return;
                 }
                 console.error(e);
-                Spicetify.showNotification('Failed to open the lyrics file');
+                Spicetify.showNotification(Strings['MSG_LOCAL_LOAD_FAIL']);
               }
             }}
             divider="after"
           >
-            Open Lyrics File
+            {Strings['MENU_LRC_OPENFILE']}
           </Spicetify.ReactComponent.MenuItem>
           <Spicetify.ReactComponent.MenuItem
             label="Cache Lyrics"
@@ -267,16 +263,16 @@ class App extends React.Component {
             }}
             leadingIcon={this.state.enableLyricsCache ? <CheckMark /> : null}
           >
-            Cache Lyrics
+            {Strings['MENU_LRC_CACHE']}
           </Spicetify.ReactComponent.MenuItem>
           <Spicetify.ReactComponent.MenuItem
             label="Copy Debug Info"
             onClick={() => {
               MadVisLyrics.copyDebugInfo();
-              Spicetify.showNotification('Debug info copied to clipboard');
+              Spicetify.showNotification(Strings['MSG_DBG_INFO_COPIED']);
             }}
           >
-            Copy Debug Info
+            {Strings['MENU_LRC_COPY_DBG_INFO']}
           </Spicetify.ReactComponent.MenuItem>
         </Spicetify.ReactComponent.MenuSubMenuItem>
         <Spicetify.ReactComponent.MenuItem
@@ -291,7 +287,7 @@ class App extends React.Component {
           }}
           leadingIcon={this.state.isFullscreen ? <CheckMark /> : null}
         >
-          Full Screen
+          {Strings['MENU_FULLSCREEN']}
         </Spicetify.ReactComponent.MenuItem>
       </Spicetify.ReactComponent.Menu>
     });
@@ -304,17 +300,22 @@ class App extends React.Component {
           text-decoration: underline;
         }
 
-        @media(min-width: 1280px) {
+        @media (min-width: 1280px) {
           .wmpvis-lyrics {
             font-size: 2rem !important;
           }
         }
 
-        @media(min-width: 1920px) {
+        @media (min-width: 1920px) {
           .wmpvis-lyrics {
             font-size: 3rem !important;
             margin: 64px 144px 0 144px !important;
           }
+        }
+
+        /* This interferes with the right-click menu on non-WMPotify themes */
+        .main-topBar-container {
+          display: none;
         }
         `}
       </style>
@@ -324,6 +325,7 @@ class App extends React.Component {
         menu={<MenuWrapper />}
       >
         <section
+          id="wmpvis"
           className="contentSpacing"
           style={{
             position: "absolute",

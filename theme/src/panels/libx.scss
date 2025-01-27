@@ -371,13 +371,6 @@ body[data-wmpotify-lib-page-open]:not(#Prio1):not(#Prio2):not(#Prio3) { /* dirty
         width: 0;
     }
 
-    .Root__right-sidebar {
-        .LayoutResizer__resize-bar {
-            /* Disallow right panel resizing when standlone libx is open as it's buggy */
-            pointer-events: none;
-        }
-    }
-
     :root[data-wmpotify-style="xp"] & {
         #Desktop_LeftSidebar_Id {
             width: calc(100vw - var(--panel-gap) * 2);

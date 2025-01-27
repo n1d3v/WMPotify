@@ -5,6 +5,7 @@
 
 'use strict';
 
+import Strings from '../strings';
 import LRC from "./lrcparse";
 import madIdb from "./MadIdb";
 import lrcCache from "./caching";
@@ -45,29 +46,6 @@ async function reloadLyrics() {
     await lrcCache.delete(hash);
     processProperties();
 };
-
-// lrcMenuItems[1].addEventListener('click', function () { // Search Lyrics button
-//     const artist = visStatus.lastMusicEnglish?.artist || visStatus.lastMusic?.artist || '';
-//     const title = visStatus.lastMusicEnglish?.title || visStatus.lastMusic?.title || '';
-//     const albumTitle = visStatus.lastMusicEnglish?.albumTitle || visStatus.lastMusic?.albumTitle || '';
-//     const params = {
-//         artist: artist,
-//         title: title,
-//         albumTitle: albumTitle
-//     };
-//     const query = new URLSearchParams(params).toString();
-
-//     const left = parseInt(madDeskMover.config.xPos) + 25 + 'px';
-//     const top = parseInt(madDeskMover.config.yPos) + 50 + 'px';
-//     const options = {
-//         left, top, width: '520px', height: '132px',
-//         aot: true, unresizable: true, noIcon: true
-//     }
-//     const searchDeskMover = madOpenWindow('apps/visualizer/lyrics/search.html?' + query + "&current=" + lastLyricsId, true, options);
-//     searchDeskMover.addEventListener('load', () => {
-//         searchDeskMover.windowElement.contentWindow.loadLyrics = loadLyrics;
-//     }, null, "window");
-// });
 
 async function openLyricsFile() {
     const pickerOpts = {
@@ -623,7 +601,7 @@ async function loadLyrics(idOrLrc, addOverride) {
                 duration: duration,
                 syncedLyrics: text,
                 plainLyrics: LRC.toPlain(text),
-                provider: 'Local File'
+                provider: Strings['LRC_PROVIDER_LOCAL']
             }
         } else {
             lyrics = {
@@ -631,12 +609,12 @@ async function loadLyrics(idOrLrc, addOverride) {
                 id: null,
                 title: getFilename(idOrLrc.name),
                 plainLyrics: text,
-                provider: 'Local File'
+                provider: Strings['LRC_PROVIDER_LOCAL']
             }
         }
     } else {
         try {
-            lyricsView.innerHTML = '<span>Loading...</span>';
+            lyricsView.innerHTML = Strings['LRC_STATUS_LOADING'];
             lyrics = await findLyrics(idOrLrc);
         } catch (error) {
             if (error.name === 'AbortError') {
@@ -671,7 +649,7 @@ async function loadLyrics(idOrLrc, addOverride) {
         }
         const providerView = document.createElement('p');
         providerView.classList.add('wmpotify-lyrics-provider');
-        providerView.textContent = 'Lyrics provided by ' + lyrics.provider;
+        providerView.textContent = Strings['LRC_PROVIDER_INFO'] + lyrics.provider;
         providerView.style = 'font-size: 0.875rem; font-weight: 400; color: lightgray; padding: 20px 0;';
         lyricsView.appendChild(providerView);
         const hash = await getSongHash(visStatus.lastMusic?.artist, visStatus.lastMusic?.title, visStatus.lastMusic?.albumTitle);
@@ -692,16 +670,16 @@ async function loadLyrics(idOrLrc, addOverride) {
         }
     } else {
         if (!navigator.onLine) {
-            lyricsView.innerHTML = '<span>No internet connection.</span>';
+            lyricsView.innerHTML = Strings['LRC_STATUS_OFFLINE'];
         } else {
-            lyricsView.innerHTML = '<span>No lyrics found.</span>';
+            lyricsView.innerHTML = Strings['LRC_STATUS_NOT_FOUND'];
         }
         lastSyncedLyricsParsed = null;
     }
 }
 
 async function processProperties() {
-    lyricsView.innerHTML = '<span>Loading...</span>';
+    lyricsView.innerHTML = Strings['LRC_STATUS_LOADING'];
     const spotifyNowPlayingLocal = await getSpotifyNowPlaying();
     if (spotifyNowPlayingLocal && spotifyNowPlayingLocal.item) {
         const artist = spotifyNowPlayingLocal.item.artists[0].name;

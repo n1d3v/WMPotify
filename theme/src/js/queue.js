@@ -1,5 +1,6 @@
 'use strict';
 
+import Strings from './strings';
 import { formatTime } from "./functions";
 import { createMadMenu, MadMenu } from "./MadMenu";
 
@@ -40,7 +41,7 @@ export function initQueuePanel() {
             window.open(url);
         }
     });
-    playlistButton.textContent = document.querySelector('#queue-panel div[data-flip-id*="section-header-"] a')?.textContent || 'Now Playing';
+    playlistButton.textContent = document.querySelector('#queue-panel div[data-flip-id*="section-header-"] a')?.textContent || Strings['QUEUE_CURRENT_PLAYLIST_PLACEHOLDER'];
     playlistButton.innerHTML += '<span class="expandMark">⏷</span>';
     queueToolbar.appendChild(playlistButton);
 

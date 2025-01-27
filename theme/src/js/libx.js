@@ -1,5 +1,7 @@
 'use strict';
 
+import Strings from './strings';
+
 // This script implements the custom sidebar, header and navigation for the stock Spotify LibraryX
 // It's implemented with parsing and clicking various elements in the DOM, so it's not the most efficient way to do it
 // Seems direct navigation is possible with Spicetify.Platform.LocalStorageAPI.setItem('ylx-active-filter-ids', {"": ["1", ...]})
@@ -97,7 +99,7 @@ function renderHeader() {
     const rootText = document.createElement('button');
     rootText.classList.add('wmpotify-libx-header-root-text');
     rootText.classList.add('wmpotify-toolbar-button');
-    rootText.textContent = 'Music';
+    rootText.textContent = Strings['LIBX_HEADER_ROOT'];
     rootText.addEventListener('click', goToRootCategory);
     header.appendChild(rootText);
 
@@ -351,7 +353,7 @@ function renderSidebar() {
     const rootButton = document.createElement('button');
     rootButton.classList.add('wmpotify-libx-sidebar-item');
     rootButton.id = 'wmpotify-libx-sidebar-root';
-    rootButton.textContent = 'Library';
+    rootButton.textContent = Strings['LIBX_SIDEBAR_ROOT'];
     rootButton.addEventListener('click', goToRootCategory);
     const rootButtonChevron = document.createElement('div');
     rootButtonChevron.classList.add('wmpotify-libx-sidebar-chevron');
