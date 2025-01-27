@@ -613,6 +613,10 @@ async function loadLyrics(idOrLrc, addOverride) {
             }
         }
     } else {
+        if (!visStatus.lastMusic && !visStatus.lastMusicEnglish) {
+            lyricsView.innerHTML = Strings['LRC_STATUS_NO_MUSIC'];
+            return;
+        }
         try {
             lyricsView.innerHTML = Strings['LRC_STATUS_LOADING'];
             lyrics = await findLyrics(idOrLrc);
