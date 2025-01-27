@@ -207,7 +207,7 @@ function open() {
         // Close standalone LibX and go to home / NowPlaying to show the config panel
         // As standalone LibX page hides the main area
         if (Spicetify.Config.custom_apps.includes('wmpvis')) {
-            document.querySelector("#wmpotify-tabs-container button[data-identifier='now-playing']")?.click();
+            Spicetify.Platform.History.push({ pathname: '/wmpvis' });
         } else {
             document.querySelector("#wmpotify-tabs-container button[data-identifier='home']")?.click();
         }

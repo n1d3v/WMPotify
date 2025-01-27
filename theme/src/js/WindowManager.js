@@ -1,5 +1,6 @@
 'use strict';
 
+import Config from "./config";
 import WindhawkComm from "./WindhawkComm";
 
 let fullscreenHideControlTimer = null;
@@ -28,12 +29,14 @@ function toggleFullscreen() {
         exitFullscreen();
     } else {
         if (Spicetify.Config.custom_apps.includes('wmpvis')) {
-            Spicetify.Platform.History.push('/wmpvis');
+            Spicetify.Platform.History.push({ pathname: '/wmpvis' });
         } else {
+            const lyricsButton = document.querySelector('.main-nowPlayingBar-extraControls button[data-testid="lyrics-button"]');
             if (lyricsButton) {
                 lyricsButton.click();
             }
         }
+        Config.close();
         document.documentElement.requestFullscreen();
         document.body.classList.add('wmpotify-playerbar-visible');
         setTimeout(() => {

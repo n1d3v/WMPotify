@@ -536,7 +536,7 @@ div[data-testid='now-playing-widget'] {
     display: none;
 }
 
-:root:not([data-wmpotify-style="xp"]) {
+:root:not([data-wmpotify-style="xp"]):not(:fullscreen) {
     .main-nowPlayingBar-extraControls {
         button[data-testid="control-button-npv"] {
             background: url('resources/playerbar/npv.png') no-repeat center;
@@ -612,13 +612,10 @@ div[data-testid='now-playing-widget'] {
     }
 }
 
-:root[data-wmpotify-style="xp"] {
-    --player-bar-height: 69px;
-
-    --prev: url('resources/playerbar/xp/prev.png');
+:root[data-wmpotify-style="xp"],
+:root:fullscreen {
     --prev-hover: url('resources/playerbar/xp/prev_hover.png');
     --prev-pressed: url('resources/playerbar/xp/prev_pressed.png');
-    --prev-disabled: url('resources/playerbar/xp/prev_disabled.png');
     --play: url('resources/playerbar/xp/play.png');
     --play-hover: url('resources/playerbar/xp/play_hover.png');
     --play-pressed: url('resources/playerbar/xp/play_pressed.png');
@@ -627,10 +624,8 @@ div[data-testid='now-playing-widget'] {
     --pause-hover: url('resources/playerbar/xp/pause_hover.png');
     --pause-pressed: url('resources/playerbar/xp/pause_pressed.png');
     --pause-disabled: url('resources/playerbar/xp/pause_disabled.png');
-    --next: url('resources/playerbar/xp/next.png');
     --next-hover: url('resources/playerbar/xp/next_hover.png');
     --next-pressed: url('resources/playerbar/xp/next_pressed.png');
-    --next-disabled: url('resources/playerbar/xp/next_disabled.png');
     --fast-forward-pressed: url('resources/playerbar/xp/fastforward_pressed.png');
     --repeat: url('resources/playerbar/xp/repeat.png');
     --repeat-active: url('resources/playerbar/xp/repeat_active.png');
@@ -655,6 +650,22 @@ div[data-testid='now-playing-widget'] {
     --vol-mini-expand-extrahover: url('resources/playerbar/xp/vol_mini_expand_extrahover.png');
     --vol-mini-expand-pressed: url('resources/playerbar/xp/vol_mini_expand_pressed.png');
     --vol-mini-hover: url('resources/playerbar/xp/vol_mini_hover.png');
+}
+
+:root:fullscreen {
+    --prev: url('resources/playerbar/prev_fullscreen.png');
+    --prev-disabled: url('resources/playerbar/prev_fullscreen_disabled.png');
+    --next: url('resources/playerbar/next_fullscreen.png');
+    --next-disabled: url('resources/playerbar/next_fullscreen_disabled.png');
+}
+
+:root[data-wmpotify-style="xp"] {
+    --player-bar-height: 69px;
+    
+    --prev: url('resources/playerbar/xp/prev.png') !important;
+    --prev-disabled: url('resources/playerbar/xp/prev_disabled.png') !important;
+    --next: url('resources/playerbar/xp/next.png') !important;
+    --next-disabled: url('resources/playerbar/xp/next_disabled.png') !important;
 
     .Root__now-playing-bar {
         position: relative;

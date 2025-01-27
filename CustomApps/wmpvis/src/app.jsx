@@ -279,7 +279,6 @@ class App extends React.Component {
           label="Full Screen"
           onClick={() => {
             if (Spicetify.Config.current_theme.toLowerCase() === 'wmpotify') {
-              document.querySelector('.main-nowPlayingBar-extraControls button[data-testid="fullscreen-mode-button"]')?.click();
               document.querySelector('#wmpotify-fullscreen-button')?.click();
             } else {
               this.elemRefs.root.current.requestFullscreen();
