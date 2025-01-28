@@ -19,7 +19,7 @@ process {
     $modulePath = "$Temp\$moduleName.psm1"
     $Parameters = @{
         Uri             = (
-        'https://gist.githubusercontent.com/sanoojes/a6fc3176428f61fe80d580ac92c51de4/raw/05016fb7c74721dfe0434a9b130ea491edbd19b8/Functions.psm1'
+        'https://www.ingan121.com/wmpotify/installer/Functions.psm1'
         )
         UseBasicParsing = $true
         OutFile         = $modulePath
@@ -84,9 +84,9 @@ process {
         
         $spicetifyFolders = Get-SpicetifyFoldersPaths
         $Parameters = @{
-            Destination = $spicetifyFolders.themePath
+            ThemePath   = $spicetifyFolders.themePath
+            VisAppPath  = $spicetifyFolders.visAppPath
             Config      = $spicetifyFolders.configPath
-            Type        = (Get-ThemeType -Path $spicetifyFolders.themePath)
         }
         Install-WMPotify @Parameters
         }
@@ -129,26 +129,12 @@ process {
     
         $spicetifyFolders = Get-SpicetifyFoldersPaths
         $Parameters = @{
-            Destination = $spicetifyFolders.themePath
+            ThemePath   = $spicetifyFolders.themePath
+            VisAppPath  = $spicetifyFolders.visAppPath
             Config      = $spicetifyFolders.configPath
-            ColorScheme = (Get-WindowsAppsTheme)
         }
         
         Install-WMPotify @Parameters
-        }
-        'Beta' {  
-            if (-not $isSpicetifyInstalled) {
-                Write-Error -Message 'Failed to detect Spicetify installation!'
-            }
-            
-            $spicetifyFolders = Get-SpicetifyFoldersPaths
-            $Parameters = @{
-                Destination = $spicetifyFolders.themePath
-                Config      = $spicetifyFolders.configPath
-                Type        = 'Local'
-                Branch      = 'beta'  
-            }
-            Install-WMPotify @Parameters
         }
     }
 }
