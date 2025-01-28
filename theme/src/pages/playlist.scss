@@ -1,4 +1,5 @@
-.playlist-playlist-playlist {
+.playlist-playlist-playlist,
+:root[data-page^="/collection/"] main > div {
     .main-entityHeader-backgroundColor,
     .main-actionBarBackground-background {
         background: none !important;
@@ -92,14 +93,15 @@
         color: var(--gray-text);
     }
 
-    .playlist-playlist-searchBoxContainer {
+    /* .playlist-playlist-searchBoxContainer in playlist, no deobfuscated class in collection */
+    .main-actionBar-ActionBarRow > div:last-child {
         span, svg, input {
             color: var(--text-subdued);
         }
     }
 
     &:has(.main-rootlist-wrapper[style*="row-height: 32"]) {
-        .playlist-playlist-searchBoxContainer {
+        .main-actionBar-ActionBarRow > div:last-child {
             button.x-sortBox-sortDropdown::before {
                 background-image: url('resources/icon/compact.png');
             }
@@ -203,7 +205,8 @@
     }
 }
 
-.Root__main-view:has(.playlist-playlist-playlist) {
+.Root__main-view:has(.playlist-playlist-playlist),
+:root[data-page^="/collection/"] .Root__main-view {
     header {
         .main-topBar-background {
             border-radius: 0;
@@ -257,11 +260,11 @@
     }
 
     &:has(.main-entityHeader-topbarContentFadeIn) {
-        .playlist-playlist-playlist div[class][data-overlayscrollbars-viewport] {
+        main div[class][data-overlayscrollbars-viewport] {
             z-index: unset;
         }
 
-        .playlist-playlist-searchBoxContainer {
+        .main-actionBar-ActionBarRow > div:last-child {
             position: fixed;
             top: 39px;
             right: calc(var(--main-area-right) + var(--scrollbar-size));
@@ -280,7 +283,7 @@
     }
 
     :root:not([data-wmpotify-title-style="native"]) &:has(.main-entityHeader-topbarContentFadeIn) {
-        .playlist-playlist-searchBoxContainer {
+        .main-actionBar-ActionBarRow > div:last-child {
             top: 64px;
         }
     }

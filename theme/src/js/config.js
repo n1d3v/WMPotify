@@ -5,6 +5,7 @@ import { promptModal } from "./functions";
 import FontDetective from "./FontDetective";
 import { setTintColor } from "./tinting";
 import WindhawkComm from "./WindhawkComm";
+import WindowManager from "./WindowManager";
 
 const configWindow = document.createElement('div');
 let tabs = null;
@@ -57,14 +58,20 @@ function init() {
                 <option value="custom">${Strings['CONF_GENERAL_TITLE_STYLE_CUSTOM']}</option>
                 <option value="spotify">Spotify</option>
                 <option value="keepmenu">${Strings['CONF_GENERAL_TITLE_STYLE_KEEPMENU']}</option>
-            </select><br>
+            </select>
+            <button id="wmpotify-config-apply" class="wmpotify-aero">${Strings['CONF_GENERAL_APPLY']}</button><br>
             <label for="wmpotify-config-font">${Strings['CONF_GENERAL_FONT']}</label>
             <select id="wmpotify-config-font" class="wmpotify-aero">
                 <option value="custom">${Strings['UI_CUSTOM']}</option>
             </select><br>
+            <label for="wmpotify-config-topmost">${Strings['CONF_GENERAL_TOPMOST']}</label>
+            <select id="wmpotify-config-topmost" class="wmpotify-aero" disabled>
+                <option value="always">${Strings['CONF_GENERAL_TOPMOST_ALWAYS']}</option>
+                <option value="minimode">${Strings['CONF_GENERAL_TOPMOST_MINIMODE']}</option>
+                <option value="never" selected>${Strings['CONF_GENERAL_TOPMOST_NEVER']}</option>
+            </select><br>
             <input type="checkbox" id="wmpotify-config-show-libx" class="wmpotify-aero">
-            <label for="wmpotify-config-show-libx">${Strings['CONF_GENERAL_SHOW_LIBX']}</label><br>
-            <button id="wmpotify-config-apply" class="wmpotify-aero">${Strings['UI_APPLY']}</button>
+            <label for="wmpotify-config-show-libx">${Strings['CONF_GENERAL_SHOW_LIBX']}</label>
         </section>
         <section class="wmpotify-config-tab-content" data-tab-title="${Strings['CONF_SPEED_TITLE']}" data-wh-speedmod-required="true">
             <a href="#" id="wmpotify-config-speed-slow">${Strings['CONF_SPEED_SLOW']}</a>
@@ -77,15 +84,24 @@ function init() {
             <div id="wmpotify-about-logo"></div>
             <p id="wmpotify-about-title">WMPotify</p><br>
             <p>${Strings['CONF_ABOUT_DESC']}</p>
-            <p>${Strings['CONF_ABOUT_VERSION']}: 1.0 Alpha 1</p>
+            <p>${Strings['CONF_ABOUT_VERSION']}: 1.0 Alpha 2<span id="wmpotify-about-ctewh-ver"></span></p>
             <p>${Strings['CONF_ABOUT_AUTHOR']} - <a href="https://www.ingan121.com/" target="_blank">www.ingan121.com</a></p>
             <a href="https://github.com/Ingan121/WMPotify" target="_blank">GitHub</a>
         </section>
     `;
 
+    tabs = configWindow.querySelectorAll('.wmpotify-config-tab-content');
     elements.topborder = configWindow.querySelector('#wmpotify-config-topborder');
+    elements.title = configWindow.querySelector('#wmpotify-config-title');
+    elements.hue = configWindow.querySelector('#wmpotify-config-hue');
+    elements.sat = configWindow.querySelector('#wmpotify-config-sat');
+    elements.tintPb = configWindow.querySelector('#wmpotify-config-tint-playerbar');
     elements.fontSelector = configWindow.querySelector('#wmpotify-config-font');
     elements.fontCustom = configWindow.querySelector('#wmpotify-config-font option');
+    elements.topmost = configWindow.querySelector('#wmpotify-config-topmost');
+    elements.showLibX = configWindow.querySelector('#wmpotify-config-show-libx');
+    elements.whVer = configWindow.querySelector('#wmpotify-about-ctewh-ver');
+
     elements.fontSelector.addEventListener('change', async () => {
         if (elements.fontSelector.value === 'custom') {
             const fontName = await promptModal(Strings['CONF_GENERAL_CUSTOM_FONT_DLG_TITLE'], Strings['CONF_GENERAL_CUSTOM_FONT_MSG'], '', localStorage.wmpotifyFont || 'Segoe UI');
@@ -101,7 +117,6 @@ function init() {
         }
         document.documentElement.style.setProperty('--ui-font', localStorage.wmpotifyFont);
     });
-    elements.showLibX = configWindow.querySelector('#wmpotify-config-show-libx');
     elements.showLibX.addEventListener('change', () => {
         if (elements.showLibX.checked) {
             localStorage.wmpotifyShowLibX = true;
@@ -114,29 +129,41 @@ function init() {
     });
     configWindow.querySelector('#wmpotify-config-close').addEventListener('click', close);
     configWindow.querySelector('#wmpotify-config-apply').addEventListener('click', apply);
-    if (!WindhawkComm.query()?.speedModSupported) {
-        configWindow.querySelector('[data-wh-speedmod-required=true]').remove();
-    } else {
-        elements.speed = configWindow.querySelector('#wmpotify-config-speed');
-        elements.speedValue = configWindow.querySelector('#wmpotify-config-speed-value');
-        elements.speed.addEventListener('pointerup', onSpeedChange);
-        configWindow.querySelector('#wmpotify-config-speed-slow').addEventListener('click', setSpeed.bind(null, 0.5));
-        configWindow.querySelector('#wmpotify-config-speed-normal').addEventListener('click', setSpeed.bind(null, 1));
-        configWindow.querySelector('#wmpotify-config-speed-fast').addEventListener('click', setSpeed.bind(null, 1.4));
-        const playbackSpeed = WindhawkComm.query()?.playbackSpeed || 1;
-        elements.speedValue.textContent = Number.isInteger(playbackSpeed) ? playbackSpeed + '.0' : playbackSpeed;
-        elements.speedValue.addEventListener('click', async () => {
-            const speed = await promptModal(Strings['CONF_SPEED_CUSTOM_DLG_TITLE'], Strings['CONF_SPEED_CUSTOM_MSG'], playbackSpeed.toString(), '1.0');
-            if (speed) {
-                setSpeed(speed);
+    const whStatus = WindhawkComm.query();
+    if (whStatus) {
+        elements.topmost.disabled = false;
+        elements.topmost.value = localStorage.wmpotifyTopMost || 'never';
+        elements.topmost.addEventListener('change', () => {
+            localStorage.wmpotifyTopMost = elements.topmost.value;
+            if (elements.topmost.value === 'always' || 
+                (elements.topmost.value === 'minimode' && WindowManager.isMiniMode())) {
+                WindhawkComm.setTopMost(true);
+            } else {
+                WindhawkComm.setTopMost(false);
             }
         });
+
+        elements.whVer.textContent = ', ' + Strings.getString('CONF_ABOUT_CTEWH_VERSION', WindhawkComm.getModule().version);
+
+        if (!whStatus.speedModSupported) {
+            configWindow.querySelector('[data-wh-speedmod-required=true]').remove();
+        } else {
+            elements.speed = configWindow.querySelector('#wmpotify-config-speed');
+            elements.speedValue = configWindow.querySelector('#wmpotify-config-speed-value');
+            elements.speed.addEventListener('pointerup', onSpeedChange);
+            configWindow.querySelector('#wmpotify-config-speed-slow').addEventListener('click', setSpeed.bind(null, 0.5));
+            configWindow.querySelector('#wmpotify-config-speed-normal').addEventListener('click', setSpeed.bind(null, 1));
+            configWindow.querySelector('#wmpotify-config-speed-fast').addEventListener('click', setSpeed.bind(null, 1.4));
+            const playbackSpeed = whStatus.playbackSpeed || 1;
+            elements.speedValue.textContent = Number.isInteger(playbackSpeed) ? playbackSpeed + '.0' : playbackSpeed;
+            elements.speedValue.addEventListener('click', async () => {
+                const speed = await promptModal(Strings['CONF_SPEED_CUSTOM_DLG_TITLE'], Strings['CONF_SPEED_CUSTOM_MSG'], playbackSpeed.toString(), '1.0');
+                if (speed) {
+                    setSpeed(speed);
+                }
+            });
+        }
     }
-    tabs = configWindow.querySelectorAll('.wmpotify-config-tab-content');
-    elements.title = configWindow.querySelector('#wmpotify-config-title');
-    elements.hue = configWindow.querySelector('#wmpotify-config-hue');
-    elements.sat = configWindow.querySelector('#wmpotify-config-sat');
-    elements.tintPb = configWindow.querySelector('#wmpotify-config-tint-playerbar');
     elements.hue.addEventListener('input', onColorChange);
     elements.sat.addEventListener('input', onColorChange);
     elements.tintPb.addEventListener('change', onColorChange);
@@ -209,7 +236,7 @@ function open() {
         if (Spicetify.Config.custom_apps.includes('wmpvis')) {
             Spicetify.Platform.History.push({ pathname: '/wmpvis' });
         } else {
-            document.querySelector("#wmpotify-tabs-container button[data-identifier='home']")?.click();
+            Spicetify.Platform.History.push({ pathname: '/' });
         }
     } else if (configWindow.style.display === 'block') {
         close();

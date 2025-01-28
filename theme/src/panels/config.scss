@@ -125,8 +125,15 @@
         margin-left: 10px;
     }
 
-    &-font {
+    &-font,
+    &-topmost {
         margin-top: 3px;
+    }
+
+    label[for="wmpotify-config-show-libx"] {
+        &::after {
+            top: -2px;
+        }
     }
 
     &-speed {

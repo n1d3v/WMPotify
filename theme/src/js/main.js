@@ -11,6 +11,7 @@ import SidebarManager from './SidebarManager';
 import { initQueuePanel } from './queue';
 import WindhawkComm from './WindhawkComm';
 import PageManager from './PageManager';
+import WindowManager from './WindowManager';
 
 const elementsRequired = [
     '.Root__globalNav',
@@ -46,6 +47,14 @@ function earlyInit() {
     WindhawkComm.init();
 
     const whStatus = WindhawkComm.query();
+
+    if (whStatus) {
+        if (localStorage.wmpotifyTopMost === 'always' || (localStorage.wmpotifyTopMost === 'minimode' && WindowManager.isMiniMode())) {
+            WindhawkComm.setTopMost(true);
+        } else {
+            WindhawkComm.setTopMost(false);
+        }
+    }
 
     // Supported: native, custom, spotify, keepmenu
     // native: Use the native title bar (requires Linux or Windows with my Windhawk mod) Assumes native title bar is available and removes any custom title bar in the client area

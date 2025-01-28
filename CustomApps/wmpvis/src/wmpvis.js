@@ -9,6 +9,8 @@ import ButterchurnAdaptor from './butterchurn/adaptor';
 import MadVisLyrics from './lyrics/main';
 import { spAudioDataToFrequencies } from './spadapter';
 
+let initedOnce = false;
+
 let albumArt = null;
 let visBar = null;
 let visTop = null;
@@ -239,6 +241,17 @@ export async function init(elemRefs) {
     }
 
     MadVisLyrics.init(elemRefs.lyrics.current);
+
+    if (!initedOnce) {
+        Spicetify.Platform.History.listen((location) => {
+            if (location.pathname !== '/wmpvis') {
+                uninit();
+                delete globalThis.wmpvisSetShowLyrics;
+            }
+        })
+    }
+
+    initedOnce = true;
 }
 
 export function uninit() {

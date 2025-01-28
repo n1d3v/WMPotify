@@ -1,6 +1,7 @@
 'use strict';
 
 import Strings from './strings';
+import DirectUserStorage from './DirectUserStorage';
 
 // This script implements the custom sidebar, header and navigation for the stock Spotify LibraryX
 // It's implemented with parsing and clicking various elements in the DOM, so it's not the most efficient way to do it
@@ -68,6 +69,8 @@ const CustomLibX = {
         // Whole category buttons container gets re-rendered when entering and exiting a playlist folder
         folderObserver.observe(document.querySelector('.main-yourLibraryX-filterArea'), { childList: true });
 
+        window.addEventListener('resize', handleResize);
+
         return true;
     },
 
@@ -76,6 +79,7 @@ const CustomLibX = {
         document.querySelector('#wmpotify-libx-sidebar')?.remove();
         categoryButtonsObserver.disconnect();
         folderObserver.disconnect();
+        window.removeEventListener('resize', handleResize);
     },
 
     go(identifiers) {
@@ -439,6 +443,12 @@ function renderSidebar() {
     } else {
         rootButton.classList.add('active');
     }
+}
+
+function handleResize() {
+    const origSidebarState = DirectUserStorage.getItem("ylx-sidebar-state");
+    Spicetify.Platform.LocalStorageAPI.setItem("ylx-sidebar-state", 2);
+    DirectUserStorage.setItem("ylx-sidebar-state", origSidebarState); // make the previous setItem temporary
 }
 
 function waitForLibXLoad() {

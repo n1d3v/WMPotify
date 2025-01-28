@@ -456,6 +456,12 @@ div[data-testid='now-playing-widget'] {
         }
     }
 
+    &:has(#wmpotify-mini-mode-button) {
+        button[data-testid='pip-toggle-button'] {
+            display: none;
+        }
+    }
+
     button[data-testid='fullscreen-mode-button'] {
         display: none;
     }
@@ -726,14 +732,15 @@ div[data-testid='now-playing-widget'] {
     }
 }
 
-:root[data-wmpotify-style="aero"] {
+:root[data-wmpotify-style="aero"],
+:root:fullscreen {
     .wmpotify-track-info,
     .wmpotify-time-text {
         text-shadow: var(--aero-text-glow);
     }
 }
 
-:root[data-wmpotify-style="basic"] {
+:root[data-wmpotify-style="basic"]:not(:fullscreen) {
     .wmpotify-track-info,
     .wmpotify-time-text {
         color: #002963;

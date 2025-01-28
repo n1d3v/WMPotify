@@ -30,6 +30,8 @@ const PageManager = {
             return;
         }
 
+        document.documentElement.dataset.page = location.pathname;
+
         SidebarManager.updateSidebarWidth();
 
         if (location.pathname.startsWith('/wmpotify-standalone-libx')) {

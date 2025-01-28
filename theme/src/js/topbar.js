@@ -73,7 +73,7 @@ export function setupTopbar() {
     searchButton.addEventListener('click', (event) => {
         // This button behave differently from version to version
         // So just open the search page directly
-        window.open('spotify:search');
+        Spicetify.Platform.History.push({ pathname: '/search' });
         event.preventDefault();
         event.stopPropagation();
     });
@@ -135,7 +135,7 @@ export function setupTopbar() {
     searchClearButton.addEventListener('click', () => {
         searchBar.value = '';
         searchBar.focus();
-        window.open('spotify:search');
+        Spicetify.Platform.History.push({ pathname: '/search' });
     });
     searchBarWrapper.appendChild(searchClearButton);
     searchContainer.appendChild(searchBarWrapper);

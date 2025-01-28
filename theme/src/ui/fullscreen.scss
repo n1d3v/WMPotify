@@ -1,5 +1,7 @@
 :root:fullscreen {
-    background-color: var(--wmp11-window) !important;
+    body {
+        background-color: var(--wmp11-window) !important;
+    }
 
     .Root__globalNav {
         display: none;

@@ -9,10 +9,13 @@ function toggleMiniMode() {
     if (!WindhawkComm.available()) {
         return;
     }
-    if (window.innerWidth < 360 && window.innerHeight < 262) {
+    if (isMiniMode()) {
         const lastSize = localStorage.wmpotifyPreMiniModeSize?.split(',');
         if (lastSize && lastSize.length === 2) {
             window.resizeTo(parseInt(lastSize[0]), parseInt(lastSize[1]));
+        }
+        if (localStorage.wmpotifyTopMost === 'minimode') {
+            WindhawkComm.setTopMost(false);
         }
     } else {
         if (document.fullscreenElement) {
@@ -20,6 +23,9 @@ function toggleMiniMode() {
         }
         localStorage.wmpotifyPreMiniModeSize = [window.innerWidth, window.innerHeight];
         WindhawkComm.resizeTo(358, 60);
+        if (localStorage.wmpotifyTopMost === 'minimode') {
+            WindhawkComm.setTopMost(true);
+        }
     }
 }
 
@@ -55,6 +61,11 @@ function toggleFullscreen() {
     }, { once: true });
 }
 
+function isMiniMode() {
+    const isCustomTitlebar = !!document.querySelector('#wmpotify-title-bar');
+    return window.innerWidth < 360 && window.innerHeight < (isCustomTitlebar ? 92 : 62);
+}
+
 function fullscreenMouseMoveListener() {
     if (!document.fullscreenElement) {
         exitFullscreen();
@@ -74,7 +85,8 @@ function exitFullscreen() {
 
 const WindowManager = {
     toggleMiniMode,
-    toggleFullscreen
+    toggleFullscreen,
+    isMiniMode,
 }
 
 export default WindowManager;

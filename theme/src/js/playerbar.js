@@ -109,10 +109,6 @@ export function setupPlayerbar() {
     }
 
     if (whStatus) {
-        const pipButton = document.querySelector('.main-nowPlayingBar-extraControls button[data-testid="pip-toggle-button"]');
-        if (pipButton) {
-            pipButton.style.display = 'none';
-        }
         const miniModeButton = new Spicetify.Playbar.Button(
             Strings['PB_BTN_MINI_MODE'],
             '', // SVG icon, not needed (image provided in CSS)
