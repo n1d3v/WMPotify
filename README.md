@@ -25,8 +25,6 @@ echo.
 * Make sure to check for new commits and update the theme (+CustomApps+WH mod) accordingly if you installed this WIP theme
 
 ## TODO
-* Support more versions of Spotify
-    * Older versions support
 * Add installation script + guide
 
 ### Things to be done after a proper beta release
