@@ -6,23 +6,33 @@
     * 1.2.45: global navbar must be enabled in the experimental features
     * 1.2.44 and below are not supported
 
-## Installation
-* No proper installation guide yet
-* Using the theme is NOT YET RECOMMENDED for end users, as it's still WIP
-* For Windows, paste this in cmd to install the theme:
-```cmd
-cd %tmp%
-set "THEMEPATH=%appdata%\spicetify\Themes\WMPotify"
-curl -L https://github.com/Ingan121/WMPotify/archive/refs/heads/master.zip -o wmpotify.zip
-tar -xf wmpotify.zip
-md "%THEMEPATH%"
-copy WMPotify-master\theme\dist\* "%THEMEPATH%" /y
-spicetify config current_theme WMPotify
-spicetify apply
-echo.
+## **Installation**
+
+### **Manual installation using Scripts (recomended):**
+
+#### **Windows (Powershell)**
+
+* WMPotify + WMPotify NowPlaying + Windhawk + CEF/Spotify Tweaks mod
+```powershell
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+iex "& { $(iwr -useb 'https://raw.githubusercontent.com/Ingan121/WMPotify/master/installer/install.ps1') }"
 ```
-* For Windows, install the `CEF/Spotify Tweaks` [Windhawk](https://windhawk.net/) mod [in this repository](https://github.com/Ingan121/WMPotify/tree/master/cte.wh.cpp) to use the Aero/Basic style properly. (Paste the contents of the `cte.wh.cpp` file in the WH mod editor and compile it; it wasn't uploaded to the WH mod repository yet) Disable the `CEF/Spotify Titlebar Enabler` mod if you have it installed. (It's older version of the WH mod in this repository)
-* Make sure to check for new commits and update the theme (+CustomApps+WH mod) accordingly if you installed this WIP theme
+
+* Theme only:
+```powershell
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+iex "& { $(iwr -useb 'https://raw.githubusercontent.com/Ingan121/WMPotify/master/installer/install.ps1') } -Install @('wmpotify')"
+```
+
+* WMPotify NowPlaying only:
+```powershell
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+iex "& { $(iwr -useb 'https://raw.githubusercontent.com/Ingan121/WMPotify/master/installer/install.ps1') } -Install @('wmpvis')"
+```
+
+#### **Linux/macOS (Bash)**
+
+* Not yet!
 
 ## TODO
 * Add installation script + guide

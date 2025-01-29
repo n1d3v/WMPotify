@@ -1,14 +1,14 @@
 [CmdletBinding()]
 param (
-    [ValidateSet('Install', 'Uninstall', 'Update', 'AdminJob')]
-    [string]$Action = 'Install'
+    [ValidateSet('Install', 'Uninstall')]
+    [string]$Action = 'Install',
 
-    [string[]]$Install = @('wmpotify', 'wmpvis', 'ctewh')
+    [string[]]$Install = @('wmpotify', 'wmpvis', 'ctewh'),
 
-    [string]$Version = 'latest'
+    [string]$Version = 'latest',
 
-    [bool]$GetFromGit = $false
-    [bool]$NoAskCTEWH = $false
+    [switch]$GetFromGit,
+    [switch]$NoAskCTEWH
 )
 begin {
     $ErrorActionPreference = 'Stop'
@@ -24,19 +24,17 @@ process {
     $moduleName = 'Functions'
     $Temp = [System.IO.Path]::GetTempPath()
     $modulePath = "$Temp\$moduleName.psm1"
-    if (-not (Test-Path -Path $modulePath)) {
-        $Parameters = @{
-            Uri             = (
-            'https://www.ingan121.com/wmpotify/installer/Functions.psm1'
-            )
-            UseBasicParsing = $true
-            OutFile         = $modulePath
-        }
-        try {
-            Invoke-WebRequest @Parameters -ErrorAction Stop
-        } catch {
-            Write-Error -Message "Failed to download: $($_.Exception.Message). Please check your internet connection and try again."
-        }
+    $Parameters = @{
+        Uri             = (
+        'https://raw.githubusercontent.com/Ingan121/WMPotify/master/installer/Functions.psm1'
+        )
+        UseBasicParsing = $true
+        OutFile         = $modulePath
+    }
+    try {
+        Invoke-WebRequest @Parameters -ErrorAction Stop
+    } catch {
+        Write-Error -Message "Failed to download: $($_.Exception.Message). Please check your internet connection and try again."
     }
     Import-Module -Name $modulePath
 
@@ -90,19 +88,6 @@ process {
 
         Uninstall-WMPotify @Parameters
         }
-        'Update' {
-        if (-not $isSpicetifyInstalled) {
-            Write-Error -Message 'Failed to detect Spicetify installation!'
-        }
-
-        $spicetifyFolders = Get-SpicetifyFoldersPaths
-        $Parameters = @{
-            ThemePath   = $spicetifyFolders.themePath
-            VisAppPath  = $spicetifyFolders.visAppPath
-            Config      = $spicetifyFolders.configPath
-        }
-        Install-WMPotify @Parameters
-        }
         'Install' {
         if (-not (Test-Spotify)) {
             Write-Host -Object 'Spotify not found.' -ForegroundColor Yellow
@@ -140,6 +125,13 @@ process {
             Install-Marketplace
         }
 
+        $latestVersions = Get-LatestVersions
+
+        if ($Install.Count -eq 0) {
+            Write-Error -Message 'No components selected for installation.'
+            exit
+        }
+
         if ('ctewh' -in $Install) {
             if (-not (Test-Windhawk)) {
                 Write-Host -Object 'Windhawk not found.' -ForegroundColor Yellow
@@ -159,7 +151,7 @@ process {
                     if ($choice -eq 0) {
                         if ($isAdmin) {
                             Install-Windhawk
-                            Install-WindhawkMod
+                            Install-WindhawkMod -LatestVersions $latestVersions
                         } else {
                             Invoke-AdminJob
                         }
@@ -167,7 +159,7 @@ process {
                 } else {
                     if ($isAdmin) {
                         Install-Windhawk
-                        Install-WindhawkMod
+                        Install-WindhawkMod -LatestVersions $latestVersions
                     } else {
                         Invoke-AdminJob
                     }
@@ -188,14 +180,14 @@ process {
 
                     if ($choice -eq 0) {
                         if ($isAdmin) {
-                            Install-WindhawkMod
+                            Install-WindhawkMod -LatestVersions $latestVersions
                         } else {
                             Invoke-AdminJob
                         }
                     }
                 } else {
                     if ($isAdmin) {
-                        Install-WindhawkMod
+                        Install-WindhawkMod -LatestVersions $latestVersions
                     } else {
                         Invoke-AdminJob
                     }
@@ -203,36 +195,26 @@ process {
             }
         }
 
-        $spicetifyFolders = Get-SpicetifyFoldersPaths
-        $Parameters = @{
-            ThemePath   = $spicetifyFolders.themePath
-            VisAppPath  = $spicetifyFolders.visAppPath
-            Config      = $spicetifyFolders.configPath
-            GetWMPVis   = 'wmpvis' -in $Install
-            SkipTheme   = 'wmpotify' -notin $Install
-        }
-        if ($GetFromGit) {
-            $Parameters.Branch = $Version
-        } else {
-            $Parameters.Tag = $Version
-        }
-
-        Install-WMPotify @Parameters
-        }
-        'AdminJob' {
-        if (-not $isAdmin) {
-            Write-Error -Message 'This action requires administrator privileges.'
-        } else {
-            if ('ctewh' -in $Install) {
-                if (-not (Test-Windhawk)) {
-                    Install-Windhawk
-                }
-                if (-not (Test-WindhawkMod)) {
-                    Install-WindhawkMod
-                }
-            } else {
-                Write-Error -Message 'Nothing to do as admin.'
+        if ('wmpotify' -in $Install -or 'wmpvis' -in $Install) {
+            $spicetifyFolders = Get-SpicetifyFoldersPaths
+            $Parameters = @{
+                ThemePath   = $spicetifyFolders.themePath
+                VisAppPath  = $spicetifyFolders.visAppPath
+                Config      = $spicetifyFolders.configPath
+                GetWMPVis   = 'wmpvis' -in $Install
+                SkipTheme   = 'wmpotify' -notin $Install
             }
+            if ($GetFromGit) {
+                $Parameters.Branch = $Version
+            } else {
+                if ($Version -eq 'latest') {
+                    $Parameters.Tag = $latestVersions.Theme
+                } else {
+                    $Parameters.Tag = $Version
+                }
+            }
+
+            Install-WMPotify @Parameters
         }
         }
     }
