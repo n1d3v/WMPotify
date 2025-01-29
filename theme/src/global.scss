@@ -37,6 +37,12 @@ body {
 /* Performance optimizations */
 div[role="tablist"],
 .StyledTabList-tablist-tabList,
+:root[data-page="/"] div[data-overlayscrollbars-viewport],
+:root[data-page="/"] div[data-overlayscrollbars],
+:root[data-page^="/artist/"] div[data-overlayscrollbars-viewport],
+:root[data-page^="/artist/"] div[data-overlayscrollbars],
+aside div[data-overlayscrollbars-viewport],
+aside div[data-overlayscrollbars],
 .search-searchCategory-categoryGrid,
 .main-yourLibraryX-libraryContainer,
 .main-yourLibraryX-libraryFilter,
