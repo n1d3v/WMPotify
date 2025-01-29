@@ -41,11 +41,9 @@ function Write-ByeMessage {
     param ()
     process {
         Write-Host
-        Write-Center -Message '----------------------------------------' -ForegroundColor Green
-        Write-Center -Message 'No errors!' -ForegroundColor Green
+        Write-Host -Object 'Done!' -ForegroundColor Green
         Write-Host
-        Write-Center -Message 'Thanks for using WMPotify!' -ForegroundColor Green
-        Write-Center -Message '----------------------------------------' -ForegroundColor Green
+        Write-Host -Object 'Thanks for using WMPotify!' -ForegroundColor Green
         Write-Host
     }
 }
@@ -276,7 +274,7 @@ function Install-Windhawk {
         }
 
         Write-Host
-        Write-Verbose -Message 'Starting the Windhawk installer...'
+        Write-Host -Object "installing Windhawk... This may take a while."
         Start-Process -FilePath $installerPath -ArgumentList '/S'
 
         while (-not (Get-Service -Name 'windhawk' -ErrorAction SilentlyContinue)) {
@@ -291,12 +289,12 @@ function Get-WindhawkPaths {
     [OutputType([hashtable])]
     param ()
     begin {
-        Write-Verbose -Message 'Getting the Windhawk mod paths...'
-    }
-    process {
+        Write-Verbose -Message 'Getting the Windhawk paths...'
+
         $service = Get-Service -Name 'windhawk' -ErrorAction SilentlyContinue
         $portable = Get-Process -Name 'windhawk' -ErrorAction SilentlyContinue
-
+    }
+    process {
         $windhawkPath = if ($service) {
             (Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\windhawk" -Name "ImagePath").ImagePath -replace '\"', ''
         } elseif ($portable) {
@@ -353,7 +351,6 @@ function Get-WindhawkModPaths {
     process {
         $windhawkPaths = Get-WindhawkPaths
         $modNames = @('local@cef-titlebar-enabler-universal', 'cef-titlebar-enabler-universal')
-        $requiredVersion = [Version]'0.6'
 
         $modPaths = @{
             x86 = $modNames | ForEach-Object { Join-Path -Path $windhawkPaths.EngineAppDataPath -ChildPath "Mods\32\$_*.dll" }
@@ -361,31 +358,6 @@ function Get-WindhawkModPaths {
             source = $modNames | ForEach-Object { Join-Path -Path $windhawkPaths.AppDataPath -ChildPath "ModsSource\$_.wh.cpp" }
             registry = $modNames | ForEach-Object { Join-Path -Path $windhawkPaths.EngineRegistryKey -ChildPath "Mods\$_" }
         }
-
-        $modFiles = @()
-        $modPaths.x86 + $modPaths.x64 | ForEach-Object { $modFiles += Get-ChildItem -Path $_ -ErrorAction SilentlyContinue }
-        $modPaths.source | ForEach-Object { $modFiles += Get-Item -Path $_ -ErrorAction SilentlyContinue }
-
-        # if ($modFiles.Count -eq 0) {
-        #     Write-Error -Message "Mod not found in required paths."
-        #     return
-        # }
-
-        # $modVersion = $null
-        # foreach ($file in $modFiles) {
-        #     if ($file.Name -match "(${modNames -join '|'})_(\d+\.\d+)_\d+\.dll$") {
-        #         $version = [Version]$Matches[2]
-        #         if ($version -ge $requiredVersion) {
-        #             $modVersion = $version
-        #             break
-        #         }
-        #     }
-        # }
-
-        # if (-not $modVersion) {
-        #     Write-Error -Message "Mod version is lower than required ($requiredVersion)."
-        #     return
-        # }
 
         $modPaths
     }
@@ -399,10 +371,78 @@ function Test-WindhawkMod {
         Write-Verbose -Message 'Checking if the Windhawk mod is installed...'
     }
     process {
+        $requiredVersion = [Version]'0.6'
+
         $modPaths = Get-WindhawkModPaths
-        $fileTest = $modPaths.x86 + $modPaths.x64 + $modPaths.source | ForEach-Object { Test-Path -Path $_ }
+        $x86Test = $modPaths.x86 | ForEach-Object { Test-Path -Path $_ }
+        $x64Test = $modPaths.x64 | ForEach-Object { Test-Path -Path $_ }
+        $srcTest = $modPaths.source | ForEach-Object { Test-Path -Path $_ }
         $regTest = $modPaths.registry | ForEach-Object { Test-Path -Path "Registry::$($_)" }
-        $fileTest -and $regTest
+
+        if (-not ($x86Test -and $x64Test -and $srcTest -and $regTest)) {
+            Write-Verbose -Message 'Mod files or registry keys are missing.'
+            $false
+        } else {
+            foreach ($key in $modPaths.registry) {
+                $result = Get-ItemProperty -Path "Registry::$key" -Name 'Version' -ErrorAction SilentlyContinue
+                if ($result) {
+                    $modVersion = $result
+                    break
+                }
+            }
+            if ($modVersion) {
+                [Version]$modVersion.Version -ge $requiredVersion
+            } else {
+                Write-Verbose -Message 'Version registry key is missing.'
+                $false
+            }
+        }
+    }
+}
+
+function Uninstall-WindhawkMod {
+    [CmdletBinding()]
+    param ()
+    begin {
+        $modPaths = Get-WindhawkModPaths
+        $service = Get-Service -Name 'windhawk' -ErrorAction SilentlyContinue
+        $process = Get-Process -Name 'windhawk' -ErrorAction SilentlyContinue
+    }
+    process {
+        if ($service) {
+            Write-Verbose -Message 'Stopping Windhawk service...'
+            Stop-Service -Name 'windhawk' -Force
+        } elseif ($process) {
+            Write-Verbose -Message 'Stopping Windhawk process...'
+            Stop-Process -Name 'windhawk' -Force
+        } else {
+            Write-Error -Message 'Windhawk is not installed or running.'
+        }
+        Write-Verbose -Message 'Stopping Spotify process...'
+        Stop-Process -Name 'Spotify' -Force -ErrorAction SilentlyContinue
+
+        Write-Verbose -Message 'Removing the Windhawk mod files...'
+        $modFiles = Get-ChildItem -Path $modPaths.source -Recurse -File
+        foreach ($file in $modFiles) {
+            Write-Verbose -Message "Removing '$($file.FullName)'..."
+            Remove-Item -Path $file.FullName -Force
+        }
+
+        Write-Verbose -Message 'Removing the registry keys...'
+        foreach ($key in $modPaths.registry) {
+            Write-Verbose -Message "Removing 'Registry::$key'..."
+            Remove-Item -Path "Registry::$key" -Force
+        }
+
+        if ($service) {
+            Write-Verbose -Message 'Restarting Windhawk service...'
+            Start-Service -Name 'windhawk'
+        } elseif ($process) {
+            Write-Verbose -Message 'Restarting Windhawk process...'
+            Start-Process -FilePath $process.Path
+        } else {
+            Write-Error -Message 'Windhawk is not installed or running.'
+        }
     }
 }
 
@@ -410,18 +450,26 @@ function Install-WindhawkMod {
     [CmdletBinding()]
     param ()
     begin {
+        $latestVersions = Get-LatestVersions
+        $latestCTE = [Version]$latestVersions.CTE
         $Temp = [System.IO.Path]::GetTempPath()
-        $installerPath = "$Temp\cte_0.6.zip"
+        $installerPath = "$Temp\cte_$latestCTE.zip"
+        $unzipPath = "$Temp\cte_$latestCTE"
         # cte.reg
         # local@cef-titlebar-enabler-universal.wh.cpp
         # 32/local@cef-titlebar-enabler-universal_0.6_242230.dll
         # 64/local@cef-titlebar-enabler-universal_0.6_242230.dll
     }
     process {
+        if (Test-WindhawkMod) {
+            Write-Verbose -Message 'Cleaning up the existing Windhawk mod...'
+            Uninstall-WindhawkMod
+        }
+
         Write-Verbose -Message 'Downloading the Windhawk mod files...'
         $Parameters = @{
             UseBasicParsing = $true
-            Uri             = 'https://www.ingan121.com/wmpotify/installer/cte_0.6.zip'
+            Uri             = "https://www.ingan121.com/wmpotify/installer/cte_$latestCTE.zip"
             OutFile         = $installerPath
         }
         try {
@@ -431,12 +479,12 @@ function Install-WindhawkMod {
         }
 
         Write-Verbose -Message 'Extracting the Windhawk mod files...'
-        Expand-Archive -Path $installerPath -Destination $Temp
+        Expand-Archive -Path $installerPath -Destination $unzipPath
 
         $modPaths = Get-WindhawkModPaths
         
         Write-Verbose -Message 'Copying the Windhawk mod files to the correct directories...'
-        $modFiles = Get-ChildItem -Path "$Temp\cte_0.6" -Recurse
+        $modFiles = Get-ChildItem -Path $unzipPath -Recurse -File
 
         foreach ($file in $modFiles) {
             $destination = switch -Regex ($file.FullName) {
@@ -456,7 +504,7 @@ function Install-WindhawkMod {
         $regFileContent = Get-Content -Path $regFilePath
         $regFileContent = $regFileContent -replace 'HKEY_LOCAL_MACHINE\\SOFTWARE\\Windhawk\\Engine\\Mods\\local@cef-titlebar-enabler-universal', $modPaths.registry
         Set-Content -Path $regFilePath -Value $regFileContent
-        $regFilePath = Join-Path -Path "$Temp\cte_0.6" -ChildPath 'cte.reg'
+        $regFilePath = Join-Path -Path $unzipPath -ChildPath 'cte.reg'
         if (Test-Path -Path $regFilePath) {
             try {
                 Start-Process -FilePath 'regedit.exe' -ArgumentList "/s `"$regFilePath`"" -Wait -NoNewWindow
@@ -485,6 +533,48 @@ function Install-WindhawkMod {
 #endregion Windhawk
 
 #region Misc
+function Get-LatestVersions {
+    [CmdletBinding()]
+    [OutputType([hashtable])]
+    param ()
+    begin {
+        Write-Verbose -Message 'Getting the latest versions of WMPotify, WMPotify NowPlaying, and CEF/Spotify Tweaks...'
+    }
+    process {
+        try {
+            $verContent = Invoke-WebRequest -Uri "https://www.ingan121.com/wmpotify/latest.txt" -UseBasicParsing -ErrorAction Stop
+        } catch {
+            Write-Error -Message "Failed to download: $($_.Exception.Message). Please check your internet connection and try again."
+        }
+        $themeVer = foreach ($line in $verContent | Select-String -Pattern 'wmpotify\s*=\s*(.+)') { $line.Matches[0].Groups[1].Value }
+        $visVer = foreach ($line in $verContent | Select-String -Pattern 'wmpvis\s*=\s*(.+)') { $line.Matches[0].Groups[1].Value }
+        $cteVer = foreach ($line in $verContent | Select-String -Pattern 'cte\s*=\s*(.+)') { $line.Matches[0].Groups[1].Value }
+    }
+    end {
+        @{
+            Theme = $themeVer
+            Vis = $visVer
+            CTE = $cteVer
+        }
+    }
+}
+
+function Invoke-AdminJob {
+    [CmdletBinding()]
+    param ()
+    begin {
+        $command = @'
+            [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+            iex "& { $(iwr -useb 'https://raw.githubusercontent.com/Ingan121/WMPotify/master/installer/install.ps1') } -Action AdminJob"
+'@
+        Write-Verbose -Message 'Running the installation script as an administrator...'
+    }
+    process {
+        $adminJob = Start-Process -FilePath 'powershell.exe' -ArgumentList "-NoProfile -NoLogo -ExecutionPolicy Bypass -Command $command" -PassThru
+        Wait-Process -InputObject $adminJob
+    }
+}
+
 function Get-WindowsAppsTheme {
     [CmdletBinding()]
     param ()
@@ -509,9 +599,10 @@ function Get-WMPotify {
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
     param (
-        [string]$Tag
-        [string]$Branch
+        [string]$Tag,
+        [string]$Branch,
         [bool]$GetWMPVis = $true
+        [bool]$SkipTheme = $false
     )
     begin {
         if ($PSBoundParameters.ContainsKey('Branch')) {
@@ -519,11 +610,12 @@ function Get-WMPotify {
                 "https://github.com/Ingan121/WMPotify/archive/refs/heads/$Branch.zip"
             )
         } else {
-            $filesToDownload = @(
-                "https://github.com/Ingan121/WMPotify/releases/download/$Tag/WMPotify-$Tag.zip",
-            )
+            $filesToDownload = @();
+            if (-not $SkipTheme) {
+                $filesToDownload += "https://github.com/Ingan121/WMPotify/releases/download/$Tag/WMPotify-$Tag.zip"
+            }
             if ($GetWMPVis) {
-                $filesToDownload += "https://github.com/Ingan121/WMPotify/releases/download/$Tag/WMPotify-NowPlaying-$tag.zip",
+                $filesToDownload += "https://github.com/Ingan121/WMPotify/releases/download/$Tag/WMPotify-NowPlaying-$tag.zip"
             }
         }
 
@@ -569,8 +661,14 @@ function Install-WMPotify {
         [string]$Branch,
 
         [bool]$GetWMPVis = $true
+        [bool]$SkipTheme = $false
     )
     begin {
+        if ($SkipTheme -and -not $GetWMPVis) {
+            Write-Error -Message 'Nothing to install. Both theme and visapp are skipped. Installation aborted.'
+            return
+        }
+
         $branchExists = $PSBoundParameters.ContainsKey('Branch')
 
         if (-not $branchExists -and $Tag -eq 'latest') {
@@ -583,18 +681,22 @@ function Install-WMPotify {
         }
 
         Write-Verbose -Message "Installing WMPotify theme (Type: $Type, Branch: $Branch)..."
-        $downloadedFiles = Get-WMPotify -Tag $tag -Branch $Branch -GetWMPVis $GetWMPVis
+        $downloadedFiles = Get-WMPotify -Tag $tag -Branch $Branch -GetWMPVis $GetWMPVis -SkipTheme $SkipTheme
 
-        if (($GetWMPVis -eq $false -or $branchExists -and $downloadedFiles.Count -ne 1) -or
-            ($GetWMPVis -eq $true -and $branchExists -and $downloadedFiles.Count -ne 2) -or
-            ($GetWMPVis -eq $true -and -not $branchExists -and $downloadedFiles.Count -ne 2)
+        if (($SkipTheme -and -not $branchExists -and $downloadedFiles.Count -ne 1) -or
+            ($branchExists -and $downloadedFiles.Count -ne 1) -or
+            ($GetWMPVis -eq $false -and -not $SkipTheme -and -not $branchExists -and $downloadedFiles.Count -ne 1) -or
+            ($GetWMPVis -eq $true -and -not $SkipTheme -and -not $branchExists -and $downloadedFiles.Count -ne 2) -or
+            ($GetWMPVis -eq $true -and $branchExists -and $downloadedFiles.Count -ne 1)
         ) {
             Write-Error -Message 'Failed to download all WMPotify theme files. Installation aborted.' 
         }
     }
     process {
-        Write-Verbose -Message "Creating theme directory '$ThemePath'..."
-        New-Item -Path $ThemePath -ItemType Directory -Force | Out-Null
+        if (-not $SkipTheme) {
+            Write-Verbose -Message "Creating theme directory '$ThemePath'..."
+            New-Item -Path $ThemePath -ItemType Directory -Force | Out-Null
+        }
 
         if ($GetWMPVis) {
             Write-Verbose -Message "Creating visapp directory '$VisAppPath'..."
@@ -608,32 +710,38 @@ function Install-WMPotify {
             $themeFilesDir = "$Temp\WMPotify-$Branch\theme\dist\"
             $visAppFilesDir = "$Temp\WMPotify-$Branch\CustomeApps\wmpvis\dist\"
 
-            Write-Verbose -Message "Copying files from '$themeFilesDir' to '$ThemePath'..."
-            Copy-Item -Path $themeFilesDir -Destination $ThemePath -Recurse -Force
+            if (-not $SkipTheme) {
+                Write-Verbose -Message "Copying files from '$themeFilesDir' to '$ThemePath'..."
+                Copy-Item -Path $themeFilesDir -Destination $ThemePath -Recurse -Force
+            }
 
             if ($GetWMPVis) {
                 Write-Verbose -Message "Copying files from '$visAppFilesDir' to '$VisAppPath'..."
                 Copy-Item -Path $visAppFilesDir -Destination $VisAppPath -Recurse -Force
             }
         } else {
-            Write-Verbose -Message "Extracting files to '$ThemePath'..."
-            Expand-Archive -Path "$Temp\WMPotify-$tag.zip" -Destination $ThemePath
+            if (-not $SkipTheme) {
+                Write-Verbose -Message "Extracting files to '$ThemePath'..."
+                Expand-Archive -Path "$Temp\WMPotify-$tag.zip" -Destination $ThemePath
+            }
 
             if ($GetWMPVis) {
                 Write-Verbose -Message "Extracting files to '$VisAppPath'..."
                 Expand-Archive -Path "$Temp\WMPotify-NowPlaying-$tag.zip" -Destination $VisAppPath
             }
         }
-        
+
         Write-Verbose -Message 'Configuring Spicetify...'
-        spicetify config inject_css 1 replace_colors 1 overwrite_assets 1 inject_theme_js 1
-        spicetify config current_theme 'WMPotify'
-        spicetify config color_scheme 'aero'
+        if (-not $SkipTheme) {
+            spicetify config inject_css 1 replace_colors 1 overwrite_assets 1 inject_theme_js 1
+            spicetify config current_theme 'WMPotify'
+            spicetify config color_scheme 'aero'
+        }
 
         if ($GetWMPVis) {
             spicetify config custom_apps wmpvis
         }
-        
+
         Submit-SpicetifyConfig -Path $Config
     }
 }
@@ -660,11 +768,14 @@ function Uninstall-WMPotify {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory)]
-        [string]$Path,
-        
+        [string]$ThemePath,
+
+        [Parameter(Mandatory)]
+        [string]$VisAppPath,
+
         [Parameter(Mandatory)]
         [string]$Config,
-        
+
         [string]$Value = ' '
     )
     begin {
@@ -676,8 +787,11 @@ function Uninstall-WMPotify {
         Submit-SpicetifyConfig -Path $Config
     }
     end {
-        Write-Verbose -Message "Removing theme directory '$Path'..."
-        Remove-Item -Path $Path -Recurse -Force
+        Write-Verbose -Message "Removing theme directory '$ThemePath'..."
+        Remove-Item -Path $ThemePath -Recurse -Force
+
+        Write-Verbose -Message "Removing visapp directory '$VisAppPath'..."
+        Remove-Item -Path $VisAppPath -Recurse -Force
     }
 }
 #endregion WMPotify
