@@ -75,9 +75,23 @@
 }
 
 .main-globalNav-searchContainer,
-.custom-navlinks-scrollable_container,
-.main-topBar-topbarContentRight > .main-actionButtons {
+.custom-navlinks-scrollable_container {
     display: none;
+}
+
+.main-topBar-topbarContentRight > .main-actionButtons {
+    > button {
+        display: none;
+    }
+
+    button {
+        background: none;
+        border: none;
+
+        svg {
+            color: white;
+        }
+    }
 }
 
 /* Tabs */

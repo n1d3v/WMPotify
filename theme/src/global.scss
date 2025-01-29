@@ -33,3 +33,15 @@ body {
 .field-row-stacked * + * {
     margin-top: var(--grouped-element-spacing);
 }
+
+/* Performance optimizations */
+div[role="tablist"],
+.StyledTabList-tablist-tabList,
+.search-searchCategory-categoryGrid,
+.main-yourLibraryX-libraryContainer,
+.main-yourLibraryX-libraryFilter,
+.main-navBar-mainNav,
+.main-yourLibraryX-library {
+    will-change: transform;
+    transform: translate3d(0px, 0px, 0px);
+}
