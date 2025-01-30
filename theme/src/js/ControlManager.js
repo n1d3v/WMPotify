@@ -34,7 +34,7 @@ const ControlManager = {
 				});
 			}
 
-			Spicetify.CosmosAsync.post("sp://messages/v1/container/control", {
+			Spicetify.CosmosAsync?.post("sp://messages/v1/container/control", {
 				type: "update_titlebar",
 				height: controlHeight + "px",
 			});

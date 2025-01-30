@@ -97,7 +97,6 @@ function earlyInit() {
         style = localStorage.wmpotifyStyle;
     }
     WindhawkComm.setMinSize(358, titleStyle === 'native' ? 60 : 90); // mini mode
-    WindhawkComm.setBackdrop('mica'); // win11
     switch (style) {
         case 'xp':
             WindhawkComm.extendFrame(0, 0, 0, 0);
@@ -147,6 +146,11 @@ async function init() {
         Spicetify.Platform.LocalStorageAPI.setItem("ylx-sidebar-state", 1);
     }
 
+    const isWin11 = Spicetify.Platform.PlatformData.os_version?.split('.')[2] >= 22000;
+    if (isWin11 && localStorage.wmpotifyBackdrop !== 'none') {
+        WindhawkComm.setBackdrop(localStorage.wmpotifyBackdrop || 'mica');
+    }
+
     if (localStorage.wmpotifyTintColor) {
         const [hue, sat, tintPb] = localStorage.wmpotifyTintColor.split(',');
         setTintColor(hue, sat, tintPb);
@@ -172,14 +176,14 @@ async function init() {
 }
 
 function isReady() {
-    return window.Spicetify?.CosmosAsync &&
-        window.Spicetify.Platform?.PlayerAPI &&
+    return window.Spicetify?.Platform?.PlayerAPI &&
         window.Spicetify.AppTitle &&
         window.Spicetify.Player?.origin?._state &&
         window.Spicetify.Menu &&
         window.Spicetify.Platform.History?.listen &&
         window.Spicetify.Platform.LocalStorageAPI &&
         window.Spicetify.Platform.Translations &&
+        window.Spicetify.Platform.PlatformData &&
         elementsRequired.every(selector => document.querySelector(selector));
 }
 

@@ -1,7 +1,7 @@
 // ==WindhawkMod==
 // @id              cef-titlebar-enabler-universal
 // @name            CEF/Spotify Tweaks
-// @description     Various tweaks for Spotify, including native frames, transparent window, and more
+// @description     Various tweaks for Spotify, including native frames, transparent windows, and more
 // @version         0.6
 // @author          Ingan121
 // @github          https://github.com/Ingan121
@@ -48,6 +48,7 @@
     * 1.2.45: Last version to support disabling the global navbar
     * 1.2.47: Chrome runtime is always enabled since this version
     * Try the [noControls](https://github.com/ohitstom/spicetify-extensions/tree/main/noControls) Spicetify extension to remove the space left by the custom window controls
+    * Or try the [WMPotify](https://github.com/Ingan121/WMPotify) theme by me for Windows Media Player 11-like look
     * Enable Chrome runtime to get a proper window icon. Use `--enable-chrome-runtime` flag or put `app.enable-chrome-runtime=true` in `%appdata%\Spotify\prefs`
 * Notes for Spicetify extension/theme developers
     * Use `window.outerHeight - window.innerHeight > 0` to detect if the window has a native title bar

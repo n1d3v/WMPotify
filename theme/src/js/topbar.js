@@ -36,25 +36,31 @@ export function setupTopbar() {
                         <li>1. ${Strings['WMPVIS_INSTALL_STEP1']}</li>
                         <div class="wmpotify-code-container">
                             <button id="wmpotify-copy-code">
-                                <svg viewBox="0 0 16 16" fill="currentColor" width="16" height="16">
-                                    ${Spicetify.SVGIcons.copy}
+                                ${/* https://icons.getbootstrap.com/icons/copy/ */ ''}
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-copy" viewBox="0 0 16 16">
+                                    <path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"/>
                                 </svg>
                             </button>
-                            <code>powershell -command "$install=\\"wmpvis\\";iwr -useb <a href='https://raw.githubusercontent.com/Ingan121/WMPotify/master/install/install.ps1'>https://raw.githubusercontent.com/Ingan121/WMPotify/master/install/install.ps1</a> | iex"</code>
+                            <code>
+                            ${navigator.userAgent.includes('Windows') ?
+                                'powershell -command "iex ""& { $(iwr -useb \'<a href="https://raw.githubusercontent.com/Ingan121/WMPotify/master/installer/install.ps1">https://raw.githubusercontent.com/Ingan121/WMPotify/master/installer/install.ps1</a>\') } -Install @(\'wmpvis\')"""' :
+                                'export SKIP_THEME=true; curl -fsSL <a href="https://raw.githubusercontent.com/Ingan121/WMPotify/master/installer/install.sh">https://raw.githubusercontent.com/Ingan121/WMPotify/master/installer/install.sh</a> | sh'
+                            }
+                            </code>
                         </div>
-                        <li>2. ${Strings['WMPVIS_INSTALL_STEP2']}</li>
+                        <li>2. ${Strings[navigator.userAgent.includes('Windows') ? 'WMPVIS_INSTALL_STEP2' : 'WMPVIS_INSTALL_STEP2_UNIX']}</li>
                         <li>3. ${Strings['WMPVIS_INSTALL_STEP3']}</li>
                     </ol><br>
                     <p>${Strings.getString('WMPVIS_INSTALL_MORE_INFO', `<a href="https://github.com/Ingan121/WMPotify">${Strings['UI_CLICK_HERE']}</a>`)}</p>
-                    <p>${Strings.getString('WMPVIS_INSTALL_HIDE', `<a href="javascript:localStorage.wmpotifyNoWmpvis=true;document.querySelector('#wmpotify-tabs-container button[data-identifier=now-playing]').dataset.hidden=true;Spicetify.PopupModal.hide()">${Strings['UI_CLICK_HERE']}</a>`)}</p>
+                    <p>${Strings.getString('WMPVIS_INSTALL_HIDE', `<a href="javascript:localStorage.wmpotifyNoWmpvis=true;document.querySelector('#wmpotify-tabs-container button[data-identifier=now-playing]').dataset.hidden=true;Spicetify.PopupModal.hide();window.dispatchEvent(new Event('resize'))">${Strings['UI_CLICK_HERE']}</a>`)}</p>
                 `;
                 Spicetify.PopupModal.display({
                     title: Strings['WMPVIS_INSTALL_TITLE'],
                     content: dialogContent
                 });
                 document.querySelector('#wmpotify-copy-code').addEventListener('click', () => {
-                    Spicetify.Platform.ClipboardAPI.copy('powershell -command "$install=\\"wmpvis\\";iwr -useb https://raw.githubusercontent.com/Ingan121/WMPotify/master/install/install.ps1 | iex"');
-                    Spicetify.showNotification('Code copied to clipboard!');
+                    const command = document.querySelector('#wmpotify-wmpvis-install-dialog code').textContent.trim();
+                    Spicetify.Platform.ClipboardAPI.copy(command);
                 });
             }
         });

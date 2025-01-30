@@ -35,6 +35,7 @@ body {
 }
 
 /* Performance optimizations */
+/* This breaks position: fixed so exclude those that need it */
 div[role="tablist"],
 .StyledTabList-tablist-tabList,
 :root[data-page="/"] div[data-overlayscrollbars-viewport],

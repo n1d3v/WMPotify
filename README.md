@@ -6,7 +6,7 @@
     * 1.2.45: global navbar must be enabled in the experimental features
     * 1.2.44 and below are not supported
 
-## **Installation**
+## **Installation** / Updating
 
 ### **Manual installation using Scripts (recomended):**
 
@@ -32,13 +32,52 @@ iex "& { $(iwr -useb 'https://raw.githubusercontent.com/Ingan121/WMPotify/master
 
 #### **Linux/macOS (Bash)**
 
-* Not yet!
+* Note: Not tested on macOS yet
+
+* WMPotify + WMPotify NowPlaying
+```bash
+curl -fsSL https://raw.githubusercontent.com/Ingan121/WMPotify/master/installer/install.sh | sh
+```
+
+* WMPotify NowPlaying only:
+```bash
+export SKIP_THEME=true
+curl -fsSL https://raw.githubusercontent.com/Ingan121/WMPotify/master/installer/install.sh | sh
+```
+
+### **Manual installation**
+1. Download the latest release from the [releases page](https://github.com/Ingan121/WMPotify/releases)
+2. Locate Spicetify directories: use `spicetify config-dir` or `spicetify path userdata`
+3. Extract the contents of the WMPotify zip to the `Themes\WMPotify` folder in the Spicetify directory. Create the `Themes\WMPotify` folder if it doesn't exist.
+4. Extract the contents of the WMPotify NowPlaying zip to the `CustomApps\wmpvis` folder in the Spicetify directory. Create the `CustomApps\wmpvis` folder if it doesn't exist.
+5. Run the following commands in Command Prompt / PowerShell / Terminal:
+    ```cmd
+    spicetify config inject_css 1 replace_colors 1 overwrite_assets 1 inject_theme_js 1
+    spicetify config current_theme WMPotify
+    spicetify config custom_apps wmpvis
+    spicetify apply
+    ```
+6. Windows only: Install [Windhawk](https://windhawk.net/) and [CEF/Spotify Tweaks mod](https://windhawk.net/mods/cef-titlebar-enabler-universal) for the full experience (optional but recommended)
+
+## **Uninstallation**
+
+### **Manual uninstallation using Scripts (recomended):**
+
+#### **Windows (Powershell)**
+```powershell
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+iex "& { $(iwr -useb 'https://raw.githubusercontent.com/Ingan121/WMPotify/master/installer/install.ps1') } -Action Uninstall"
+```
+
+#### **Linux/macOS (Bash)**
+```bash
+curl -fsSL https://raw.githubusercontent.com/Ingan121/WMPotify/master/installer/uninstall.sh | sh
+```
+
 
 ## TODO
-* Add installation script + guide
-
-### Things to be done after a proper beta release
 * Dark mode support + dynamic theme support
+* Changing order of top bar buttons with drag and drop
 
 ## Credits
 * [Spicetify](https://spicetify.app/)

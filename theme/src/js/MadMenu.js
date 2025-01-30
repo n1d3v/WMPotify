@@ -5,6 +5,8 @@
 
 'use strict';
 
+import { processString } from "./strings";
+
 // This script handles the menu bar and context menus in ModernActiveDesktop apps
 // Dependencies: functions.js (getTextWidth)
 // Load libmad.css for the default styles
@@ -523,19 +525,4 @@ function getTextWidth(text, font = getComputedStyle(document.documentElement).ge
     context.font = font;
     const metrics = context.measureText(text);
     return metrics.width;
-}
-
-function processString(str) {
-    // &Apply -> <u>A</u>pply
-    // \&Apply -> &Apply
-    str = str.replace(/&([^&])/g, "<u>$1</u>").replace(/\\&/g, "&");
-    // %s -> extraString
-    // %[n]s -> arguments[n]
-    if (arguments.length > 1) {
-        for (let i = 1; i < arguments.length; i++) {
-            str = str.replace(/%s/, arguments[i]);
-            str = str.replace(`%${i}s`, arguments[i]);
-        }
-    }
-    return str;
 }

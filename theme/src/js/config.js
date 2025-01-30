@@ -69,9 +69,17 @@ function init() {
                 <option value="always">${Strings['CONF_GENERAL_TOPMOST_ALWAYS']}</option>
                 <option value="minimode">${Strings['CONF_GENERAL_TOPMOST_MINIMODE']}</option>
                 <option value="never" selected>${Strings['CONF_GENERAL_TOPMOST_NEVER']}</option>
+            </select>
+            <label for="wmpotify-config-backdrop">${Strings['CONF_GENERAL_BACKDROP']}</label>
+            <select id="wmpotify-config-backdrop" class="wmpotify-aero" disabled>
+                <option value="none" selected>${Strings['CONF_GENERAL_BACKDROP_NONE']}</option>
+                <option value="mica">Mica</option>
+                <option value="acrylic">${Strings['CONF_GENERAL_BACKDROP_ACRYLIC']}</option>
+                <option value="tabbed">${Strings['CONF_GENERAL_BACKDROP_TABBED']}</option>
             </select><br>
             <input type="checkbox" id="wmpotify-config-show-libx" class="wmpotify-aero">
-            <label for="wmpotify-config-show-libx">${Strings['CONF_GENERAL_SHOW_LIBX']}</label>
+            <label for="wmpotify-config-show-libx">${Strings['CONF_GENERAL_SHOW_LIBX']}</label><br>
+            <span id="wmpotify-config-wh-message">${Strings['CONF_GENERAL_WH_MESSAGE']}</span>
         </section>
         <section class="wmpotify-config-tab-content" data-tab-title="${Strings['CONF_SPEED_TITLE']}" data-wh-speedmod-required="true">
             <a href="#" id="wmpotify-config-speed-slow">${Strings['CONF_SPEED_SLOW']}</a>
@@ -84,7 +92,7 @@ function init() {
             <div id="wmpotify-about-logo"></div>
             <p id="wmpotify-about-title">WMPotify</p><br>
             <p>${Strings['CONF_ABOUT_DESC']}</p>
-            <p>${Strings['CONF_ABOUT_VERSION']}: 1.0 Alpha 2<span id="wmpotify-about-ctewh-ver"></span></p>
+            <p>${Strings['CONF_ABOUT_VERSION']}: 1.0 Beta 1<span id="wmpotify-about-ctewh-ver"></span></p>
             <p>${Strings['CONF_ABOUT_AUTHOR']} - <a href="https://www.ingan121.com/" target="_blank">www.ingan121.com</a></p>
             <a href="https://github.com/Ingan121/WMPotify" target="_blank">GitHub</a>
         </section>
@@ -99,8 +107,12 @@ function init() {
     elements.fontSelector = configWindow.querySelector('#wmpotify-config-font');
     elements.fontCustom = configWindow.querySelector('#wmpotify-config-font option');
     elements.topmost = configWindow.querySelector('#wmpotify-config-topmost');
+    elements.backdrop = configWindow.querySelector('#wmpotify-config-backdrop');
     elements.showLibX = configWindow.querySelector('#wmpotify-config-show-libx');
+    elements.whMessage = configWindow.querySelector('#wmpotify-config-wh-message');
     elements.whVer = configWindow.querySelector('#wmpotify-about-ctewh-ver');
+
+    configWindow.style.height = localStorage.wmpotifyConfigHeight || '';
 
     elements.fontSelector.addEventListener('change', async () => {
         if (elements.fontSelector.value === 'custom') {
@@ -130,6 +142,7 @@ function init() {
     configWindow.querySelector('#wmpotify-config-close').addEventListener('click', close);
     configWindow.querySelector('#wmpotify-config-apply').addEventListener('click', apply);
     const whStatus = WindhawkComm.query();
+    const isWin11 = Spicetify.Platform.PlatformData.os_version.split('.')[2] >= 22000;
     if (whStatus) {
         elements.topmost.disabled = false;
         elements.topmost.value = localStorage.wmpotifyTopMost || 'never';
@@ -143,6 +156,16 @@ function init() {
             }
         });
 
+        if (isWin11) {
+            elements.backdrop.disabled = false;
+            elements.backdrop.value = localStorage.wmpotifyBackdrop || 'mica';
+            elements.backdrop.addEventListener('change', () => {
+                localStorage.wmpotifyBackdrop = elements.backdrop.value;
+                WindhawkComm.setBackdrop(elements.backdrop.value);
+            });
+        }
+
+        elements.whMessage.style.display = 'none';
         elements.whVer.textContent = ', ' + Strings.getString('CONF_ABOUT_CTEWH_VERSION', WindhawkComm.getModule().version);
 
         if (!whStatus.speedModSupported) {
@@ -163,6 +186,10 @@ function init() {
                 }
             });
         }
+    }
+    if (!isWin11) {
+        elements.backdrop.style.display = 'none';
+        elements.backdrop.previousElementSibling.style.display = 'none';
     }
     elements.hue.addEventListener('input', onColorChange);
     elements.sat.addEventListener('input', onColorChange);

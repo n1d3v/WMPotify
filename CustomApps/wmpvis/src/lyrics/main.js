@@ -14,7 +14,7 @@ import { openSearchDialog } from "./search";
 
 let lyricsView = null;
 
-let visStatus = {
+const visStatus = {
     lastMusic: null,
     lastMusicEnglish: null
 };
@@ -27,11 +27,15 @@ let lastFetchInfo = {}; // For debugging
 let overrides = {};
 let abortController = new AbortController();
 let scrolling = false;
-let intersectionObserver = new IntersectionObserver((entries) => {
+
+const intersectionObserver = new IntersectionObserver((entries) => {
     if (entries[0].isIntersecting) {
         processTimeline(true);
     }
 });
+const forceProcessTimeline = () => {
+    processTimeline(true);
+};
 
 export const headers = {
     'Lrclib-Client': 'WMPotify/1.0 ModernActiveDesktop/3.4.0'
@@ -141,7 +145,7 @@ async function findLyrics(id) {
 
     let unsyncedSpotifyLyrics = null;
     if (!localStorage.wmpotifyVisLyricsNoSpotify && Spicetify.Player.data?.item?.uri?.startsWith('spotify:')) {
-        const spotifyData = await Spicetify.CosmosAsync.get(`https://spclient.wg.spotify.com/color-lyrics/v2/track/${Spicetify.Player.data?.item?.uri?.split(':').pop()}?format=json&vocalRemoval=false&market=from_token`);
+        const spotifyData = await Spicetify.CosmosAsync?.get(`https://spclient.wg.spotify.com/color-lyrics/v2/track/${Spicetify.Player.data?.item?.uri?.split(':').pop()}?format=json&vocalRemoval=false&market=from_token`);
         if (spotifyData?.lyrics) {
             if (spotifyData.lyrics.syncType === "LINE_SYNCED") {
                 return {
@@ -989,6 +993,7 @@ async function init(lv) {
     processProperties();
     Spicetify.Player.addEventListener('songchange', processProperties);
     Spicetify.Player.addEventListener('onprogress', processTimeline);
+    window.addEventListener('focus', forceProcessTimeline);
 
     lyricsView.addEventListener('scroll', () => {
         scrolling = true;
@@ -1003,6 +1008,7 @@ async function init(lv) {
 function uninit() {
     Spicetify.Player.removeEventListener('songchange', processProperties);
     Spicetify.Player.removeEventListener('onprogress', processTimeline);
+    window.removeEventListener('focus', forceProcessTimeline);
     abortController.abort();
     intersectionObserver.disconnect();
     lyricsView = null;
