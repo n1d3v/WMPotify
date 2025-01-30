@@ -169,7 +169,8 @@ function init() {
         elements.whVer.textContent = ', ' + Strings.getString('CONF_ABOUT_CTEWH_VERSION', WindhawkComm.getModule().version);
 
         if (!whStatus.speedModSupported) {
-            configWindow.querySelector('[data-wh-speedmod-required=true]').remove();
+            configWindow.querySelector('[data-wh-speedmod-required=true]').style.display = 'none';
+            tabs = Array.from(tabs).filter(tab => tab.dataset.whSpeedmodRequired !== 'true');
         } else {
             elements.speed = configWindow.querySelector('#wmpotify-config-speed');
             elements.speedValue = configWindow.querySelector('#wmpotify-config-speed-value');
@@ -186,10 +187,18 @@ function init() {
                 }
             });
         }
+    } else {
+        configWindow.querySelector('[data-wh-speedmod-required=true]').style.display = 'none';
+        tabs = Array.from(tabs).filter(tab => tab.dataset.whSpeedmodRequired !== 'true');
     }
     if (!isWin11) {
         elements.backdrop.style.display = 'none';
         elements.backdrop.previousElementSibling.style.display = 'none';
+    }
+    if (!navigator.userAgent.includes('Windows')) {
+        elements.topmost.style.display = 'none';
+        elements.topmost.previousElementSibling.style.display = 'none';
+        elements.whMessage.style.display = 'none';
     }
     elements.hue.addEventListener('input', onColorChange);
     elements.sat.addEventListener('input', onColorChange);
@@ -229,7 +238,6 @@ function init() {
         configWindow.querySelector('#wmpotify-config-show-libx').checked = true;
     }
 
-    
     let offset = 0, isDown = false;
 
     elements.topborder.addEventListener('pointerdown', function () {

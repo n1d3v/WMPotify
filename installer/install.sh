@@ -69,15 +69,18 @@ main() {
         # Download and install WMPotify theme
         theme_url="https://github.com/Ingan121/WMPotify/releases/download/$theme_version/WMPotify-$theme_version.zip"
         download_and_extract "$theme_url" "$theme_path"
+
+        spicetify config inject_css 1 replace_colors 1 overwrite_assets 1 inject_theme_js 1
+        spicetify config current_theme WMPotify
+        spicetify config color_scheme aero
     fi
 
     # Download and install WMPotify NowPlaying app
     vis_url="https://github.com/Ingan121/WMPotify/releases/download/$vis_version/WMPotify-NowPlaying-$vis_version.zip"
     download_and_extract "$vis_url" "$vis_app_path"
 
-    spicetify config inject_css 1 replace_colors 1 overwrite_assets 1 inject_theme_js 1
-    spicetify config current_theme WMPotify
     spicetify config custom_apps wmpvis
+    spicetify apply
 
     echo "Done!"
     echo
