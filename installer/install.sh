@@ -9,7 +9,6 @@ print_error() {
 
 # Function to download the latest versions information
 get_latest_versions() {
-    echo "Getting the latest versions of WMPotify and WMPVis..."
     latest_versions_url="https://www.ingan121.com/wmpotify/latest.txt"
     latest_versions=$(curl -s "$latest_versions_url")
     if [ -z "$latest_versions" ]; then
@@ -20,7 +19,6 @@ get_latest_versions() {
     theme_version=$(echo "$latest_versions" | grep 'wmpotify\s*=' | awk -F '=' '{print $2}' | tr -d ' ')
     vis_version=$(echo "$latest_versions" | grep 'wmpvis\s*=' | awk -F '=' '{print $2}' | tr -d ' ')
 
-    echo "Latest versions - WMPotify: $theme_version, WMPVis: $vis_version"
     echo "$theme_version" "$vis_version"
 }
 
@@ -61,9 +59,9 @@ main() {
     vis_app_path="$spicetify_path/CustomApps/wmpvis"
 
     # Get the latest versions
-    set -- $(get_latest_versions)
-    theme_version=$1
-    vis_version=$2
+    versions=$(get_latest_versions)
+    theme_version=$(echo "$versions" | awk '{print $1}')
+    vis_version=$(echo "$versions" | awk '{print $2}')
 
     if [ -n "$SKIP_THEME" ]; then
         echo "Skipping theme installation as SKIP_THEME is set."
