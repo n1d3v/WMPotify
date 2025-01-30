@@ -1,4 +1,4 @@
-# <img src="https://raw.githubusercontent.com/Ingan121/WMPotify/refs/heads/master/theme/src/resources/icon/wmpotify.png"> WMPotify
+# <img src="https://raw.githubusercontent.com/Ingan121/WMPotify/refs/heads/master/theme/src/resources/icon/wmpotify_48.png"> WMPotify
 * A Windows Media Player 11 inspired Spicetify theme for Spotify
 * Supported versions: 1.2.45 - 1.2.56
     * Primarily tested on 1.2.52
@@ -144,7 +144,7 @@ curl -fsSL https://raw.githubusercontent.com/Ingan121/WMPotify/master/installer/
 
 * Aero / Basic
 ![fullscreen_aero](screenshots/fullscreen_aero.png)
-(I know this is Windows Media Player 12, but Vista WMP11 fullscreen look bad)
+(I know this is Windows Media Player 12, but I don't like Vista WMP11 fullscreen design)
 
 * XP
 ![fullscreen_xp](screenshots/fullscreen_xp.png)
