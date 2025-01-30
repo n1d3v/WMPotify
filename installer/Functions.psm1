@@ -839,9 +839,9 @@ function Uninstall-WMPotify {
     process {
         Write-Verbose -Message 'Resetting Spicetify configurations...'
         spicetify config current_theme $Value color_scheme $Value
-        $configContent = Get-Content -Path $Config
-        $configContent = $configContent -replace '\|wmpvis', ''
-        Set-Content -Path $Config -Value $configContent
+        $currentApps = (spicetify config custom_apps).Split('\n') | Where-Object { $_ -ne 'wmpvis' }
+        spicetify config custom_apps " "
+        spicetify config custom_apps ($currentApps -join '|')
         Submit-SpicetifyConfig -Path $Config
     }
     end {

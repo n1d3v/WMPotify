@@ -68,6 +68,10 @@ generic-modal {
             justify-content: flex-end;
             margin-top: 8px;
             margin-bottom: 5px;
+
+            button + button {
+                margin-left: 6px;
+            }
         }
     }
 }

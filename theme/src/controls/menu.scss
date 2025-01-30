@@ -158,7 +158,8 @@
           }
         }
 
-        > button {
+        > button,
+        > a {
           &::after {
             content: none;
           }
@@ -210,6 +211,19 @@
           margin-top: 0 !important;
           margin-bottom: 9px;
         }
+      }
+
+      /* Bottom separator, verified classname being consistent in Spotify 1.2.45, .52, .53, .55, and .56 */
+      .Vz3pFUXmll6fKB5Fc4nd:not(#Prio1):not(#Prio2) {
+        &::before {
+          content: '';
+          position: absolute;
+          top: unset !important;
+          bottom: -6px;
+          pointer-events: none;
+        }
+        margin-top: 0 !important;
+        margin-bottom: 9px;
       }
 
       &:has(+ [role="menu"]) {

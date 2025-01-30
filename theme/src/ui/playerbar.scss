@@ -733,7 +733,7 @@ div[data-testid='now-playing-widget'] {
 }
 
 :root[data-wmpotify-style="aero"],
-:root:fullscreen {
+:root[data-wmpotify-style="basic"]:fullscreen {
     .wmpotify-track-info,
     .wmpotify-time-text {
         text-shadow: var(--aero-text-glow);
@@ -897,6 +897,7 @@ div[data-testid='now-playing-widget'] {
                 margin-top: -3px;
                 left: -18px;
                 background: url('resources/playerbar/vol_popup_bg.png') no-repeat;
+                z-index: 99;
 
                 .x-progressBar-progressBarBg {
                     width: 64px;
@@ -944,7 +945,7 @@ div[data-testid='now-playing-widget'] {
             }
         }
 
-        &:has(.volume-bar__slider-container:hover:not(:has(.playback-progressbar:hover))) .volume-bar__icon-button::before {
+        &:has(.volume-bar__slider-container:hover):not(:has(.playback-progressbar:hover)) .volume-bar__icon-button::before {
             background-image: var(--vol-mini-hover);
         }
     }

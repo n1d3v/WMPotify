@@ -23,6 +23,7 @@ function init() {
         return;
     }
 
+    const whStatus = WindhawkComm.query();
     const mainView = document.querySelector('.Root__main-view');
 
     configWindow.id = 'wmpotify-config';
@@ -81,6 +82,7 @@ function init() {
             <label for="wmpotify-config-show-libx">${Strings['CONF_GENERAL_SHOW_LIBX']}</label><br>
             <span id="wmpotify-config-wh-message">${Strings['CONF_GENERAL_WH_MESSAGE']}</span>
         </section>
+        ${whStatus?.speedModSupported ? `
         <section class="wmpotify-config-tab-content" data-tab-title="${Strings['CONF_SPEED_TITLE']}" data-wh-speedmod-required="true">
             <a href="#" id="wmpotify-config-speed-slow">${Strings['CONF_SPEED_SLOW']}</a>
             <a href="#" id="wmpotify-config-speed-normal">${Strings['CONF_SPEED_NORMAL']}</a>
@@ -88,6 +90,7 @@ function init() {
             <input type="range" id="wmpotify-config-speed" class="wmpotify-aero" min="0.5" max="2.0" step="0.1" value="1"><br>
             ${Strings['CONF_SPEED_CURRENT_LABEL']}: <span id="wmpotify-config-speed-value">1.0</span>
         </section>
+        ` : ''}
         <section class="wmpotify-config-tab-content" data-tab-title="${Strings['CONF_ABOUT_TITLE']}">
             <div id="wmpotify-about-logo"></div>
             <p id="wmpotify-about-title">WMPotify</p><br>
@@ -141,7 +144,6 @@ function init() {
     });
     configWindow.querySelector('#wmpotify-config-close').addEventListener('click', close);
     configWindow.querySelector('#wmpotify-config-apply').addEventListener('click', apply);
-    const whStatus = WindhawkComm.query();
     const isWin11 = Spicetify.Platform.PlatformData.os_version.split('.')[2] >= 22000;
     if (whStatus) {
         elements.topmost.disabled = false;
@@ -168,10 +170,7 @@ function init() {
         elements.whMessage.style.display = 'none';
         elements.whVer.textContent = ', ' + Strings.getString('CONF_ABOUT_CTEWH_VERSION', WindhawkComm.getModule().version);
 
-        if (!whStatus.speedModSupported) {
-            configWindow.querySelector('[data-wh-speedmod-required=true]').style.display = 'none';
-            tabs = Array.from(tabs).filter(tab => tab.dataset.whSpeedmodRequired !== 'true');
-        } else {
+        if (whStatus.speedModSupported) {
             elements.speed = configWindow.querySelector('#wmpotify-config-speed');
             elements.speedValue = configWindow.querySelector('#wmpotify-config-speed-value');
             elements.speed.addEventListener('pointerup', onSpeedChange);
@@ -187,9 +186,6 @@ function init() {
                 }
             });
         }
-    } else {
-        configWindow.querySelector('[data-wh-speedmod-required=true]').style.display = 'none';
-        tabs = Array.from(tabs).filter(tab => tab.dataset.whSpeedmodRequired !== 'true');
     }
     if (!isWin11) {
         elements.backdrop.style.display = 'none';

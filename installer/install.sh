@@ -86,6 +86,8 @@ main() {
     echo
     echo "Thanks for using WMPotify!"
     echo
+
+    export SKIP_THEME=
 }
 
 main "$@"

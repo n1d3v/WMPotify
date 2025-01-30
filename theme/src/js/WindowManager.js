@@ -14,18 +14,12 @@ function toggleMiniMode() {
         if (lastSize && lastSize.length === 2) {
             window.resizeTo(parseInt(lastSize[0]), parseInt(lastSize[1]));
         }
-        if (localStorage.wmpotifyTopMost === 'minimode') {
-            WindhawkComm.setTopMost(false);
-        }
     } else {
         if (document.fullscreenElement) {
             document.exitFullscreen();
         }
         localStorage.wmpotifyPreMiniModeSize = [window.innerWidth, window.innerHeight];
         WindhawkComm.resizeTo(358, 60);
-        if (localStorage.wmpotifyTopMost === 'minimode') {
-            WindhawkComm.setTopMost(true);
-        }
     }
 }
 
@@ -82,6 +76,12 @@ function exitFullscreen() {
     document.body.classList.remove('wmpotify-playerbar-visible');
     document.removeEventListener('pointermove', fullscreenMouseMoveListener);
 }
+
+window.addEventListener('resize', () => {
+    if (localStorage.wmpotifyTopMost === 'minimode') {
+        WindhawkComm.setTopMost(isMiniMode());
+    }
+});
 
 const WindowManager = {
     toggleMiniMode,

@@ -1,6 +1,5 @@
-# WMPotify
+# <img src="https://raw.githubusercontent.com/Ingan121/WMPotify/refs/heads/master/theme/src/resources/icon/wmpotify.png"> WMPotify
 * A Windows Media Player 11 inspired Spicetify theme for Spotify
-* Still WIP
 * Supported versions: 1.2.45 - 1.2.56
     * Primarily tested on 1.2.52
     * 1.2.45: global navbar must be enabled in the experimental features
@@ -74,6 +73,96 @@ iex "& { $(iwr -useb 'https://raw.githubusercontent.com/Ingan121/WMPotify/master
 curl -fsSL https://raw.githubusercontent.com/Ingan121/WMPotify/master/installer/uninstall.sh | sh
 ```
 
+## **Screenshots**
+
+### Home
+
+* Aero
+![home_aero](screenshots/home_aero.png)
+
+* Basic
+![home_basic](screenshots/home_basic.png)
+
+* XP
+![home_xp](screenshots/home_xp.png)
+
+### Mini Mode
+
+* Aero
+
+    ![minimode_aero](screenshots/minimode_aero.png)
+
+* Basic
+
+    ![minimode_basic](screenshots/minimode_basic.png)
+
+* XP
+
+    ![minimode_xp](screenshots/minimode_xp.png)
+
+### Now Playing
+
+* Aero
+![wmpvis_aero](screenshots/wmpvis_aero.png)
+
+* Basic
+![wmpvis_basic](screenshots/wmpvis_basic.png)
+
+* XP
+![wmpvis_xp](screenshots/wmpvis_xp.png)
+
+* Menu
+![wmpvis_menu](screenshots/wmpvis_menu_xp.png)
+
+* Bars Visualization
+![wmpvis_bars](screenshots/wmpvis_bars_xp.png)
+
+### Library
+
+* Compact
+![library_compact_aero](screenshots/library_compact_aero.png)
+
+* List
+![library_list_aero](screenshots/library_list_aero.png)
+
+* Grid
+![library_grid_aero](screenshots/library_grid_aero.png)
+
+### Settings
+
+* General
+![config_general_xp](screenshots/config_general_xp.png)
+
+* Color Customization
+![color_applied_aero](screenshots/color_applied_aero.png)
+![color_applied_xp](screenshots/color_applied_xp.png)
+
+* Playback Speed Control
+![config_speed_aero](screenshots/config_speed_aero.png)
+
+### Full Screen
+
+* Aero / Basic
+![fullscreen_aero](screenshots/fullscreen_aero.png)
+(I know this is Windows Media Player 12, but Vista WMP11 fullscreen look bad)
+
+* XP
+![fullscreen_xp](screenshots/fullscreen_xp.png)
+
+### Others
+
+* Playlist
+![playlist_aero](screenshots/playlist_aero.png)
+![playlist_basic](screenshots/playlist_basic.png)
+
+* Playlist (Scrolled)
+![playlist_scrolled_aero](screenshots/playlist_scrolled_aero.png)
+
+* Search
+![search_xp](screenshots/search_xp.png)
+
+* Discography
+![discography_aero](screenshots/discography_aero.png)
 
 ## TODO
 * Dark mode support + dynamic theme support

@@ -30,7 +30,7 @@ export function setupTopbar() {
                 dialogContent.id = 'wmpotify-wmpvis-install-dialog';
                 dialogContent.innerHTML = `
                     <p>${Strings['WMPVIS_INSTALL_DESC']}</p><br>
-                    <img src="https://www.ingan121.com/files3/Spotify_aVCKRF1XOt.png" alt="WMPotify NowPlaying screenshot"><br><br>
+                    <img src="https://raw.githubusercontent.com/Ingan121/WMPotify/refs/heads/master/screenshots/wmpvis_aero_2.png" alt="WMPotify NowPlaying screenshot"><br><br>
                     <p>${Strings['WMPVIS_INSTALL_STEPS']}</p><br>
                     <ol>
                         <li>1. ${Strings['WMPVIS_INSTALL_STEP1']}</li>

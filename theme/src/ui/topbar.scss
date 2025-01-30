@@ -216,6 +216,11 @@
         display: none;
     }
 
+    /* Spotify update alert */
+    svg {
+        display: none;
+    }
+
     &:hover {
         border-image-source: url('resources/topbar/user_hover.png');
     }

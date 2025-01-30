@@ -225,12 +225,9 @@
     }
 
     &:not([data-wmpotify-style="xp"]) {
-        #main {
-            height: calc(100% - 24px);
-        }
-
         #wmpotify-title-bar {
             height: 24px;
+            outline: solid 1px #242426;
 
             &::before {
                 height: 24px;
@@ -257,6 +254,7 @@
     
         #wmpotify-title-bar {
             height: 24px;
+            outline: none;
     
             &::before {
                 height: 24px;
