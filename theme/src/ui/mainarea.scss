@@ -68,7 +68,7 @@ body[data-hide-libx],
         &:has(.main-topBar-topbarContent > div:first-child > button:first-child[data-encore-id="buttonPrimary"]) {
             &:has(span.main-entityHeader-topbarTitle) {
                 position: absolute;
-                width: auto;
+                width: calc(100% - var(--scrollbar-size));
                 outline: none;
 
                 &:not(:has(.main-entityHeader-topbarContentFadeIn)) {
@@ -167,15 +167,25 @@ body[data-hide-libx],
         margin-right: 0;
     }
 
-    body[data-hide-libx],
-    :root:fullscreen {
+    body[data-hide-libx] {
         .Root__main-view {
-            margin-left: calc(var(--panel-gap) * -2);
-            width: calc(100% + var(--panel-gap) * 2);
+            margin-left: calc(var(--panel-gap) * -1);
+            width: calc(100% + var(--panel-gap) * 1);
         }
 
         #main:has(.Root__right-sidebar aside) .Root__main-view {
-            width: calc(100% + var(--panel-gap) * 3 - 3px);
+            width: calc(100% + var(--panel-gap) * 2 - 3px);
+        }
+    }
+
+    &:fullscreen {
+        .Root__main-view {
+            margin-left: calc(var(--panel-gap) * -2) !important;
+            width: calc(100% + var(--panel-gap) * 3) !important;
+        }
+
+        #main:has(.Root__right-sidebar aside) .Root__main-view {
+            width: calc(100% + var(--panel-gap) * 3 - 3px) !important;
         }
     }
 }

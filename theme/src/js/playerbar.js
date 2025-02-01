@@ -198,8 +198,10 @@ async function setupTrackInfoWidget() {
                 if (isCustomTitlebar) {
                     titlebarText.textContent = origDefaultTitle;
                 }
-                WindhawkComm.lockTitle(false);
-                if (Spicetify.Player.isPlaying()) {
+                if (!localStorage.wmpotifyLockTitle) {
+                    WindhawkComm.lockTitle(false);
+                }
+                if (Spicetify.Player.isPlaying() && !localStorage.wmpotifyLockTitle) {
                     WindhawkComm.setTitle(trackInfo.artist_name + ' - ' + trackInfo.title);
                 } else {
                     WindhawkComm.setTitle(origDefaultTitle);

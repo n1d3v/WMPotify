@@ -239,15 +239,6 @@ section[data-testid="album-page"] {
     }
 }
 
-:root[data-wmpotify-style="xp"] body[data-hide-libx],
-:root[data-wmpotify-style="xp"]:fullscreen {
-    .Root__main-view:has(section[data-testid="album-page"]) {
-        header {
-            left: var(--panel-gap);
-        }
-    }
-}
-
 /* Sort and view picker in playlist page */
 ul[id*="sortboxlist-"] {
     li:last-child {

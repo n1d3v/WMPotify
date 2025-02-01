@@ -255,7 +255,8 @@
 
 /* Remove Spotify's custom scrollbar and make it use the standard WebKit scrollbar */
 [data-overlayscrollbars-initialize],
-[data-overlayscrollbars-viewport] {
+[data-overlayscrollbars-viewport],
+.wmpotify-config-tab-content {
   scrollbar-color: initial !important;
   scrollbar-width: auto !important;
 

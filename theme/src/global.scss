@@ -35,15 +35,10 @@ body {
 }
 
 /* Performance optimizations */
-/* This breaks position: fixed so exclude those that need it */
 div[role="tablist"],
 .StyledTabList-tablist-tabList,
-:root[data-page="/"] div[data-overlayscrollbars-viewport],
-:root[data-page="/"] div[data-overlayscrollbars],
-:root[data-page^="/artist/"]:not([data-page*="/discography"]) div[data-overlayscrollbars-viewport],
-:root[data-page^="/artist/"]:not([data-page*="/discography"]) div[data-overlayscrollbars],
-aside div[data-overlayscrollbars-viewport],
-aside div[data-overlayscrollbars],
+div[data-overlayscrollbars-viewport],
+div[data-overlayscrollbars],
 .search-searchCategory-categoryGrid,
 .main-yourLibraryX-libraryContainer,
 .main-yourLibraryX-libraryFilter,

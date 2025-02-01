@@ -106,7 +106,9 @@
 
     .wmpotify-config-tab-content {
         display: none;
-        margin: 0 10px;
+        margin-left: 10px;
+        height: calc(100% - 25px);
+        overflow-y: auto;
     }
 
     &-hue {
@@ -130,7 +132,8 @@
         margin-top: 3px;
     }
 
-    label[for="wmpotify-config-show-libx"] {
+    label[for="wmpotify-config-show-libx"],
+    label[for="wmpotify-config-lock-title"] {
         &::after {
             top: -2px;
         }
@@ -176,9 +179,4 @@
         color: #abd5fd !important;
         text-decoration: underline;
     }
-}
-
-:root[data-wmpotify-style="xp"] body[data-hide-libx] #wmpotify-config,
-:root[data-wmpotify-style="xp"]:fullscreen #wmpotify-config {
-    margin-left: var(--panel-gap);
 }

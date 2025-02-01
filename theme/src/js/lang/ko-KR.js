@@ -48,6 +48,7 @@ const lang = {
     'CONF_GENERAL_BACKDROP_ACRYLIC': '아크릴',
     'CONF_GENERAL_BACKDROP_TABBED': '탭',
     'CONF_GENERAL_SHOW_LIBX': '왼쪽 사이드바에 라이브러리 X 표시',
+    'CONF_GENERAL_LOCK_TITLE': '정적 창 제목 사용',
     'CONF_GENERAL_WH_MESSAGE': '일부 옵션은 <a href="https://windhawk.net/mods/cef-titlebar-enabler-universal">CEF/Spotify Tweaks Windhawk 모드</a>가 필요합니다.',
     'CONF_SPEED_TITLE': '재생 속도 설정',
     'CONF_SPEED_SLOW': '느리게',

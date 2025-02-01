@@ -132,7 +132,7 @@ section[data-testid="artist-page"] {
 }
 
 .Root__main-view:has(section[data-testid="artist-page"]) {
-    header {
+    header:not(:has(.artist-artistDiscography-topBar)) {
         width: calc(100% - var(--scrollbar-size)) !important;
 
         .main-topBar-background {
@@ -172,15 +172,6 @@ section[data-testid="artist-page"] {
         .main-entityHeader-topbarTitle {
             font-size: 12px;
             font-family: var(--ui-font);
-        }
-    }
-}
-
-:root[data-wmpotify-style="xp"] body[data-hide-libx],
-:root[data-wmpotify-style="xp"]:fullscreen {
-    .Root__main-view:has(section[data-testid="artist-page"]) {
-        header {
-            left: var(--panel-gap);
         }
     }
 }

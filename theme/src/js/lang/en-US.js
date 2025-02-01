@@ -48,6 +48,7 @@ const lang = {
     'CONF_GENERAL_BACKDROP_ACRYLIC': 'Acrylic',
     'CONF_GENERAL_BACKDROP_TABBED': 'Tabbed',
     'CONF_GENERAL_SHOW_LIBX': 'Show Your Library X on the left sidebar',
+    'CONF_GENERAL_LOCK_TITLE': 'Use static window title',
     'CONF_GENERAL_WH_MESSAGE': 'Some options require <a href="https://windhawk.net/mods/cef-titlebar-enabler-universal">CEF/Spotify Tweaks Windhawk mod</a> to work or look good.',
     'CONF_SPEED_TITLE': 'Play speed settings',
     'CONF_SPEED_SLOW': 'Slow',

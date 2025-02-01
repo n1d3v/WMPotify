@@ -3,6 +3,7 @@ import SidebarManager from "./SidebarManager";
 import CustomLibX from "./libx";
 import { updatePlayPauseButton } from "./playerbar";
 import { initDiscographyPage } from "./discography";
+import { initPlaylistPage } from "./playlist";
 
 let initTime = 0;
 
@@ -77,6 +78,8 @@ const PageManager = {
             }
             updatePlayPauseButton();
         }
+
+        initPlaylistPage(true);
     },
 
     init() {

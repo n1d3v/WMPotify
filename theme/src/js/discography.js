@@ -14,11 +14,13 @@ export async function initDiscographyPage(wait) {
 
     await waitForFullRender(section);
 
+    document.querySelector('.main-topBar-topbarContent').appendChild(document.querySelector('.artist-artistDiscography-topBar'));
+
     if (section.querySelector('.artist-artistDiscography-cardGrid')) {
         return;
     }
 
-    const artistName = section.querySelector('.artist-artistDiscography-topBar a').textContent;
+    const artistName = document.querySelector('.main-topBar-topbarContent .artist-artistDiscography-topBar a').textContent;
     const artistUrl = section.dataset.testUri;
 
     const headers = section.querySelectorAll('.artist-artistDiscography-headerContainer');

@@ -135,12 +135,20 @@ function earlyInit() {
     if (localStorage.wmpotifyFont) {
         document.documentElement.style.setProperty('--ui-font', localStorage.wmpotifyFont);
     }
+
+    if (whStatus && localStorage.wmpotifyLockTitle) {
+        WindhawkComm.lockTitle(true);
+    }
 }
 
 earlyInit();
 
 async function init() {
     await createTitlebar(titleStyle);
+
+    if (WindhawkComm.available() && localStorage.wmpotifyLockTitle) {
+        WindhawkComm.setTitle(await Spicetify.AppTitle.get());
+    }
 
     if (!localStorage.wmpotifyShowLibX) {
         Spicetify.Platform.LocalStorageAPI.setItem("ylx-sidebar-state", 1);

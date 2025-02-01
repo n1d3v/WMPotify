@@ -79,7 +79,9 @@ function init() {
                 <option value="tabbed">${Strings['CONF_GENERAL_BACKDROP_TABBED']}</option>
             </select><br>
             <input type="checkbox" id="wmpotify-config-show-libx" class="wmpotify-aero">
-            <label for="wmpotify-config-show-libx">${Strings['CONF_GENERAL_SHOW_LIBX']}</label><br>
+            <label for="wmpotify-config-show-libx">${Strings['CONF_GENERAL_SHOW_LIBX']}</label>
+            <input type="checkbox" id="wmpotify-config-lock-title" class="wmpotify-aero" disabled>
+            <label for="wmpotify-config-lock-title">${Strings['CONF_GENERAL_LOCK_TITLE']}</label><br>
             <span id="wmpotify-config-wh-message">${Strings['CONF_GENERAL_WH_MESSAGE']}</span>
         </section>
         ${whStatus?.speedModSupported ? `
@@ -95,7 +97,7 @@ function init() {
             <div id="wmpotify-about-logo"></div>
             <p id="wmpotify-about-title">WMPotify</p><br>
             <p>${Strings['CONF_ABOUT_DESC']}</p>
-            <p>${Strings['CONF_ABOUT_VERSION']}: 1.0 Beta 1<span id="wmpotify-about-ctewh-ver"></span></p>
+            <p>${Strings['CONF_ABOUT_VERSION']}: 1.0 Beta 2<span id="wmpotify-about-ctewh-ver"></span></p>
             <p>${Strings['CONF_ABOUT_AUTHOR']} - <a href="https://www.ingan121.com/" target="_blank">www.ingan121.com</a></p>
             <a href="https://github.com/Ingan121/WMPotify" target="_blank">GitHub</a>
         </section>
@@ -112,6 +114,7 @@ function init() {
     elements.topmost = configWindow.querySelector('#wmpotify-config-topmost');
     elements.backdrop = configWindow.querySelector('#wmpotify-config-backdrop');
     elements.showLibX = configWindow.querySelector('#wmpotify-config-show-libx');
+    elements.lockTitle = configWindow.querySelector('#wmpotify-config-lock-title');
     elements.whMessage = configWindow.querySelector('#wmpotify-config-wh-message');
     elements.whVer = configWindow.querySelector('#wmpotify-about-ctewh-ver');
 
@@ -144,6 +147,7 @@ function init() {
     });
     configWindow.querySelector('#wmpotify-config-close').addEventListener('click', close);
     configWindow.querySelector('#wmpotify-config-apply').addEventListener('click', apply);
+
     const isWin11 = Spicetify.Platform.PlatformData.os_version.split('.')[2] >= 22000;
     if (whStatus) {
         elements.topmost.disabled = false;
@@ -155,6 +159,22 @@ function init() {
                 WindhawkComm.setTopMost(true);
             } else {
                 WindhawkComm.setTopMost(false);
+            }
+        });
+
+        elements.lockTitle.disabled = false;
+        elements.lockTitle.checked = localStorage.wmpotifyLockTitle;
+        elements.lockTitle.addEventListener('change', async () => {
+            WindhawkComm.lockTitle(elements.lockTitle.checked);
+            if (elements.lockTitle.checked) {
+                WindhawkComm.setTitle(await Spicetify.AppTitle.get());
+                localStorage.wmpotifyLockTitle = true;
+            } else {
+                delete localStorage.wmpotifyLockTitle;
+                const trackInfo = Spicetify.Player.data?.item.metadata;
+                if (trackInfo && Spicetify.Player.isPlaying()) {
+                    WindhawkComm.setTitle(trackInfo.artist_name + ' - ' + trackInfo.title);
+                }
             }
         });
 
@@ -194,8 +214,11 @@ function init() {
     if (!navigator.userAgent.includes('Windows')) {
         elements.topmost.style.display = 'none';
         elements.topmost.previousElementSibling.style.display = 'none';
+        elements.lockTitle.style.display = 'none';
+        elements.lockTitle.nextElementSibling.style.display = 'none';
         elements.whMessage.style.display = 'none';
     }
+
     elements.hue.addEventListener('input', onColorChange);
     elements.sat.addEventListener('input', onColorChange);
     elements.tintPb.addEventListener('change', onColorChange);
