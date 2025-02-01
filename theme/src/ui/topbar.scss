@@ -3,8 +3,13 @@
     background: url('resources/topbar/bgstrip.png') repeat-x;
     border-image: url('resources/topbar/bg.png') 2 / 2px 1px 2px 1px;
     justify-content: center;
-    padding-inline: 8px !important;
     margin: calc(var(--panel-gap) * -1); /* For Spotify 1.2.46 and below compatibility, present by default in xpui.css on 1.2.47+ */
+
+    /* Marketplace load bugfix */
+    padding-inline: 0 !important;
+    &:has(#wmpotify-tabs-container) {
+        padding-inline: 8px !important;
+    }
 }
 
 .main-globalNav-historyButtons {

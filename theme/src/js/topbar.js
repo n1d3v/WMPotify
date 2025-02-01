@@ -84,8 +84,14 @@ export function setupTopbar() {
         menu.openMenu('wmpotifyTab', { top: '0', left: overflowButton.getBoundingClientRect().left + 'px' });
     });
     tabsContainer.appendChild(overflowButton);
+    let cnt = 0;
     handleTabOverflow();
-    setTimeout(handleTabOverflow, 1000);
+    setInterval(() => {
+        handleTabOverflow();
+        if (cnt++ > 10) {
+            clearInterval(this);
+        }
+    }, 200);
     window.addEventListener('resize', handleTabOverflow);
     document.addEventListener('fullscreenchange', handleTabOverflow);
 

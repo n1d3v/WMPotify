@@ -205,7 +205,15 @@ function isReady() {
         elementsRequired.every(selector => document.querySelector(selector));
 }
 
+if (document.readyState === 'complete') {
+    waitForReady();
+}
+
 window.addEventListener('load', () => {
+    waitForReady();
+});
+
+function waitForReady() {
     let cnt = 0;
     const interval = setInterval(async () => {
         if (isReady()) {
@@ -229,7 +237,7 @@ window.addEventListener('load', () => {
             console.log('WMPotify: Missing elements:', missing);
         }
     }, 100);
-});
+}
 
 document.addEventListener('scroll', function () {
     document.documentElement.scrollTo(0, 0);

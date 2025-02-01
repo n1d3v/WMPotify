@@ -61,6 +61,12 @@ curl -fsSL https://raw.githubusercontent.com/Ingan121/WMPotify/master/installer/
     ```
 6. Windows only: Install [Windhawk](https://windhawk.net/) and [CEF/Spotify Tweaks mod](https://windhawk.net/mods/cef-titlebar-enabler-universal) for the full experience (optional but recommended)
 
+### **Using Spicetify Marketplace (simpler installation):**
+
+1. Install the `spicetify-marketplace` extension following its instructions: [https://github.com/spicetify/marketplace/wiki/Installation](https://github.com/spicetify/marketplace/wiki/Installation).
+2. Search for "WMPotify" in the Spicetify Marketplace and click "Install."
+* Warning: The Spicetify Marketplace version may load slowly due to the large number of images in the theme.
+
 ## **Uninstallation**
 
 ### **Manual uninstallation using Scripts (recomended):**
