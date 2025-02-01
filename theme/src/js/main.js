@@ -12,6 +12,8 @@ import { initQueuePanel } from './queue';
 import WindhawkComm from './WindhawkComm';
 import PageManager from './PageManager';
 import WindowManager from './WindowManager';
+import { ver, checkUpdates, compareVersions } from './UpdateCheck';
+import { openUpdateDialog } from './dialogs';
 
 const elementsRequired = [
     '.Root__globalNav',
@@ -181,6 +183,14 @@ async function init() {
         document.querySelector('.Root__right-sidebar > div > div[class]:first-child') ||
         document.querySelector('.Root__right-sidebar div[class]') // Works on .45-.52
     , { childList: true });
+
+    if (!localStorage.wmpotifyLastVer || compareVersions(localStorage.wmpotifyLastVer, ver) < 0) {
+        openUpdateDialog(true, ver);
+    }
+    localStorage.wmpotifyLastVer = ver;
+    if (!localStorage.wmpotifyNoUpdateCheck) {
+        checkUpdates();
+    }
 }
 
 function isReady() {

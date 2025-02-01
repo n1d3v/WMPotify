@@ -27,7 +27,6 @@ const strings = {
 
 const currentStrings = strings[lang] || strings['en-US'];
 currentStrings.getString = getString;
-currentStrings.processString = processString;
 
 export default currentStrings;
 
@@ -43,7 +42,7 @@ function getString(locId) {
     }
 }
 
-function processString(str) {
+export function processString(str) {
     // &Apply -> <u>A</u>pply
     // \&Apply -> &Apply
     str = str.replace(/&([^&])/g, "<u>$1</u>").replace(/\\&/g, "&");

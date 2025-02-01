@@ -63,6 +63,7 @@ const lang = {
     'CONF_ABOUT_VERSION': '버전',
     'CONF_ABOUT_CTEWH_VERSION': 'CEF/Spotify Tweaks Windhawk 모드 %s 사용 가능',
     'CONF_ABOUT_AUTHOR': '제작: Ingan121',
+    'CONF_ABOUT_AUTO_UPDATES': '자동으로 업데이트 확인',
 
     'WMPVIS_INSTALL_TITLE': 'WMPotify NowPlaying을 설치하시겠습니까?',
     'WMPVIS_INSTALL_DESC': 'WMPotify NowPlaying은 WMP와 같은 시각화 화면과 그 위에 표시되는 가사 창을 제공합니다. WMPotify를 최상의 경험으로 사용하려면 WMPotify NowPlaying 설치를 권장합니다.',
@@ -74,6 +75,14 @@ const lang = {
     'WMPVIS_INSTALL_MORE_INFO': '또는 수동 설치 지침을 포함한 자세한 정보를 보려면 %s하십시오.',
     'WMPVIS_INSTALL_HIDE': '설치하지 않으려면 %s하여 이 버튼을 숨기십시오.',
     'WMPVIS_INSTALL_CODE_COPY': '코드가 클립보드에 복사되었습니다!',
+
+    'THEME_UPDATE_TITLE': 'WMPotify가 업데이트되었습니다!',
+    'THEME_UPDATE_INFO': 'WMPotify가 %s(으)로 업데이트되었습니다. 아래의 변경 로그를 읽어주십시오.',
+    'THEME_UPDATE_STEPS': '업데이트하려면 다음 단계를 따르십시오:',
+    'THEME_CHANGELOG_PLACEHOLDER': '변경 내역을 가져오지 못했습니다! 자세한 정보를 보려면 %s하십시오.',
+    'THEME_UPDATE_DISMISS': '이 업데이트에 대한 알림을 다시 표시하지 않음',
+
+    'CTEWH_UPDATE_MSG': 'CEF/Spotify Tweaks Windhawk 모드를 %s(으)로 업데이트할 수 있습니다. 최상의 경험을 위해 Windhawk UI에서 모드를 업데이트하십시오.',
 };
 
 export default lang;

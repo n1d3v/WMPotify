@@ -63,6 +63,7 @@ const lang = {
     'CONF_ABOUT_VERSION': 'Version',
     'CONF_ABOUT_CTEWH_VERSION': 'CEF/Spotify Tweaks Windhawk mod %s available',
     'CONF_ABOUT_AUTHOR': 'Made by Ingan121',
+    'CONF_ABOUT_AUTO_UPDATES': 'Automatically check for updates',
 
     'WMPVIS_INSTALL_TITLE': 'Install WMPotify NowPlaying?',
     'WMPVIS_INSTALL_DESC': 'WMPotify NowPlaying features WMP-like visualization screen and lyrics overlaid on top of it. We recommend installing it for the best experience with WMPotify.',
@@ -74,6 +75,14 @@ const lang = {
     'WMPVIS_INSTALL_MORE_INFO': 'Or %s for more information, including manual installation instructions.',
     'WMPVIS_INSTALL_HIDE': 'If you don\'t want to install it, %s to hide this button.',
     'WMPVIS_INSTALL_CODE_COPY': 'Code copied to clipboard!',
+
+    'THEME_UPDATE_TITLE': 'WMPotify has been updated!',
+    'THEME_UPDATE_INFO': 'WMPotify has been updated to %s. Please read the changelog below.',
+    'THEME_UPDATE_STEPS': 'To update it, please follow these steps:',
+    'THEME_CHANGELOG_PLACEHOLDER': 'Failed to fetch changelog! Please %s for more information.',
+    'THEME_UPDATE_DISMISS': 'Do not notify me again about this update',
+
+    'CTEWH_UPDATE_MSG': 'CEF/Spotify Tweaks Windhawk mod can be updated to version %s. Please update it from the Windhawk UI for the best experience with WMPotify.',
 };
 
 export default lang;

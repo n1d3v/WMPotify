@@ -23,6 +23,7 @@ const lang = {
     'MENU_LRC_CACHE': 'Cache Lyrics',
     'MENU_LRC_COPY_DBG_INFO': 'Copy Debug Info',
     'MENU_FULLSCREEN': 'Full Screen',
+    'MENU_UPDATE_AVAILABLE': 'Update Available!',
 
     'MSG_LOCAL_REMOVE_GUIDE': 'Click Load Lyrics in the right-click menu to remove the override.',
     'MSG_LOCAL_LOAD_FAIL': 'Failed to open the lyrics file.',

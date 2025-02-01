@@ -1,31 +1,11 @@
 'use strict';
 
-import Strings from './strings'
-import WindhawkComm from "./WindhawkComm";
-import { openUpdateDialog } from './dialogs';
-
-export const ver = '1.0b2';
-
-export async function checkUpdates() {
+export async function checkUpdates(current) {
     try {
-        const isMarketplaceDist = !!document.querySelector('style.marketplaceUserCSS');
-        const cteAvailable = WindhawkComm.available();
-        const cteVer = WindhawkComm.getModule()?.version;
-
         const res = await fetch('https://www.ingan121.com/wmpotify/latest.txt');
         const latest = await res.text();
-        const wmpotifyLatest = latest.match('wmpotify=(.*)')[1];
-        const cteLatest = latest.match('cte=(.*)')[1];
-
-        if (!isMarketplaceDist && compareVersions(ver, wmpotifyLatest) < 0) {
-            if (localStorage.wmpotifyIgnoreVersion !== wmpotifyLatest) {
-                openUpdateDialog(false, wmpotifyLatest);
-            }
-        }
-
-        if (cteAvailable && compareVersions(cteVer, cteLatest) < 0) {
-            Spicetify.showNotification('[WMPotify] ' + Strings.getString('CTEWH_UPDATE_MSG', cteLatest));
-        }
+        const wmpvisLatest = latest.match('wmpvis=(.*)')[1];
+        return compareVersions(current, wmpvisLatest) < 0;
     } catch (e) {
         // probably offline or my server is down
         console.error(e);

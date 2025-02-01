@@ -23,6 +23,7 @@ const lang = {
     'MENU_LRC_CACHE': '가사 캐시 사용',
     'MENU_LRC_COPY_DBG_INFO': '디버그 정보 복사',
     'MENU_FULLSCREEN': '전체 화면',
+    'MENU_UPDATE_AVAILABLE': '업데이트 가능!',
 
     "MSG_LOCAL_REMOVE_GUIDE": "불러온 가사를 제거하려면 오른쪽 클릭 메뉴에서 가사 불러오기를 클릭하세요.",
     "MSG_LOCAL_LOAD_FAIL": "가사 파일을 열지 못했습니다.",

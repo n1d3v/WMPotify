@@ -1,3 +1,5 @@
+let observer = null;
+
 export async function initPlaylistPage(wait) {
     const section = document.querySelector('main > [role=presentation]');
     if (!section) {
@@ -21,7 +23,10 @@ export async function initPlaylistPage(wait) {
     searchBox.id = "playlist-search-box-container";
     const searchBoxOrigParent = searchBox.parentElement;
 
-    new MutationObserver((mutationsList) => {
+    if (observer) {
+        observer.disconnect();
+    }
+    observer = new MutationObserver((mutationsList) => {
         for (let mutation of mutationsList) {
             if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
                 const targetElement = mutation.target;
@@ -32,7 +37,8 @@ export async function initPlaylistPage(wait) {
                 }
             }
         }
-    }).observe(topbarContent, { attributes: true, attributeFilter: ['class'] });
+    });
+    observer.observe(topbarContent, { attributes: true, attributeFilter: ['class'] });
 }
 
 function waitForPageRender() {

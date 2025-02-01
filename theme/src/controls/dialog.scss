@@ -128,10 +128,8 @@ generic-modal {
     }
 }
 
-/* WMPotify NowPlaying install dialog */
-.main-trackCreditsModal-container:has(#wmpotify-wmpvis-install-dialog) {
-    min-width: 620px;
-
+/* WMPotify / WMPotify NowPlaying install / update dialog */
+#wmpotify-instructions-dialog {
     img {
         width: 100%;
     }
@@ -141,7 +139,7 @@ generic-modal {
         background-color: lightgray;
         padding: 10px;
         margin: 10px 0;
-        overflow-x: scroll;
+        overflow-x: auto;
 
         button {
             width: 16px;
@@ -162,5 +160,10 @@ generic-modal {
 
     a {
         color: var(--hot-tracking-color);
+    }
+
+    button.wmpotify-aero {
+        margin-top: 5px;
+        float: right;
     }
 }

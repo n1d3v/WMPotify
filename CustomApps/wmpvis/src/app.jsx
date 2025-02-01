@@ -6,6 +6,7 @@ import { init, updateVisConfig, uninit } from './wmpvis';
 import ButterchurnAdaptor from './butterchurn/adaptor';
 import MadVisLyrics from './lyrics/main';
 import lrcCache from './lyrics/caching';
+import { checkUpdates } from './UpdateCheck';
 
 class App extends React.Component {
   constructor(props) {
@@ -26,7 +27,8 @@ class App extends React.Component {
       showLyrics: !!localStorage.wmpotifyVisShowLyrics,
       enableSpotifyLyrics: !localStorage.wmpotifyVisLyricsNoSpotify,
       enableLyricsCache: !localStorage.wmpotifyVisLyricsNoCache,
-      isFullscreen: !!document.fullscreenElement
+      isFullscreen: !!document.fullscreenElement,
+      updateAvailable: false
     };
   }
 
@@ -57,6 +59,12 @@ class App extends React.Component {
     observer.observe(this.elemRefs.visBar.current);
     document.addEventListener('fullscreenchange', this.handleFullscreenChange);
     globalThis.wmpvisSetShowLyrics = this.setShowLyrics;
+
+    if (!localStorage.wmpotifyNoUpdateCheck) {
+      checkUpdates('1.0b2').then((updateAvailable) => {
+        this.setState({ updateAvailable });
+      });
+    }
   }
 
   componentWillUnmount() {
@@ -278,16 +286,30 @@ class App extends React.Component {
         <Spicetify.ReactComponent.MenuItem
           label="Full Screen"
           onClick={() => {
-            if (Spicetify.Config.current_theme.toLowerCase() === 'wmpotify') {
-              document.querySelector('#wmpotify-fullscreen-button')?.click();
+            const wmpotifyFullscreen = document.querySelector('#wmpotify-fullscreen-button');
+            if (wmpotifyFullscreen) {
+              wmpotifyFullscreen.click();
             } else {
               this.elemRefs.root.current.requestFullscreen();
             }
           }}
           leadingIcon={this.state.isFullscreen ? <CheckMark /> : null}
+          divider={this.state.updateAvailable ? "after" : null}
         >
           {Strings['MENU_FULLSCREEN']}
         </Spicetify.ReactComponent.MenuItem>
+        {this.state.updateAvailable &&
+        <Spicetify.ReactComponent.MenuItem
+          label="Update Available"
+          onClick={() => {
+            const url = Spicetify.Config.current_theme.toLowerCase() === 'wmpotify' ?
+              'https://github.com/Ingan121/WMPotify' :
+              'https://github.com/Ingan121/Spicetify-CustomApps';
+            window.open(url);
+          }}
+        >
+          {Strings['MENU_UPDATE_AVAILABLE']}
+        </Spicetify.ReactComponent.MenuItem>}
       </Spicetify.ReactComponent.Menu>
     });
 

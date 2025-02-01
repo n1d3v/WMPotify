@@ -2,7 +2,7 @@
 // @id              cef-titlebar-enabler-universal
 // @name            CEF/Spotify Tweaks
 // @description     Various tweaks for Spotify, including native frames, transparent windows, and more
-// @version         0.6
+// @version         0.7
 // @author          Ingan121
 // @github          https://github.com/Ingan121
 // @twitter         https://twitter.com/Ingan121
@@ -2024,6 +2024,7 @@ BOOL Wh_ModInit() {
         const size_t OFFSET_SAME_TEB_FLAGS = 0x0FCA;
     #endif
     BOOL isInitialThread = *(USHORT*)((BYTE*)NtCurrentTeb() + OFFSET_SAME_TEB_FLAGS) & 0x0400;
+    Wh_Log(L"Is initial thread: %d", isInitialThread);
 
     HMODULE cefModule = LoadLibrary(L"libcef.dll");
     if (!cefModule) {
@@ -2065,7 +2066,7 @@ BOOL Wh_ModInit() {
     // Check if this process is auxilliary process by checking if the arguments contain --type=
     LPWSTR args = GetCommandLineW();
     if (wcsstr(args, L"--type=") != NULL) {
-        if (isSpotify && isInitialThread &&
+        if (isSpotify &&
             major >= 108 && isTestedVersion &&
             wcsstr(args, L"--type=renderer") != NULL &&
             wcsstr(args, L"--extension-process") == NULL
@@ -2109,30 +2110,28 @@ BOOL Wh_ModInit() {
                            (void**)&CreateProcessAsUserW_original);
 
         // Patch the executable in memory to enable transparent rendering, disable forced dark mode, or force enable extensions
-        // (Only do this on process startup as patching after CEF initialization is pointless)
-        if (isInitialThread) {
-            if (cte_settings.transparentrendering) {
-                if (EnableTransparentRendering(pbExecutable)) {
-                    Wh_Log(L"Enabled transparent rendering");
-                }
+        // (Pointless if done after CEF initialization though)
+        if (cte_settings.transparentrendering) {
+            if (EnableTransparentRendering(pbExecutable)) {
+                Wh_Log(L"Enabled transparent rendering");
             }
-            if (cte_settings.noforceddarkmode) {
-                if (DisableForcedDarkMode(pbExecutable)) {
-                    Wh_Log(L"Disabled forced dark mode");
-                }
-            }
-            if (cte_settings.forceextensions) {
-                if (ForceEnableExtensions(pbExecutable)) {
-                    Wh_Log(L"Enabled extensions");
-                }
-            }
-
-            #ifdef _WIN64
-            if (major >= 122 && isTestedVersion) {
-                HookCreateTrackPlayer(pbExecutable, major >= 127);
-            }
-            #endif
         }
+        if (cte_settings.noforceddarkmode) {
+            if (DisableForcedDarkMode(pbExecutable)) {
+                Wh_Log(L"Disabled forced dark mode");
+            }
+        }
+        if (cte_settings.forceextensions) {
+            if (ForceEnableExtensions(pbExecutable)) {
+                Wh_Log(L"Enabled extensions");
+            }
+        }
+
+        #ifdef _WIN64
+        if (major >= 122 && isTestedVersion) {
+            HookCreateTrackPlayer(pbExecutable, major >= 127);
+        }
+        #endif
     }
 
     EnumWindows(InitEnumWindowsProc, 1);
