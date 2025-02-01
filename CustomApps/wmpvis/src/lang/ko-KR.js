@@ -31,7 +31,7 @@ const lang = {
 
     "LRC_STATUS_LOADING": "불러오는 중...",
     "LRC_STATUS_NOT_FOUND": "가사를 찾을 수 없습니다.",
-    "LRC_STATUS_OFFLINE": "인터넷에 연결되어 있지 않습니다.",
+    "LRC_STATUS_OFFLINE": "오프라인 상태입니다.",
     "LRC_STATUS_NO_MUSIC": "음악이 재생 중이 아닙니다.",
     "LRC_PROVIDER_INFO": "가사 제공: ",
     "LRC_PROVIDER_LOCAL": "로컬 파일",

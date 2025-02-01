@@ -31,7 +31,7 @@ const lang = {
 
     "LRC_STATUS_LOADING": "Loading...",
     "LRC_STATUS_NOT_FOUND": "No lyrics found.",
-    "LRC_STATUS_OFFLINE": "No internet connection.",
+    "LRC_STATUS_OFFLINE": "You're offline.",
     "LRC_STATUS_NO_MUSIC": "No music is playing.",
     "LRC_PROVIDER_INFO": "Lyrics provided by ",
     "LRC_PROVIDER_LOCAL": "Local File",

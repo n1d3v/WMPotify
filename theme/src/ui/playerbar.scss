@@ -53,6 +53,7 @@
 
     svg {
         color: white !important;
+        scale: 0.9;
     }
 
     /* Nothing is playing, so hide the time text */
@@ -491,6 +492,25 @@ div[data-testid='now-playing-widget'] {
     }
 }
 
+:root:fullscreen {
+    #wmpotify-fullscreen-button {
+        background-image: var(--fullscreen-exit);
+
+        &:hover {
+            background-image: var(--fullscreen-exit-hover);
+        }
+
+        &:active {
+            background-image: var(--fullscreen-exit-pressed);
+        }
+
+        &:disabled {
+            opacity: 1 !important;
+            background-image: var(--fullscreen-exit-disabled) !important;
+        }
+    }
+}
+
 .playback-bar {
     position: absolute;
     bottom: 46px;
@@ -647,6 +667,10 @@ div[data-testid='now-playing-widget'] {
     --fullscreen-hover: url('resources/playerbar/xp/fullscreen_hover.png');
     --fullscreen-pressed: url('resources/playerbar/xp/fullscreen_pressed.png');
     --fullscreen-disabled: url('resources/playerbar/xp/fullscreen_disabled.png');
+    --fullscreen-exit: url('resources/playerbar/xp/fullscreen_exit.png');
+    --fullscreen-exit-hover: url('resources/playerbar/xp/fullscreen_exit_hover.png');
+    --fullscreen-exit-pressed: url('resources/playerbar/xp/fullscreen_exit_pressed.png');
+    --fullscreen-exit-disabled: url('resources/playerbar/xp/fullscreen_exit_disabled.png');
     --vol-muted: url('resources/playerbar/xp/vol_muted.png');
     --vol-low: url('resources/playerbar/xp/vol_low.png');
     --vol-mid: url('resources/playerbar/xp/vol_mid.png');
