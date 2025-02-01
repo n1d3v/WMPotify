@@ -24,8 +24,11 @@ export async function checkUpdates() {
         }
 
         if (cteAvailable && compareVersions(cteVer, cteLatest) < 0) {
-            Spicetify.showNotification('[WMPotify] ' + Strings.getString('CTEWH_UPDATE_MSG', cteLatest));
+            if (localStorage.wmpotifyLastCheckedWhVer !== cteLatest) {
+                Spicetify.showNotification('[WMPotify] ' + Strings.getString('CTEWH_UPDATE_MSG', cteLatest));
+            }
         }
+        localStorage.wmpotifyLastCheckedWhVer = cteLatest;
     } catch (e) {
         // probably offline or my server is down
         console.error(e);

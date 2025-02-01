@@ -61,7 +61,7 @@ class App extends React.Component {
     globalThis.wmpvisSetShowLyrics = this.setShowLyrics;
 
     if (!localStorage.wmpotifyNoUpdateCheck) {
-      checkUpdates('1.0b2').then((updateAvailable) => {
+      checkUpdates().then((updateAvailable) => {
         this.setState({ updateAvailable });
       });
     }

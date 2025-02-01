@@ -1,11 +1,13 @@
 'use strict';
 
-export async function checkUpdates(current) {
+export const ver = '1.0b2';
+
+export async function checkUpdates() {
     try {
         const res = await fetch('https://www.ingan121.com/wmpotify/latest.txt');
         const latest = await res.text();
         const wmpvisLatest = latest.match('wmpvis=(.*)')[1];
-        return compareVersions(current, wmpvisLatest) < 0;
+        return compareVersions(ver, wmpvisLatest) < 0;
     } catch (e) {
         // probably offline or my server is down
         console.error(e);
