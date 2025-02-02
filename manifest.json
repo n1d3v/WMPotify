@@ -5,7 +5,6 @@
     "readme": "README.md",
     "usercss": "theme/dist/user.css",
     "schemes": "theme/dist/color.ini",
-    "include": ["https://cdn.jsdelivr.net/gh/Ingan121/WMPotify@refs/heads/release/theme/dist/theme.js"],
-    "branch": "release",
+    "include": ["https://cdn.jsdelivr.net/gh/Ingan121/WMPotify@refs/heads/master/theme/dist/theme.js"],
     "tags": ["aero", "wmp", "customizable"]
 }
