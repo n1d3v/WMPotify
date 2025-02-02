@@ -3,8 +3,9 @@
     "description": "A Windows Media Player 11 inspired Spicetify theme for Spotify",
     "preview": "screenshots/home_aero.png",
     "readme": "README.md",
-    "usercss": "https://cdn.jsdelivr.net/gh/Ingan121/WMPotify@refs/heads/master/theme/dist/user.css",
+    "usercss": "theme/dist/user.css",
     "schemes": "theme/dist/color.ini",
-    "include": ["https://cdn.jsdelivr.net/gh/Ingan121/WMPotify@refs/heads/master/theme/dist/theme.js"],
+    "include": ["https://cdn.jsdelivr.net/gh/Ingan121/WMPotify@refs/heads/release/theme/dist/theme.js"],
+    "branch": "release",
     "tags": ["aero", "wmp", "customizable"]
 }
