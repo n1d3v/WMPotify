@@ -2,6 +2,7 @@
 * A Windows Media Player 11 inspired Spicetify theme for Spotify
 * Supported versions: 1.2.45 - 1.2.56
     * Primarily tested on 1.2.52
+    * **1.2.56 is not fully supported by Spicetify yet! Using this version is not recommended!**
     * 1.2.45: global navbar must be enabled in the experimental features
     * 1.2.44 and below are not supported
 
@@ -172,6 +173,14 @@ curl -fsSL https://raw.githubusercontent.com/Ingan121/WMPotify/master/installer/
 
 * Discography
 ![discography_aero](screenshots/discography_aero.png)
+
+## Frequently Asked Questions
+1. **Q:** Queue list does not show up in the right panel
+    * **A:** Check `Enable Queue on the right panel.` in the user button -> `Experimental features`.
+    * If this still does not work and the Experimental features popup shows `Using fallback mode`, you need to downgrade Spotify to a version fully supported by Spicetify. Old releases are available [here](https://docs.google.com/spreadsheets/d/1wztO1L4zvNykBRw7X4jxP8pvo11oQjT0O5DvZ_-S4Ok/edit?pli=1&gid=803394557#gid=803394557)
+2. **Q:** Aero Glass or the mini mode does not work
+    * **A:** Currently those features are only available on Windows, and if you have installed the [CEF/Spotify Tweaks](https://windhawk.net/mods/cef-titlebar-enabler-universal) [Windhawk](https://windhawk.net/) mod. macOS and Linux are not supported now, and it needs more research to implement them.
+    * For the mini mode, you might get it working by force resizing the window to a smaller size with an external tool. I will implement a custom miniplayer in the future that looks like the mini mode.
 
 ## TODO
 * Dark mode support + dynamic theme support
