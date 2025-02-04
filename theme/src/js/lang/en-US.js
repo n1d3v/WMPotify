@@ -15,6 +15,7 @@ const lang = {
 
     'TAB_NOW_PLAYING': 'Now Playing',
     'TAB_LIBRARY': 'Library',
+    'TAB_RESET_ORDER': 'Reset Tab Order',
 
     'PB_BTN_MINI_MODE': 'Mini mode',
     'PB_BTN_FULLSCREEN': 'Full screen',

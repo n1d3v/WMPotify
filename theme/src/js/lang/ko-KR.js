@@ -15,6 +15,7 @@ const lang = {
 
     'TAB_NOW_PLAYING': '지금 재생',
     'TAB_LIBRARY': '라이브러리',
+    'TAB_RESET_ORDER': '탭 순서 초기화',
 
     'PB_BTN_MINI_MODE': '미니 모드',
     'PB_BTN_FULLSCREEN': '전체 화면',

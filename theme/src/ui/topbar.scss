@@ -1,7 +1,5 @@
 .Root__globalNav {
     height: 36px;
-    background: url('resources/topbar/bgstrip.png') repeat-x;
-    border-image: url('resources/topbar/bg.png') 2 / 2px 1px 2px 1px;
     justify-content: center;
     margin: calc(var(--panel-gap) * -1); /* For Spotify 1.2.46 and below compatibility, present by default in xpui.css on 1.2.47+ */
 
@@ -9,6 +7,17 @@
     padding-inline: 0 !important;
     &:has(#wmpotify-tabs-container) {
         padding-inline: 8px !important;
+    }
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 36px;
+        background: url('resources/topbar/bgstrip.png') repeat-x;
+        border-image: url('resources/topbar/bg.png') 2 / 2px 1px 2px 1px;
     }
 }
 
@@ -163,13 +172,9 @@
                 border-image-source: url('resources/topbar/tab_active_pressed.png');
             }
         }
-
-        &[data-hidden] {
-            display: none;
-        }
     }
 
-    > button[data-identifier="now-playing"] {
+    > button[data-identifier="now-playing"]:first-child {
         position: relative;
         margin-right: 17px;
 
@@ -195,6 +200,12 @@
             background-image: url('resources/topbar/overflow_hover.png');
         }
     }
+
+    &.dragging {
+        > button:not(:first-child):not(#wmpotify-tabs-overflow-button) {
+            box-shadow: -2px 0 0 white;
+        }
+    }
 }
 
 /* User button */
@@ -204,10 +215,6 @@
     height: 36px;
     min-height: 0;
     background: none !important;
-    border: 10px solid transparent;
-    border-image: url('resources/topbar/user.png') 10 5 10 5 fill stretch;
-    border-image-width: 10px 5px 10px 5px;
-    border-radius: 0 !important;
     color: white !important;
     font-weight: normal !important;
     display: block !important;
@@ -221,16 +228,33 @@
         display: none;
     }
 
+    .wmpotify-user-label {
+        position: relative;
+        padding: 10px;
+    }
+
     /* Spotify update alert */
     svg {
         display: none;
     }
 
-    &:hover {
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 36px;
+        border-image: url('resources/topbar/user.png') 10 5 10 5 fill stretch;
+        border-image-width: 10px 5px 10px 5px;
+        border-radius: 0 !important;
+    }
+
+    &:hover::before {
         border-image-source: url('resources/topbar/user_hover.png');
     }
 
-    &:active {
+    &:active::before {
         border-image-source: url('resources/topbar/user_pressed.png');
     }
 }

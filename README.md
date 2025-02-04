@@ -2,7 +2,6 @@
 * A Windows Media Player 11 inspired Spicetify theme for Spotify
 * Supported versions: 1.2.45 - 1.2.56
     * Primarily tested on 1.2.52
-    * **1.2.56 is not fully supported by Spicetify yet! Using this version is not recommended!**
     * 1.2.45: global navbar must be enabled in the experimental features
     * 1.2.44 and below are not supported
 
@@ -184,7 +183,6 @@ curl -fsSL https://raw.githubusercontent.com/Ingan121/WMPotify/master/installer/
 
 ## TODO
 * Dark mode support + dynamic theme support
-* Changing order of top bar buttons with drag and drop
 
 ## Credits
 * [Spicetify](https://spicetify.app/)
