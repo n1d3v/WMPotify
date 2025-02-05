@@ -775,6 +775,14 @@ div[data-testid='now-playing-widget'] {
     }
 }
 
+body[data-hide-pb-left-btn] {
+    .main-nowPlayingBar-left [data-testid="now-playing-widget"] {
+        button:not([data-testid="cover-art-button"]) {
+            display: none;
+        }
+    }
+}
+
 @media (max-width: 1024px) {
     :root[data-wmpotify-style="xp"] {
         .main-nowPlayingBar-left [data-testid="now-playing-widget"] {

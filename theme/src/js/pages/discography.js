@@ -1,6 +1,6 @@
 'use strict';
 
-import PageManager from "./PageManager";
+import PageManager from "../managers/PageManager";
 
 export async function initDiscographyPage(wait) {
     const section = document.querySelector('section[data-testid="artist-page"]');

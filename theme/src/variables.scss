@@ -133,3 +133,7 @@
 .encore-dark-theme {
     --background-highlight: var(--hilight);
 }
+
+[style*="--text-subdued"] {
+    --text-subdued: var(--gray-text) !important;
+}

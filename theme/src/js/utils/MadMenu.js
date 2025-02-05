@@ -5,7 +5,7 @@
 
 'use strict';
 
-import { processString } from "./strings";
+import { processString } from "../strings";
 
 // This script handles the menu bar and context menus in ModernActiveDesktop apps
 // Dependencies: functions.js (getTextWidth)

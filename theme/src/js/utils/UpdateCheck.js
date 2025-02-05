@@ -1,8 +1,8 @@
 'use strict';
 
-import Strings from './strings'
-import WindhawkComm from "./WindhawkComm";
-import { openUpdateDialog } from './dialogs';
+import Strings from '../strings'
+import WindhawkComm from "../WindhawkComm";
+import { openUpdateDialog } from '../ui/dialogs';
 
 export const ver = '1.0b2';
 

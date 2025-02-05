@@ -1,12 +1,12 @@
 'use strict';
 
-import Strings from "./strings";
-import { promptModal } from "./dialogs";
-import FontDetective from "./FontDetective";
-import { setTintColor } from "./tinting";
-import WindhawkComm from "./WindhawkComm";
-import WindowManager from "./WindowManager";
-import { checkUpdates } from "./UpdateCheck";
+import Strings from "../strings";
+import { promptModal } from "../ui/dialogs";
+import FontDetective from "../utils/FontDetective";
+import { setTintColor } from "../ui/tinting";
+import WindhawkComm from "../WindhawkComm";
+import WindowManager from "../managers/WindowManager";
+import { checkUpdates } from "../utils/UpdateCheck";
 
 const configWindow = document.createElement('div');
 let tabs = null;
@@ -65,7 +65,9 @@ function init() {
             <label for="wmpotify-config-font">${Strings['CONF_GENERAL_FONT']}</label>
             <select id="wmpotify-config-font" class="wmpotify-aero">
                 <option value="custom">${Strings['UI_CUSTOM']}</option>
-            </select><br>
+            </select>
+            <input type="checkbox" id="wmpotify-config-hide-pbleftbtn" class="wmpotify-aero">
+            <label for="wmpotify-config-hide-pbleftbtn">${Strings['CONF_GENERAL_HIDE_PBLEFTBTN']}</label><br>
             <label for="wmpotify-config-topmost">${Strings['CONF_GENERAL_TOPMOST']}</label>
             <select id="wmpotify-config-topmost" class="wmpotify-aero" disabled>
                 <option value="always">${Strings['CONF_GENERAL_TOPMOST_ALWAYS']}</option>
@@ -136,6 +138,7 @@ function init() {
     elements.tintPb = configWindow.querySelector('#wmpotify-config-tint-playerbar');
     elements.fontSelector = configWindow.querySelector('#wmpotify-config-font');
     elements.fontCustom = configWindow.querySelector('#wmpotify-config-font option');
+    elements.hidePbLeftBtn = configWindow.querySelector('#wmpotify-config-hide-pbleftbtn');
     elements.topmost = configWindow.querySelector('#wmpotify-config-topmost');
     elements.backdrop = configWindow.querySelector('#wmpotify-config-backdrop');
     elements.showLibX = configWindow.querySelector('#wmpotify-config-show-libx');
@@ -160,6 +163,15 @@ function init() {
             localStorage.wmpotifyFont = elements.fontSelector.value;
         }
         document.documentElement.style.setProperty('--ui-font', localStorage.wmpotifyFont);
+    });
+    elements.hidePbLeftBtn.addEventListener('change', () => {
+        if (elements.hidePbLeftBtn.checked) {
+            localStorage.wmpotifyHidePbLeftBtn = true;
+            document.body.dataset.hidePbLeftBtn = true;
+        } else {
+            delete localStorage.wmpotifyHidePbLeftBtn;
+            delete document.body.dataset.hidePbLeftBtn;
+        }
     });
     elements.showLibX.addEventListener('change', () => {
         if (elements.showLibX.checked) {
@@ -287,6 +299,9 @@ function init() {
     }
     if (localStorage.wmpotifyTitleStyle) {
         titleStyleSelector.value = localStorage.wmpotifyTitleStyle;
+    }
+    if (localStorage.wmpotifyHidePbLeftBtn) {
+        elements.hidePbLeftBtn.checked = true;
     }
     if (localStorage.wmpotifyShowLibX) {
         configWindow.querySelector('#wmpotify-config-show-libx').checked = true;

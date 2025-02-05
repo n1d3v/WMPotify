@@ -134,7 +134,8 @@
 
     label[for="wmpotify-config-show-libx"],
     label[for="wmpotify-config-lock-title"],
-    label[for="wmpotify-config-auto-updates"] {
+    label[for="wmpotify-config-auto-updates"],
+    label[for="wmpotify-config-hide-pbleftbtn"] {
         &::after {
             top: -2px;
         }

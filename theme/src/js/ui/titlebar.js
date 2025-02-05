@@ -1,9 +1,23 @@
 'use strict';
 
-import ControlManager from "./ControlManager";
-import WindhawkComm from "./WindhawkComm";
+import ControlManager from "../managers/ControlManager";
+import WindhawkComm from "../WindhawkComm";
 
-export async function createTitlebar(mode) {
+let titleBar = null;
+
+function createTitlebarSkeleton() {
+    titleBar = document.createElement('div');
+    titleBar.id = 'wmpotify-title-bar';
+    const titleIcon = document.createElement('div');
+    titleIcon.id = 'wmpotify-title-icon';
+    titleIcon.addEventListener('dblclick', () => {
+        closeWindow();
+    });
+    titleBar.appendChild(titleIcon);
+    document.body.appendChild(titleBar);
+}
+
+async function initTitlebar(mode) {
     const whStatus = WindhawkComm.query();
 
     switch (mode) {
@@ -63,14 +77,9 @@ export async function createTitlebar(mode) {
             });
             titleButtons.appendChild(closeButton);
         case 'spotify':
-            const titleBar = document.createElement('div');
-            titleBar.id = 'wmpotify-title-bar';
-            const titleIcon = document.createElement('div');
-            titleIcon.id = 'wmpotify-title-icon';
-            titleIcon.addEventListener('dblclick', () => {
-                closeWindow();
-            });
-            titleBar.appendChild(titleIcon);
+            if (titleBar === null) {
+                createTitlebarSkeleton();
+            }
             const titleText = document.createElement('span');
             titleText.id = 'wmpotify-title-text';
             titleText.textContent = await Spicetify.AppTitle.get();
@@ -81,7 +90,6 @@ export async function createTitlebar(mode) {
             if (mode === 'keepmenu' || mode === 'spotify') {
                 ControlManager.setControlHeight(25);
             }
-            document.body.appendChild(titleBar);
             Spicetify.AppTitle.sub((title) => {
                 titleText.textContent = title;
             });
@@ -96,3 +104,10 @@ async function closeWindow() {
         window.close();
     }
 }
+
+const CustomTitlebar = {
+    earlyInit: createTitlebarSkeleton,
+    init: initTitlebar,
+};
+
+export default CustomTitlebar;

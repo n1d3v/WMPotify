@@ -187,7 +187,8 @@ curl -fsSL https://raw.githubusercontent.com/Ingan121/WMPotify/master/installer/
 ## Credits
 * [Spicetify](https://spicetify.app/)
 * [Spotify](https://www.spotify.com/)
-* wmploc.dll resources from Windows Media Player 11 by Microsoft
+* wmploc.dll resources from Windows Media Player 11(+12) by Microsoft Corporation
+* authui.dll resources from Windows Vista by Microsoft Corporation
 * Some codes from [spicetify-visualizer](https://github.com/Konsl/spicetify-visualizer) by Konsl
 * [7.css](https://khang-nd.github.io/7.css) by Khang-ND - used for some controls like buttons, menus, etc. Actually from my own fork from ModernActiveDesktop
 * [font-detective](https://github.com/1j01/font-detective) by 1j01

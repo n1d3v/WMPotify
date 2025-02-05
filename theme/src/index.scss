@@ -12,12 +12,14 @@
 @import "controls/dialog.scss";
 @import "controls/tooltip.scss";
 @import "controls/textbox.scss";
+@import "controls/common.scss";
 
 @import "ui/frame.scss";
 @import "ui/topbar.scss";
 @import "ui/mainarea.scss";
 @import "ui/playerbar.scss";
 @import "ui/fullscreen.scss";
+@import "ui/tinting.scss";
 
 @import "panels/queue.scss";
 @import "panels/npv.scss";
@@ -32,5 +34,5 @@
 @import "pages/album.scss";
 @import "pages/search.scss";
 @import "pages/settings.scss";
-
-@import "tinting.scss";
+@import "pages/profile.scss";
+@import "pages/genre.scss";

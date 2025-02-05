@@ -40,6 +40,7 @@ const lang = {
     'CONF_GENERAL_FONT': 'UI 글꼴',
     'CONF_GENERAL_CUSTOM_FONT_DLG_TITLE': '사용자 정의 글꼴 설정',
     'CONF_GENERAL_CUSTOM_FONT_MSG': '올바른 CSS font-family 이름 입력',
+    'CONF_GENERAL_HIDE_PBLEFTBTN': '지금 재생 막대의 좋아요 버튼 숨기기',
     'CONF_GENERAL_TOPMOST': '항상 위에 표시',
     'CONF_GENERAL_TOPMOST_ALWAYS': '항상',
     'CONF_GENERAL_TOPMOST_MINIMODE': '미니 모드에서',

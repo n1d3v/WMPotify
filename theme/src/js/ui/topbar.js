@@ -1,9 +1,9 @@
 'use strict';
 
-import Strings from './strings';
-import { openWmpvisInstallDialog } from './dialogs';
-import { MadMenu, createMadMenu } from './MadMenu';
-import WindhawkComm from './WindhawkComm';
+import Strings from '../strings';
+import { openWmpvisInstallDialog } from '../ui/dialogs';
+import { MadMenu, createMadMenu } from '../utils/MadMenu';
+import WindhawkComm from '../WindhawkComm';
 
 let tabsContainer;
 let tabs = [];

@@ -1,0 +1,77 @@
+:root[data-page^="/user/"] {
+    .Root__main-view {
+        header {
+            .main-topBar-background {
+                border-radius: 0;
+                width: calc(100% - var(--scrollbar-size));
+    
+                .main-topBar-overlay {
+                    background: var(--wmp11-window);
+                }
+            }
+    
+            .contentSpacing {
+                padding: 8px;
+                padding-right: 0;
+            }
+    
+            .main-topBar-topbarContent {    
+                .main-entityHeader-topbarTitle {
+                    font-size: 12px;
+                    font-family: var(--ui-font);
+                }
+            }
+        }
+    }
+
+    main > section {
+        .main-entityHeader-container {
+            min-height: 0;
+            margin-top: 20px;
+        }
+
+        .main-entityHeader-backgroundColor,
+        .main-actionBarBackground-background {
+            background: none !important;
+        }
+
+        .main-entityHeader-imageContainer {
+            .main-entityHeader-image {
+                border-radius: 0;
+
+                img {
+                    border-radius: 0;
+
+                    /* userframe.png: 190x190, picture area: center 126x126, 32px frame in each side */
+                    position: relative;
+                    top: 16.84%;
+                    left: 16.84%;
+                    width: 66.32%;
+                    height: 66.32%;
+                }
+
+                &::after {
+                    content: '';
+                    display: block;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: url('resources/icon/userframe.png') 0 0 / cover no-repeat;
+                }
+            }
+
+            button[data-testid="edit-image-button"] {
+                position: relative;
+                top: 16.84%;
+                left: 16.84%;
+                width: 66.32%;
+                height: 66.32%;
+                border-radius: 0;
+                background-color: rgba(0, 0, 0, 0.5);
+                color: white;
+            }
+        }
+    }
+}

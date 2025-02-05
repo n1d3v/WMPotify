@@ -1,19 +1,19 @@
 'use strict';
 
 import Strings from './strings'
-import ControlManager from './ControlManager';
-import { setTintColor } from './tinting';
-import { createTitlebar } from './titlebar';
-import { setupTopbar } from './topbar';
-import { setupPlayerbar } from './playerbar';
-import Config from './config';
-import SidebarManager from './SidebarManager';
-import { initQueuePanel } from './queue';
+import ControlManager from './managers/ControlManager';
+import { setTintColor } from './ui/tinting';
+import CustomTitlebar from './ui/titlebar';
+import { setupTopbar } from './ui/topbar';
+import { setupPlayerbar } from './ui/playerbar';
+import Config from './pages/config';
+import SidebarManager from './managers/SidebarManager';
+import { initQueuePanel } from './pages/queue';
 import WindhawkComm from './WindhawkComm';
-import PageManager from './PageManager';
-import WindowManager from './WindowManager';
-import { ver, checkUpdates, compareVersions } from './UpdateCheck';
-import { openUpdateDialog } from './dialogs';
+import PageManager from './managers/PageManager';
+import WindowManager from './managers/WindowManager';
+import { ver, checkUpdates, compareVersions } from './utils/UpdateCheck';
+import { openUpdateDialog } from './ui/dialogs';
 
 const elementsRequired = [
     '.Root__globalNav',
@@ -85,6 +85,9 @@ function earlyInit() {
         titleStyle = 'native';
     }
     document.documentElement.dataset.wmpotifyTitleStyle = titleStyle;
+    if (titleStyle !== 'native') {
+        CustomTitlebar.earlyInit();
+    }
 
     if (whStatus && !localStorage.wmpotifyStyle && titleStyle === 'native' && whStatus.isThemingEnabled) {
         if (whStatus.options.transparentrendering && whStatus.isDwmEnabled) {
@@ -138,6 +141,10 @@ function earlyInit() {
         document.documentElement.style.setProperty('--ui-font', localStorage.wmpotifyFont);
     }
 
+    if (localStorage.wmpotifyHidePbLeftBtn) {
+        document.body.dataset.hidePbLeftBtn = true;
+    }
+
     if (whStatus && localStorage.wmpotifyLockTitle) {
         WindhawkComm.lockTitle(true);
     }
@@ -146,7 +153,7 @@ function earlyInit() {
 earlyInit();
 
 async function init() {
-    await createTitlebar(titleStyle);
+    await CustomTitlebar.init(titleStyle);
 
     if (WindhawkComm.available() && localStorage.wmpotifyLockTitle) {
         WindhawkComm.setTitle(await Spicetify.AppTitle.get());

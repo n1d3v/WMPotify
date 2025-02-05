@@ -158,21 +158,12 @@ section[data-testid="artist-page"] {
         .main-trackList-trackListRow {
             grid-gap: 0;
 
-            > div {
-                padding-left: 5px;
-            }
-
             .main-trackList-number {
                 top: 0;
             }
 
             .main-trackList-rowSectionStart .main-trackList-rowMainContentCompact {
                 margin-left: 5px;
-            }
-
-            &:hover {
-                background: var(--item-hover-background);
-                border-color: var(--item-hover-border);
             }
 
             * {

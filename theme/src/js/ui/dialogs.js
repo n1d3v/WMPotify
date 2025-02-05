@@ -1,6 +1,6 @@
 'use strict';
 
-import Strings from './strings';
+import Strings from '../strings';
 
 export function promptModal(title, message, text, hint) {
     return new Promise((resolve, reject) => {

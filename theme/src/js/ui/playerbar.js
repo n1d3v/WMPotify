@@ -1,9 +1,9 @@
 'use strict';
 
-import Strings from './strings';
-import { formatTime } from './functions';
-import WindhawkComm from './WindhawkComm';
-import WindowManager from './WindowManager';
+import Strings from '../strings';
+import { formatTime } from '../utils/functions';
+import WindhawkComm from '../WindhawkComm';
+import WindowManager from '../managers/WindowManager';
 
 let playPauseButton, volumeButton, volumeBarProgress, timeTexts, timeTextMode, timeText;
 let longPressTimer = null;
