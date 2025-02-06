@@ -4,7 +4,7 @@
     margin: calc(var(--panel-gap) * -1); /* For Spotify 1.2.46 and below compatibility, present by default in xpui.css on 1.2.47+ */
 
     /* Marketplace load bugfix */
-    padding-inline: 0 !important;
+    padding-inline: 7px !important;
     &:has(#wmpotify-tabs-container) {
         padding-inline: 8px !important;
     }
