@@ -33,42 +33,45 @@ async function initTitlebar(mode) {
                 const minimizeButton = document.createElement('button');
                 minimizeButton.id = 'wmpotify-minimize-button';
                 minimizeButton.addEventListener('click', () => {
-                    if (window.SpotEx) {
-                        SpotEx.updateWindow({ state: 'minimized' });
-                    } else {
+                    if (whStatus) {
                         WindhawkComm.minimize();
+                    } else {
+                        SpotEx.updateWindow({ state: 'minimized' });
                     }
                 });
                 titleButtons.appendChild(minimizeButton);
                 const maximizeButton = document.createElement('button');
                 maximizeButton.id = 'wmpotify-maximize-button';
                 maximizeButton.addEventListener('click', async () => {
-                    if (window.SpotEx) {
+                    if (whStatus) {
+                        WindhawkComm.maximizeRestore();
+                    } else {
                         if ((await SpotEx.getWindow()).state === 'maximized') {
                             SpotEx.updateWindow({ state: 'normal' });
                         } else {
                             SpotEx.updateWindow({ state: 'maximized' });
                         }
-                    } else {
-                        WindhawkComm.maximizeRestore();
                     }
                 });
                 titleButtons.appendChild(maximizeButton);
-                window.addEventListener('resize', async () => {
-                    if (window.SpotEx) {
-                        if ((await SpotEx.getWindow()).state === 'maximized') {
-                            maximizeButton.dataset.maximized = true;
-                        } else {
-                            delete maximizeButton.dataset.maximized;
-                        }
-                    } else {
+                window.addEventListener('resize', updateWindowStatus);
+                updateWindowStatus();
+
+                async function updateWindowStatus() {
+                    if (whStatus) {
                         if (WindhawkComm.query().isMaximized) {
                             maximizeButton.dataset.maximized = true;
                         } else {
                             delete maximizeButton.dataset.maximized;
                         }
+                    } else {
+                        if ((await SpotEx.getWindow()).state === 'maximized') {
+                            maximizeButton.dataset.maximized = true;
+                        } else {
+                            delete maximizeButton.dataset.maximized;
+                        }
                     }
-                });
+                }
             }
             const closeButton = document.createElement('button');
             closeButton.id = 'wmpotify-close-button';
