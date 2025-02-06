@@ -180,6 +180,11 @@ curl -fsSL https://raw.githubusercontent.com/Ingan121/WMPotify/master/installer/
 2. **Q:** Aero Glass or the mini mode does not work
     * **A:** Currently those features are only available on Windows, and if you have installed the [CEF/Spotify Tweaks](https://windhawk.net/mods/cef-titlebar-enabler-universal) [Windhawk](https://windhawk.net/) mod. macOS and Linux are not supported now, and it needs more research to implement them.
     * For the mini mode, you might get it working by force resizing the window to a smaller size with an external tool. I will implement a custom miniplayer in the future that looks like the mini mode.
+3. **Q.** Custom title bar only shows the close button
+    * **A.** Either the CEF/Spotify Tweaks Windhawk mod or the Spotify API Extender Chrome extension required for the minimize/maximize/restore buttons to show up. The extension is available in the [SpotifyCrExt](/SpotifyCrExt) folder in the repository.
+    * Using the extension is only recommended if you cannot use the Windhawk mod, such as on Linux or macOS.
+    * To install the extension, you have to enable DevTools with `spicetify enable-devtools`, right-click any empty space, click `Show Chrome Tools`, open `chrome://extensions`, enable developer mode, and load the unpacked extension. If the extension installation doesn't work, run `spicetify enable-devtools`
+    * Note that Chrome extensions only work if DevTools is enabled. Spotify will randomly disable DevTools after a while and all extensions will stop working. To permanently enable DevTools and extensions, hex-patch the Spotify executable to fill the `disable-extensions` string to something invalid.
 
 ## TODO
 * Dark mode support + dynamic theme support
