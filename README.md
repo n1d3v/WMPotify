@@ -183,7 +183,7 @@ curl -fsSL https://raw.githubusercontent.com/Ingan121/WMPotify/master/installer/
 3. **Q.** Custom title bar only shows the close button
     * **A.** Either the CEF/Spotify Tweaks Windhawk mod or the Spotify API Extender Chrome extension required for the minimize/maximize/restore buttons to show up. The extension is available in the [SpotifyCrExt](/SpotifyCrExt) folder in the repository.
     * Using the extension is only recommended if you cannot use the Windhawk mod, such as on Linux or macOS.
-    * To install the extension, you have to enable DevTools with `spicetify enable-devtools`, right-click any empty space, click `Show Chrome Tools`, open `chrome://extensions`, enable developer mode, and load the unpacked extension. If the extension installation doesn't work, run `spicetify enable-devtools`
+    * To install the extension, you have to enable DevTools with `spicetify enable-devtools`, right-click any empty space, click `Show Chrome Tools`, open `chrome://extensions`, enable developer mode, and load the unpacked extension. If the extension installation doesn't work, run `spicetify enable-devtools` again and try again.
     * Note that Chrome extensions only work if DevTools is enabled. Spotify will randomly disable DevTools after a while and all extensions will stop working. To permanently enable DevTools and extensions, hex-patch the Spotify executable to fill the `disable-extensions` string to something invalid.
 
 ## TODO
@@ -192,8 +192,7 @@ curl -fsSL https://raw.githubusercontent.com/Ingan121/WMPotify/master/installer/
 ## Credits
 * [Spicetify](https://spicetify.app/)
 * [Spotify](https://www.spotify.com/)
-* wmploc.dll resources from Windows Media Player 11(+12) by Microsoft Corporation
-* authui.dll resources from Windows Vista by Microsoft Corporation
+* Several resources from Windows Media Player / Windows Vista by Microsoft Corporation
 * Some codes from [spicetify-visualizer](https://github.com/Konsl/spicetify-visualizer) by Konsl
 * [7.css](https://khang-nd.github.io/7.css) by Khang-ND - used for some controls like buttons, menus, etc. Actually from my own fork from ModernActiveDesktop
 * [font-detective](https://github.com/1j01/font-detective) by 1j01
