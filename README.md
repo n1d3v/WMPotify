@@ -1,6 +1,6 @@
 # <img src="https://raw.githubusercontent.com/Ingan121/WMPotify/refs/heads/master/theme/src/resources/icon/wmpotify_48.png"> WMPotify
 * A Windows Media Player 11 inspired Spicetify theme for Spotify
-* Supported versions: 1.2.45 - 1.2.56
+* Supported versions: 1.2.45 - 1.2.57
     * Primarily tested on 1.2.52
     * 1.2.45: global navbar must be enabled in the experimental features
     * 1.2.44 and below are not supported

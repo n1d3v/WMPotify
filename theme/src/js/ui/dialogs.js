@@ -16,32 +16,47 @@ export function promptModal(title, message, text, hint) {
         input.placeholder = hint;
         input.style.width = '100%';
         modalContent.appendChild(input);
-        const buttonContainer = document.createElement('div');
-        buttonContainer.classList.add('wmpotify-modal-bottom-buttons');
-        const okButton = document.createElement('button');
-        okButton.classList.add('wmpotify-aero');
-        okButton.textContent = 'OK';
-        okButton.addEventListener('click', () => {
-            resolve(input.value);
-            Spicetify.PopupModal.hide();
-        });
-        buttonContainer.appendChild(okButton);
-        const cancelButton = document.createElement('button');
-        cancelButton.classList.add('wmpotify-aero');
-        cancelButton.textContent = 'Cancel';
-        cancelButton.addEventListener('click', () => {
-            resolve(null);
-            Spicetify.PopupModal.hide();
-        });
-        buttonContainer.appendChild(cancelButton);
-        modalContent.appendChild(buttonContainer);
-        Spicetify.PopupModal.display({ title: title, content: modalContent });
+
         const observer = new MutationObserver(() => {
             if (!document.contains(modalContent)) {
                 observer.disconnect();
                 resolve(null);
             }
         });
+        const buttonContainer = document.createElement('div');
+        buttonContainer.classList.add('wmpotify-modal-bottom-buttons');
+        const okButton = document.createElement('button');
+        okButton.classList.add('wmpotify-aero');
+        okButton.textContent = 'OK';
+        okButton.addEventListener('click', (event) => {
+            observer.disconnect();
+            Spicetify.PopupModal.hide();
+            resolve(input.value);
+            event.preventDefault();
+            event.stopPropagation();
+        });
+        buttonContainer.appendChild(okButton);
+        const cancelButton = document.createElement('button');
+        cancelButton.classList.add('wmpotify-aero');
+        cancelButton.textContent = 'Cancel';
+        cancelButton.addEventListener('click', (event) => {
+            observer.disconnect();
+            Spicetify.PopupModal.hide();
+            resolve(null);
+            event.preventDefault();
+            event.stopPropagation();
+        });
+        buttonContainer.appendChild(cancelButton);
+        input.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                okButton.click();
+            } else if (event.key === 'Escape') {
+                cancelButton.click();
+            }
+        });
+        modalContent.appendChild(buttonContainer);
+        Spicetify.PopupModal.display({ title: title, content: modalContent });
+        input.focus();
         observer.observe(document.body, { childList: true });
     });
 }

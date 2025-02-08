@@ -1,5 +1,6 @@
 .playlist-playlist-playlist,
-:root[data-page^="/collection/"] main > div {
+section[data-testid="playlist-page"],
+:root[data-page^="/collection/"] main {
     .main-entityHeader-backgroundColor,
     .main-actionBarBackground-background {
         background: none !important;

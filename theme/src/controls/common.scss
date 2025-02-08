@@ -24,6 +24,10 @@
             display: none;
         }
 
+        > div::after {
+            display: none;
+        }
+
         &:hover {
             background: var(--item-hover-background);
             border-color: var(--item-hover-border);

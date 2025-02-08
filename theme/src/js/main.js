@@ -111,16 +111,17 @@ function earlyInit() {
             break;
         case 'basic':
             WindhawkComm.extendFrame(0, 0, 0, 0);
+            document.body.style.setProperty('--basic-pb-text', localStorage.wmpotifyBasicTextColor || '#002963');
             if (document.hasFocus()) {
-                document.body.style.backgroundColor = '#b9d1ea';
+                document.body.style.backgroundColor = localStorage.wmpotifyBasicActiveColor || '#b9d1ea';
             } else {
-                document.body.style.backgroundColor = '#d7e4f2';
+                document.body.style.backgroundColor = localStorage.wmpotifyBasicInactiveColor || '#d7e4f2';
             }
             window.addEventListener('focus', () => {
-                document.body.style.backgroundColor = '#b9d1ea';
+                document.body.style.backgroundColor = localStorage.wmpotifyBasicActiveColor || '#b9d1ea';
             });
             window.addEventListener('blur', () => {
-                document.body.style.backgroundColor = '#d7e4f2';
+                document.body.style.backgroundColor = localStorage.wmpotifyBasicInactiveColor || '#d7e4f2';
             });
             break;
     }

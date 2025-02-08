@@ -13,11 +13,11 @@ let tabs = null;
 let currentTab = 0;
 let speedApplyTimer = null;
 
-const elements = {
-    title: null,
-    hue: null,
-    sat: null,
-}
+let activeBasicColor = null;
+let inactiveBasicColor = null;
+let textBasicColor = null;
+
+const elements = {}
 
 function init() {
     if (document.getElementById('wmpotify-config')) {
@@ -52,6 +52,7 @@ function init() {
                 <option value="xp">XP</option>
                 <option value="aero">Aero</option>
                 <option value="basic">Basic</option>
+                <option value="basic_custom">Basic (${Strings['UI_CUSTOM']})</option>
             </select>
             <label for="wmpotify-config-title-style">${Strings['CONF_GENERAL_TITLE_STYLE']}</label>
             <select id="wmpotify-config-title-style" class="wmpotify-aero">
@@ -136,6 +137,8 @@ function init() {
     elements.hue = configWindow.querySelector('#wmpotify-config-hue');
     elements.sat = configWindow.querySelector('#wmpotify-config-sat');
     elements.tintPb = configWindow.querySelector('#wmpotify-config-tint-playerbar');
+    elements.style = configWindow.querySelector('#wmpotify-config-style');
+    elements.titleStyle = configWindow.querySelector('#wmpotify-config-title-style');
     elements.fontSelector = configWindow.querySelector('#wmpotify-config-font');
     elements.fontCustom = configWindow.querySelector('#wmpotify-config-font option');
     elements.hidePbLeftBtn = configWindow.querySelector('#wmpotify-config-hide-pbleftbtn');
@@ -149,6 +152,28 @@ function init() {
 
     configWindow.style.height = localStorage.wmpotifyConfigHeight || '';
 
+    elements.style.addEventListener('change', async () => {
+        if (elements.style.value === 'basic_custom') {
+            const activeColor = await promptModal(Strings['CONF_GENERAL_BASIC_CUSTOM_DLG_TITLE'], Strings['CONF_GENERAL_BASIC_CUSTOM_ACTIVE_MSG'], '', Strings['CONF_GENERAL_BASIC_CUSTOM_PLACEHOLDER']);
+            if (!activeColor) {
+                elements.style.value = localStorage.wmpotifyStyle || 'auto';
+                return;
+            }
+            const inactiveColor = await promptModal(Strings['CONF_GENERAL_BASIC_CUSTOM_DLG_TITLE'], Strings['CONF_GENERAL_BASIC_CUSTOM_INACTIVE_MSG'], '', Strings['CONF_GENERAL_BASIC_CUSTOM_PLACEHOLDER']);
+            if (!inactiveColor) {
+                elements.style.value = localStorage.wmpotifyStyle || 'auto';
+                return;
+            }
+            const textColor = await promptModal(Strings['CONF_GENERAL_BASIC_CUSTOM_DLG_TITLE'], Strings['CONF_GENERAL_BASIC_CUSTOM_TEXT_MSG'], '', Strings['CONF_GENERAL_BASIC_CUSTOM_PLACEHOLDER']);
+            if (!textColor) {
+                elements.style.value = localStorage.wmpotifyStyle || 'auto';
+                return;
+            }
+            activeBasicColor = activeColor;
+            inactiveBasicColor = inactiveColor;
+            textBasicColor = textColor;
+        }
+    });
     elements.fontSelector.addEventListener('change', async () => {
         if (elements.fontSelector.value === 'custom') {
             const fontName = await promptModal(Strings['CONF_GENERAL_CUSTOM_FONT_DLG_TITLE'], Strings['CONF_GENERAL_CUSTOM_FONT_MSG'], '', localStorage.wmpotifyFont || 'Segoe UI');
@@ -288,17 +313,23 @@ function init() {
     });
 
     if (localStorage.wmpotifyStyle) {
-        configWindow.querySelector('#wmpotify-config-style').value = localStorage.wmpotifyStyle;
+        if (localStorage.wmpotifyStyle === 'basic' && localStorage.wmpotifyBasicActiveColor && localStorage.wmpotifyBasicInactiveColor && localStorage.wmpotifyBasicTextColor) {
+            activeBasicColor = localStorage.wmpotifyBasicActiveColor;
+            inactiveBasicColor = localStorage.wmpotifyBasicInactiveColor;
+            textBasicColor = localStorage.wmpotifyBasicTextColor;
+            elements.style.value = 'basic_custom';
+        } else {
+            elements.style.value = localStorage.wmpotifyStyle;
+        }
     }
-    const titleStyleSelector = configWindow.querySelector('#wmpotify-config-title-style');
     if (!navigator.userAgent.includes('Windows')) {
-        titleStyleSelector.querySelector('option[value=keepmenu]').remove();
+        elements.titleStyle.querySelector('option[value=keepmenu]').remove();
     }
     if (navigator.userAgent.includes('Linux')) {
-        titleStyleSelector.querySelector('option[value=spotify]').remove();
+        elements.titleStyle.querySelector('option[value=spotify]').remove();
     }
     if (localStorage.wmpotifyTitleStyle) {
-        titleStyleSelector.value = localStorage.wmpotifyTitleStyle;
+        elements.titleStyle.value = localStorage.wmpotifyTitleStyle;
     }
     if (localStorage.wmpotifyHidePbLeftBtn) {
         elements.hidePbLeftBtn.checked = true;
@@ -429,11 +460,19 @@ function setSpeed(speed) {
 }
 
 function apply() {
-    const style = configWindow.querySelector('#wmpotify-config-style').value;
-    const titleStyle = configWindow.querySelector('#wmpotify-config-title-style').value;
-    const showLibX = elements.showLibX.checked;
+    const style = elements.style.value;
+    const titleStyle = elements.titleStyle.value;
     if (style !== 'auto') {
-        localStorage.wmpotifyStyle = style;
+        if (style !== 'basic_custom' || !activeBasicColor || !inactiveBasicColor || !textBasicColor) {
+            delete localStorage.wmpotifyBasicActiveColor;
+            delete localStorage.wmpotifyBasicInactiveColor;
+            delete localStorage.wmpotifyBasicTextColor;
+        } else {
+            localStorage.wmpotifyBasicActiveColor = activeBasicColor;
+            localStorage.wmpotifyBasicInactiveColor = inactiveBasicColor;
+            localStorage.wmpotifyBasicTextColor = textBasicColor;
+        }
+        localStorage.wmpotifyStyle = style === 'basic_custom' ? 'basic' : style;
     } else {
         delete localStorage.wmpotifyStyle;
     }
@@ -441,11 +480,6 @@ function apply() {
         localStorage.wmpotifyTitleStyle = titleStyle;
     } else {
         delete localStorage.wmpotifyTitleStyle;
-    }
-    if (showLibX) {
-        localStorage.wmpotifyShowLibX = true;
-    } else {
-        delete localStorage.wmpotifyShowLibX;
     }
     location.reload();
 }
