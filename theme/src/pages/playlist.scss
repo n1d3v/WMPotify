@@ -98,6 +98,7 @@ section[data-testid="playlist-page"],
             width: 42px;
             height: 43px;
             background: url('resources/playerbar/play.png') no-repeat;
+            transform: none !important;
 
             &:hover {
                 background-image: url('resources/playerbar/play_hover.png');

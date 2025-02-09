@@ -76,7 +76,7 @@ const lang = {
     'WMPVIS_INSTALL_DESC': 'WMPotify NowPlaying features WMP-like visualization screen and lyrics overlaid on top of it. We recommend installing it for the best experience with WMPotify.',
     'WMPVIS_INSTALL_STEPS': 'To install it, please follow these steps:',
     'WMPVIS_INSTALL_STEP1': 'Copy the following code:',
-    'WMPVIS_INSTALL_STEP2': 'Press Win+R to open the Run dialog',
+    'WMPVIS_INSTALL_STEP2': 'Open a PowerShell window',
     'WMPVIS_INSTALL_STEP2_UNIX': 'Open a terminal window',
     'WMPVIS_INSTALL_STEP3': 'Paste the code and press Enter',
     'WMPVIS_INSTALL_MORE_INFO': 'Or %s for more information, including manual installation instructions.',

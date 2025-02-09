@@ -20,7 +20,7 @@
 
     > div:last-child {
         overflow: visible !important;
-        height: calc(100% - var(--player-bar-height) + 5px);
+        height: calc(100% - 55px);
     }
 
     .main-yourLibraryX-filterArea {
@@ -129,7 +129,7 @@
             height: 100%;
 
             &:has(> .os-scrollbar-visible) {
-                height: calc(100% - var(--player-bar-height) + 31px);
+                height: calc(100% - 29px);
             }
         }
 

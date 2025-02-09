@@ -4,7 +4,7 @@ import Strings from '../strings'
 import WindhawkComm from "../WindhawkComm";
 import { openUpdateDialog } from '../ui/dialogs';
 
-export const ver = '1.0b2';
+export const ver = '1.0b3';
 
 export async function checkUpdates() {
     try {

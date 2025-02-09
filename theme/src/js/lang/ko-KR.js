@@ -76,7 +76,7 @@ const lang = {
     'WMPVIS_INSTALL_DESC': 'WMPotify NowPlaying은 WMP와 같은 시각화 화면과 그 위에 표시되는 가사 창을 제공합니다. WMPotify를 최상의 경험으로 사용하려면 WMPotify NowPlaying 설치를 권장합니다.',
     'WMPVIS_INSTALL_STEPS': '설치하려면 다음 단계를 따르십시오:',
     'WMPVIS_INSTALL_STEP1': '다음 코드를 복사하십시오:',
-    'WMPVIS_INSTALL_STEP2': 'Win+R을 눌러 실행 대화 상자를 엽니다',
+    'WMPVIS_INSTALL_STEP2': 'PowerShell을 엽니다',
     'WMPVIS_INSTALL_STEP2_UNIX': '터미널 창을 엽니다',
     'WMPVIS_INSTALL_STEP3': '코드를 붙여넣고 엔터 키를 누릅니다',
     'WMPVIS_INSTALL_MORE_INFO': '또는 수동 설치 지침을 포함한 자세한 정보를 보려면 %s하십시오.',

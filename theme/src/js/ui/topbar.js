@@ -115,13 +115,14 @@ export function setupTopbar() {
 
     let cnt = 0;
     handleTabOverflow();
-    setInterval(() => {
+    const interval = setInterval(() => {
         handleTabOverflow();
         if (cnt++ > 10) {
-            clearInterval(this);
+            clearInterval(interval);
         }
     }, 200);
     window.addEventListener('resize', handleTabOverflow);
+    new ResizeObserver(handleTabOverflow).observe(tabsContainer);
     document.addEventListener('fullscreenchange', handleTabOverflow);
 
     const accountButton = document.querySelector('.main-topBar-topbarContentRight > button:last-child');

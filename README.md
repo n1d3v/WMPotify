@@ -95,6 +95,9 @@ curl -fsSL https://raw.githubusercontent.com/Ingan121/WMPotify/master/installer/
 * XP
 ![home_xp](screenshots/home_xp.png)
 
+* XP with native title bar
+![home_xp_native](screenshots/home_xp_nativeframe.png)
+
 ### Mini Mode
 
 * Aero

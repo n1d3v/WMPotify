@@ -177,6 +177,11 @@
                 text-overflow: ellipsis;
                 white-space: nowrap;
             }
+
+            /* Music video indicator */
+            p:last-child span:has(> svg) {
+                display: none;
+            }
         }
 
         li {
@@ -227,14 +232,13 @@
 
                 p[data-encore-id="listRowSubtitle"] {
                     color: #77797d !important;
-                    margin-left: 7px;
                     position: relative;
 
-                    &::before {
+                    span:has(> a)::before {
                         content: '-';
-                        position: absolute;
-                        top: 0;
-                        left: -0.5em;
+                        float: left;
+                        margin-left: 2px;
+                        margin-right: 4px;
                         font-size: 12px;
                     }
                 }
