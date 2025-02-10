@@ -138,6 +138,7 @@
               font-weight: 700;
               position: absolute;
               z-index: 2;
+              font-family: var(--ui-font-default);
             }
 
             &:has(svg.activeStyle) > span::before {
@@ -463,6 +464,7 @@ button[disabled] u,
     display: block;
     font-weight: 700;
     position: absolute;
+    font-family: var(--ui-font-default);
   }
 }
 

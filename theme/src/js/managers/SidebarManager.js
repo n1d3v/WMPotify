@@ -9,6 +9,7 @@ const SidebarManager = {
         widthObserver2.observe(document.querySelector('.Root__right-sidebar'));
         window.addEventListener('resize', updateSidebarWidth);
         window.addEventListener('load', updateSidebarWidth);
+        updateSidebarWidth(true);
     },
     updateSidebarWidth,
 };

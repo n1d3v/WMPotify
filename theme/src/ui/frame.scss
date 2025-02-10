@@ -42,7 +42,7 @@
     }
 
     #wmpotify-title-bar {
-        --controls-width: 140px;
+        --controls-width: 139px;
         position: fixed;
         top: 0;
         left: 0;
@@ -68,14 +68,14 @@
         }
 
         &:has(#wmpotify-title-buttons) {
-            --controls-width: 43px;
+            --controls-width: 42px;
             &::before {
                 border-image-source: url('resources/frame/titlebar_closeonly.png');
             }
         }
 
         &:has(#wmpotify-minimize-button) {
-            --controls-width: 106px;
+            --controls-width: 105px;
             &::before {
                 border-image-source: url('resources/frame/titlebar.png');
             }
@@ -171,25 +171,23 @@
                 }
             }
         }
+
+        .wmpotify-time-text {
+            font-size: 12px;
+            flex-shrink: 0;
+            line-height: 1.7;
+            -webkit-app-region: no-drag !important;
+        }
     }
 
     #wmpotify-title-text {
-        font-size: 14px;
-        font-weight: 300;
-        font-family: Tahoma, sans-serif;
+        font-size: 12px;
+        line-height: 1.7;
         color: white;
         margin-left: 33px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-    }
-
-    .wmpotify-time-text {
-        font-size: 14px;
-        font-weight: 300;
-        font-family: Tahoma, sans-serif;
-        flex-shrink: 0;
-        -webkit-app-region: no-drag !important;
     }
 
     &[data-wmpotify-title-style="spotify"],

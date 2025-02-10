@@ -1,7 +1,7 @@
 'use strict';
 
-import Strings from './strings';
-import DirectUserStorage from './DirectUserStorage';
+import Strings from '../strings';
+import DirectUserStorage from '../utils/DirectUserStorage';
 
 // This script implements the custom sidebar, header and navigation for the stock Spotify LibraryX
 // It's implemented with parsing and clicking various elements in the DOM, so it's not the most efficient way to do it

@@ -1,4 +1,5 @@
-input.wmpotify-aero {
+input.wmpotify-aero,
+.main-trackCreditsModal-originalCredits input {
     &[type="text"],
     &[type="email"],
     &[type="number"],
@@ -8,16 +9,21 @@ input.wmpotify-aero {
 }
   
 input.wmpotify-aero[type="text"],
+.main-trackCreditsModal-originalCredits input[type="text"],
 input.wmpotify-aero[type="email"],
+.main-trackCreditsModal-originalCredits input[type="email"],
 input.wmpotify-aero[type="number"],
+.main-trackCreditsModal-originalCredits input[type="number"],
 input.wmpotify-aero[type="password"],
-textarea.wmpotify-aero {
+.main-trackCreditsModal-originalCredits input[type="password"],
+textarea.wmpotify-aero,
+.main-trackCreditsModal-originalCredits textarea {
     font: var(--font);
     padding: 3px 4px 5px;
     border: 1px solid #ccc;
     border-top-color: var(--button-border-color);
     border-radius: 2px;
-    background-color: var(--button-highlight);
+    background-color: var(--button-highlight) !important;
     box-sizing: border-box;
     box-shadow: none;
   

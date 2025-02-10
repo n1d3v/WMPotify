@@ -1,0 +1,194 @@
+/* Styles for some common Spotify controls that are shared across multiple pages */
+.main-trackList-trackListRow {
+    > div {
+        padding-left: 5px;
+    }
+
+    .main-trackList-rowSectionStart img {
+        border-radius: 0 !important;
+        box-shadow: var(--album-shadow-small);
+    }
+
+    &:hover {
+        background: var(--item-hover-background);
+        border-color: var(--item-hover-border);
+    }
+}
+
+.main-shelf-shelfGrid {
+    > div {
+        border: solid 1px transparent;
+        border-radius: 3px;
+
+        &::after {
+            display: none;
+        }
+
+        > div::after {
+            display: none;
+        }
+
+        &:hover {
+            background: var(--item-hover-background);
+            border-color: var(--item-hover-border);
+        }
+    }
+
+    .main-card-imageContainer {
+        > div:first-child {
+            border-radius: 0;
+            box-shadow: var(--album-shadow-big);
+    
+            img {
+                border-radius: 0;
+            }
+        }
+    
+        .main-card-PlayButtonContainer {
+            button {
+                width: 42px;
+                height: 43px;
+                background: url('resources/playerbar/play.png') no-repeat;
+    
+                &:hover {
+                    background-image: url('resources/playerbar/play_hover.png');
+                }
+    
+                &:active {
+                    background-image: url('resources/playerbar/play_pressed.png');
+                }
+    
+                span {
+                    opacity: 0;
+                }
+            }
+    
+            &.main-card-PlayButtonContainerVisible { /* Currently playing playlist - show pause button */
+                button {
+                    background-image: url('resources/playerbar/pause.png') ;
+    
+                    &:hover {
+                        background-image: url('resources/playerbar/pause_hover.png');
+                    }
+    
+                    &:active {
+                        background-image: url('resources/playerbar/pause_pressed.png');
+                    }
+                }
+            }
+        }
+    }
+}
+
+/* Carousel view, including home carousel */
+.search-searchCategory-contentArea {
+    &::before, &::after {
+        display: none;
+    }
+
+    .search-searchCategory-categoryGrid {
+        &::before, &::after {
+            display: none;
+        }
+    }
+
+    .search-searchCategory-carousel {
+        left: 0;
+        right: 0;
+
+        .search-searchCategory-carouselButton {
+            width: 16px;
+            height: 100%;
+            box-sizing: border-box;
+            border: var(--button-border);
+            border-color: var(--button-border-color);
+            border-radius: 0;
+            border-image: none !important;
+            box-shadow: var(--button-shadow) !important;
+            color: #222;
+            background: var(--button-gradient);
+            z-index: 0;
+            cursor: default !important;
+            top: 0;
+            margin-top: 0;
+            translate: 0 !important;
+
+            svg {
+                scale: 0.7;
+            }
+
+            /* Button style on hovered */
+            &::before {
+                content: "";
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                padding: 0;
+                margin: 0;
+                top: 0;
+                left: 0;
+                border-radius: var(--border-radius);
+                box-shadow: var(--button-shadow);
+                background: var(--button-gradient-hovered);
+                opacity: 0;
+                transition: opacity 0.3s;
+                z-index: -1;
+                border: none !important;
+                right: unset;
+                bottom: unset;
+            }
+
+            /* Button style on clicked */
+            &::after {
+                content: "";
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                padding: 0;
+                margin: 0;
+                top: 0;
+                left: 0;
+                box-shadow: var(--button-shadow-active);
+                border-radius: 2px;
+                background: var(--button-gradient-active);
+                opacity: 0;
+                transition: opacity 0.3s;
+                z-index: -1;
+            }
+
+            /* Animation when hovered */
+            &:hover {
+                border-color: var(--button-border-color-hovered);
+                transition: border-color 0.3s;
+
+                &::before {
+                    opacity: 1;
+                    transition: opacity 0.3s;
+                }
+            }
+
+            /* Animation when unhovered */
+            &:not(:hover) {
+                border-color: var(--button-border-color);
+                transition: border-color 1s linear, opacity 0.3s;;
+
+                &::before {
+                    opacity: 0;
+                    transition: opacity 1s linear;
+                }
+            }
+
+            &:active,
+            &[data-active],
+            &.active {
+                border-color: var(--button-border-color-active);
+                transition: border-color 0.3s;
+
+                &::after {
+                    opacity: 1;
+                    transition: opacity 0.3s;
+                }
+            }
+        }
+    }
+}

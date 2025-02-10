@@ -1,13 +1,16 @@
 'use strict';
 
-import Strings from './strings';
-import { formatTime } from "./functions";
-import { createMadMenu, MadMenu } from "./MadMenu";
+import Strings from '../strings';
+import { formatTime } from "../utils/functions";
+import { createMadMenu, MadMenu } from "../utils/MadMenu";
+import SidebarManager from '../managers/SidebarManager';
 
 let extraQueuePanelObserver;
 
 export function initQueuePanel() {
     console.log('WMPotify: Trying to initialize queue panel');
+
+    SidebarManager.updateSidebarWidth(true);
 
     // 1.2.55(53?) changed something with the right sidebar, making the npv panel always open
     const detectTarget = document.querySelector('.Root__right-sidebar > div > div > div:has(aside)');
@@ -23,10 +26,15 @@ export function initQueuePanel() {
         return;
     }
 
-    const panel = document.querySelector('#Desktop_PanelContainer_Id');
+    // There are two panels with the same ID, when the transition animation is in progress
+    const panel = document.querySelector('#Desktop_PanelContainer_Id:has(#queue-panel)');
+    const previousPanel = document.querySelector('#Desktop_PanelContainer_Id:not(:has(#queue-panel))');
+    if (panel && previousPanel) {
+        previousPanel.style.display = 'none';
+    }
     panel.classList.add('spotify-queue-panel');
-    const top = document.querySelector('#Desktop_PanelContainer_Id > div > div:first-child > div:first-child');
-    const belowSeparator = document.querySelector('#Desktop_PanelContainer_Id > div > div:nth-child(2)');
+    const top = document.querySelector('#Desktop_PanelContainer_Id:has(#queue-panel) > div > div:first-child > div:first-child');
+    const belowSeparator = document.querySelector('#Desktop_PanelContainer_Id:has(#queue-panel) > div > div:nth-child(2)');
     belowSeparator.id = 'spotify-queue-panel-content';
 
     const queueToolbar = document.createElement('div');
@@ -72,7 +80,7 @@ export function initQueuePanel() {
     onQueuePanelInit();
     new MutationObserver(onQueuePanelInit).observe(document.querySelector('#queue-panel'), { childList: true });
 
-    const tabs = document.querySelectorAll('#Desktop_PanelContainer_Id div[role="tablist"] button');
+    const tabs = document.querySelectorAll('#Desktop_PanelContainer_Id:has(#queue-panel) div[role="tablist"] button');
     let menuItems = [];
     let menuObj;
     for (const tab of tabs) {

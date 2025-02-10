@@ -1,6 +1,6 @@
 'use strict';
 
-import Strings from './strings';
+import Strings from '../strings';
 
 let controlHeight = 1;
 

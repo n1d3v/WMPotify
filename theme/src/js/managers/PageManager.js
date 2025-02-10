@@ -1,9 +1,9 @@
-import DirectUserStorage from "./DirectUserStorage";
-import SidebarManager from "./SidebarManager";
-import CustomLibX from "./libx";
-import { updatePlayPauseButton } from "./playerbar";
-import { initDiscographyPage } from "./discography";
-import { initPlaylistPage } from "./playlist";
+import DirectUserStorage from "../utils/DirectUserStorage";
+import SidebarManager from "../managers/SidebarManager";
+import CustomLibX from "../pages/libx";
+import { updatePlayPauseButton } from "../ui/playerbar";
+import { initDiscographyPage } from "../pages/discography";
+import { initPlaylistPage } from "../pages/playlist";
 
 let initTime = 0;
 
@@ -33,7 +33,7 @@ const PageManager = {
 
         document.documentElement.dataset.page = location.pathname;
 
-        SidebarManager.updateSidebarWidth();
+        SidebarManager.updateSidebarWidth(true);
 
         if (location.pathname.startsWith('/wmpotify-standalone-libx')) {
             document.body.dataset.wmpotifyLibPageOpen = true;

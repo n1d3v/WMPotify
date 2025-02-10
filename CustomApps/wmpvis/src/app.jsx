@@ -353,6 +353,7 @@ class App extends React.Component {
             height: "100%",
             backgroundColor: this.state.type === "albumArt" ? "var(--spice-main)" : "black",
             overflow: "hidden",
+            maxWidth: "none",
           }}
           ref={this.elemRefs.root}
         >

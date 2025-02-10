@@ -2,6 +2,14 @@
     background: transparent !important;
 }
 
+.main-home-filterChipsSection {
+    background: var(--wmp11-window) !important;
+
+    &::after {
+        background: var(--wmp11-window) !important;
+    }
+}
+
 .main-home-content {
     .view-homeShortcutsGrid-shortcut {
         border: solid 1px transparent;
@@ -101,7 +109,7 @@
     }
 
     .main-shelf-shelfGrid > div,
-    .search-searchCategory-categoryGrid > div[role="presentation"] > div { /* 1.2.53 */
+    .search-searchCategory-categoryGrid > div[role="presentation"] > div { /* home carousel */
         border: solid 1px transparent;
         border-radius: 3px;
 

@@ -767,11 +767,19 @@ div[data-testid='now-playing-widget'] {
 :root[data-wmpotify-style="basic"]:not(:fullscreen) {
     .wmpotify-track-info,
     .wmpotify-time-text {
-        color: #002963;
+        color: var(--basic-pb-text, #002963);
     }
 
     .main-nowPlayingBar-nowPlayingBar svg {
-        color: #002963 !important;
+        color: var(--basic-pb-text, #002963) !important;
+    }
+}
+
+body[data-hide-pb-left-btn] {
+    .main-nowPlayingBar-left [data-testid="now-playing-widget"] {
+        button:not([data-testid="cover-art-button"]) {
+            display: none;
+        }
     }
 }
 

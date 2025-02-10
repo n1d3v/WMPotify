@@ -1,6 +1,6 @@
 'use strict';
 
-import Strings from './strings';
+import Strings from '../strings';
 
 export function promptModal(title, message, text, hint) {
     return new Promise((resolve, reject) => {
@@ -16,32 +16,47 @@ export function promptModal(title, message, text, hint) {
         input.placeholder = hint;
         input.style.width = '100%';
         modalContent.appendChild(input);
-        const buttonContainer = document.createElement('div');
-        buttonContainer.classList.add('wmpotify-modal-bottom-buttons');
-        const okButton = document.createElement('button');
-        okButton.classList.add('wmpotify-aero');
-        okButton.textContent = 'OK';
-        okButton.addEventListener('click', () => {
-            resolve(input.value);
-            Spicetify.PopupModal.hide();
-        });
-        buttonContainer.appendChild(okButton);
-        const cancelButton = document.createElement('button');
-        cancelButton.classList.add('wmpotify-aero');
-        cancelButton.textContent = 'Cancel';
-        cancelButton.addEventListener('click', () => {
-            resolve(null);
-            Spicetify.PopupModal.hide();
-        });
-        buttonContainer.appendChild(cancelButton);
-        modalContent.appendChild(buttonContainer);
-        Spicetify.PopupModal.display({ title: title, content: modalContent });
+
         const observer = new MutationObserver(() => {
             if (!document.contains(modalContent)) {
                 observer.disconnect();
                 resolve(null);
             }
         });
+        const buttonContainer = document.createElement('div');
+        buttonContainer.classList.add('wmpotify-modal-bottom-buttons');
+        const okButton = document.createElement('button');
+        okButton.classList.add('wmpotify-aero');
+        okButton.textContent = 'OK';
+        okButton.addEventListener('click', (event) => {
+            observer.disconnect();
+            Spicetify.PopupModal.hide();
+            resolve(input.value);
+            event.preventDefault();
+            event.stopPropagation();
+        });
+        buttonContainer.appendChild(okButton);
+        const cancelButton = document.createElement('button');
+        cancelButton.classList.add('wmpotify-aero');
+        cancelButton.textContent = 'Cancel';
+        cancelButton.addEventListener('click', (event) => {
+            observer.disconnect();
+            Spicetify.PopupModal.hide();
+            resolve(null);
+            event.preventDefault();
+            event.stopPropagation();
+        });
+        buttonContainer.appendChild(cancelButton);
+        input.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                okButton.click();
+            } else if (event.key === 'Escape') {
+                cancelButton.click();
+            }
+        });
+        modalContent.appendChild(buttonContainer);
+        Spicetify.PopupModal.display({ title: title, content: modalContent });
+        input.focus();
         observer.observe(document.body, { childList: true });
     });
 }
@@ -64,7 +79,7 @@ export async function openWmpvisInstallDialog() {
                 </button>
                 <code>
                 ${navigator.userAgent.includes('Windows') ?
-                    'powershell -command "iex ""& { $(iwr -useb \'<a href="https://raw.githubusercontent.com/Ingan121/WMPotify/master/installer/install.ps1">https://raw.githubusercontent.com/Ingan121/WMPotify/master/installer/install.ps1</a>\') } -Install @(\'wmpvis\')"""' :
+                    'iex "& { $(iwr -useb \'<a href="https://raw.githubusercontent.com/Ingan121/WMPotify/master/installer/install.ps1">https://raw.githubusercontent.com/Ingan121/WMPotify/master/installer/install.ps1</a>\') } -Install @(\'wmpvis\')"' :
                     'export SKIP_THEME=true; curl -fsSL <a href="https://raw.githubusercontent.com/Ingan121/WMPotify/master/installer/install.sh">https://raw.githubusercontent.com/Ingan121/WMPotify/master/installer/install.sh</a> | sh'
                 }
                 </code>
@@ -86,17 +101,21 @@ export async function openWmpvisInstallDialog() {
     });
 }
 
-export async function openUpdateDialog(alreadyUpdated, tagName) {
+export async function openUpdateDialog(alreadyUpdated, tagName, content) {
     let version = tagName;
     let changelog = 'Failed to fetch changelog!';
-    try {
-        const res = await fetch('https://api.github.com/repos/Ingan121/WMPotify/releases/latest');
-        const data = await res.json();
-        version = data.name;
-        changelog = data.body?.replace(/\r\n/g, '<br>').replace(/\n/g, '<br>') || '';
-    } catch (e) {
-        // omg api rate limit
-        changelog = Strings.getString('THEME_CHANGELOG_PLACEHOLDER', `<a href="https://github.com/Ingan121/WMPotify/releases/tag/${version}">${Strings['UI_CLICK_HERE']}</a>`);
+    if (content) {
+        changelog = content.replace(/\r\n/g, '<br>').replace(/\n/g, '<br>');
+    } else {
+        try {
+            const res = await fetch('https://api.github.com/repos/Ingan121/WMPotify/releases/latest');
+            const data = await res.json();
+            version = data.name;
+            changelog = data.body?.replace(/\r\n/g, '<br>').replace(/\n/g, '<br>') || '';
+        } catch (e) {
+            // omg api rate limit
+            changelog = Strings.getString('THEME_CHANGELOG_PLACEHOLDER', `<a href="https://github.com/Ingan121/WMPotify/releases/tag/${version}">${Strings['UI_CLICK_HERE']}</a>`);
+        }
     }
 
     const dialogContent = document.createElement('div');
@@ -119,7 +138,7 @@ export async function openUpdateDialog(alreadyUpdated, tagName) {
                     </button>
                     <code>
                     ${navigator.userAgent.includes('Windows') ?
-                        'powershell -command "iex ""& { $(iwr -useb \'<a href="https://raw.githubusercontent.com/Ingan121/WMPotify/master/installer/install.ps1">https://raw.githubusercontent.com/Ingan121/WMPotify/master/installer/install.ps1</a>\') }"""' :
+                        'iex "& { $(iwr -useb \'<a href="https://raw.githubusercontent.com/Ingan121/WMPotify/master/installer/install.ps1">https://raw.githubusercontent.com/Ingan121/WMPotify/master/installer/install.ps1</a>\') }"' :
                         'curl -fsSL <a href="https://raw.githubusercontent.com/Ingan121/WMPotify/master/installer/install.sh">https://raw.githubusercontent.com/Ingan121/WMPotify/master/installer/install.sh</a> | sh'
                     }
                     </code>

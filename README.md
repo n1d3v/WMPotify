@@ -1,6 +1,6 @@
 # <img src="https://raw.githubusercontent.com/Ingan121/WMPotify/refs/heads/master/theme/src/resources/icon/wmpotify_48.png"> WMPotify
 * A Windows Media Player 11 inspired Spicetify theme for Spotify
-* Supported versions: 1.2.45 - 1.2.56
+* Supported versions: 1.2.45 - 1.2.57
     * Primarily tested on 1.2.52
     * 1.2.45: global navbar must be enabled in the experimental features
     * 1.2.44 and below are not supported
@@ -95,6 +95,9 @@ curl -fsSL https://raw.githubusercontent.com/Ingan121/WMPotify/master/installer/
 * XP
 ![home_xp](screenshots/home_xp.png)
 
+* XP with native title bar
+![home_xp_native](screenshots/home_xp_nativeframe.png)
+
 ### Mini Mode
 
 * Aero
@@ -180,15 +183,19 @@ curl -fsSL https://raw.githubusercontent.com/Ingan121/WMPotify/master/installer/
 2. **Q:** Aero Glass or the mini mode does not work
     * **A:** Currently those features are only available on Windows, and if you have installed the [CEF/Spotify Tweaks](https://windhawk.net/mods/cef-titlebar-enabler-universal) [Windhawk](https://windhawk.net/) mod. macOS and Linux are not supported now, and it needs more research to implement them.
     * For the mini mode, you might get it working by force resizing the window to a smaller size with an external tool. I will implement a custom miniplayer in the future that looks like the mini mode.
+3. **Q.** Custom title bar only shows the close button
+    * **A.** Either the CEF/Spotify Tweaks Windhawk mod or the Spotify API Extender Chrome extension required for the minimize/maximize/restore buttons to show up. The extension is available in the [SpotifyCrExt](/SpotifyCrExt) folder in the repository.
+    * Using the extension is only recommended if you cannot use the Windhawk mod, such as on Linux or macOS.
+    * To install the extension, you have to enable DevTools with `spicetify enable-devtools`, right-click any empty space, click `Show Chrome Tools`, open `chrome://extensions`, enable developer mode, and load the unpacked extension. If the extension installation doesn't work, run `spicetify enable-devtools` again and try again.
+    * Note that Chrome extensions only work if DevTools is enabled. Spotify will randomly disable DevTools after a while and all extensions will stop working. To permanently enable DevTools and extensions, hex-patch the Spotify executable to fill the `disable-extensions` string to something invalid.
 
 ## TODO
 * Dark mode support + dynamic theme support
-* Changing order of top bar buttons with drag and drop
 
 ## Credits
 * [Spicetify](https://spicetify.app/)
 * [Spotify](https://www.spotify.com/)
-* wmploc.dll resources from Windows Media Player 11 by Microsoft
+* Several resources from Windows Media Player / Windows Vista by Microsoft Corporation
 * Some codes from [spicetify-visualizer](https://github.com/Konsl/spicetify-visualizer) by Konsl
 * [7.css](https://khang-nd.github.io/7.css) by Khang-ND - used for some controls like buttons, menus, etc. Actually from my own fork from ModernActiveDesktop
 * [font-detective](https://github.com/1j01/font-detective) by 1j01

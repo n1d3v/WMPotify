@@ -1,0 +1,12 @@
+:root[data-page^="/genre/"] main {
+    .main-entityHeader-backgroundColor,
+    .main-actionBarBackground-background {
+        background: none !important;
+    }
+
+    .main-gridContainer-gridContainer {
+        > div > a > div > span {
+            color: white;
+        }
+    }
+}

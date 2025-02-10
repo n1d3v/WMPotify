@@ -1,7 +1,8 @@
 .wmpotify-toolbar-button,
 .artist-artistDiscography-button,
 [role="combobox"],
-header nav li {
+header nav li,
+[class*="LegacyChipComponent-checkbox-chip-sm-"] {
   appearance: none;
   background: transparent;
   border: none;
@@ -14,21 +15,32 @@ header nav li {
   border-image-width: 3px;
   box-sizing: border-box;
   cursor: default !important;
+  margin: 0;
+  margin-inline: 0 !important;
 
   &:hover {
     border-image-source: url("resources/ui/toolbarbutton_hover.png");
   }
 
   &:active,
-  &:has([class*="ctive"]) {
+  &:has([class*="ctive"]),
+  &[class*="-selected-"] {
     border-image-source: url("resources/ui/toolbarbutton_pressed.png");
   }
 
-  a {
+  a, > span {
     background-color: transparent !important;
     margin: 0 !important;
     padding: 0 5px !important;
+    min-block-size: unset !important;
+    color: black !important;
+    height: 100%;
+    cursor: default !important;
   }
+}
+
+.search-searchCategory-categoryGridItem {
+  padding: 0;
 }
 
 button.x-sortBox-sortDropdown {

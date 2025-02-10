@@ -1,7 +1,7 @@
 'use strict';
 
-import Config from "./config";
-import WindhawkComm from "./WindhawkComm";
+import Config from "../pages/config";
+import WindhawkComm from "../WindhawkComm";
 
 let fullscreenHideControlTimer = null;
 

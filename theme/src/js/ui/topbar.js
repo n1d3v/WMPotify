@@ -1,9 +1,9 @@
 'use strict';
 
-import Strings from './strings';
-import { openWmpvisInstallDialog } from './dialogs';
-import { MadMenu, createMadMenu } from './MadMenu';
-import WindhawkComm from './WindhawkComm';
+import Strings from '../strings';
+import { openWmpvisInstallDialog } from '../ui/dialogs';
+import { MadMenu, createMadMenu } from '../utils/MadMenu';
+import WindhawkComm from '../WindhawkComm';
 
 let tabsContainer;
 let tabs = [];
@@ -66,9 +66,28 @@ export function setupTopbar() {
     }
     const rightButtons = document.querySelectorAll('.main-topBar-topbarContentRight > .main-actionButtons > button');
     for (const btn of rightButtons) {
+        if (btn.dataset.restoreFocusKey === 'buddy_feed') {
+            btn.dataset.identifier = 'buddy-feed';
+        } else if (rightButtons.length === 2) {
+            btn.dataset.identifier = 'content-feed';
+        }
         addTab(btn);
         tabs.push(btn);
     }
+
+    if (localStorage.wmpotifyTabOrder) {
+        const order = localStorage.wmpotifyTabOrder.split(',');
+        for (const tab of order) {
+            const foundTab = tabs.find((t) => {
+                return t.dataset.identifier === tab || t.getAttribute('aria-label') === tab;
+            });
+            if (foundTab) {
+                tabsContainer.appendChild(foundTab);
+            }
+        }
+        tabs = Array.from(tabsContainer.querySelectorAll('button'));
+    }
+
     const menuItems = [];
     for (const tab of tabs) {
         menuItems.push({
@@ -77,22 +96,38 @@ export function setupTopbar() {
         });
     }
     createMadMenu('wmpotifyTab', menuItems);
-    const menu = new MadMenu(['wmpotifyTab']);
+    createMadMenu('wmpotifyTabMenu', [
+        {
+            text: Strings['TAB_RESET_ORDER'],
+            click: () => {
+                localStorage.removeItem('wmpotifyTabOrder');
+                location.reload();
+            },
+        },
+    ]);
+    const menu = new MadMenu(['wmpotifyTab', 'wmpotifyTabMenu']);
     overflowButton = document.createElement('button');
     overflowButton.id = 'wmpotify-tabs-overflow-button';
     overflowButton.addEventListener('click', () => {
         menu.openMenu('wmpotifyTab', { top: '0', left: overflowButton.getBoundingClientRect().left + 'px' });
     });
     tabsContainer.appendChild(overflowButton);
+
+    tabsContainer.addEventListener('contextmenu', (event) => {
+        event.preventDefault();
+        menu.openMenu('wmpotifyTabMenu', { top: event.clientY + 'px', left: event.clientX + 'px' });
+    });
+
     let cnt = 0;
     handleTabOverflow();
-    setInterval(() => {
+    const interval = setInterval(() => {
         handleTabOverflow();
         if (cnt++ > 10) {
-            clearInterval(this);
+            clearInterval(interval);
         }
     }, 200);
     window.addEventListener('resize', handleTabOverflow);
+    new ResizeObserver(handleTabOverflow).observe(tabsContainer);
     document.addEventListener('fullscreenchange', handleTabOverflow);
 
     const accountButton = document.querySelector('.main-topBar-topbarContentRight > button:last-child');
@@ -120,7 +155,7 @@ export function setupTopbar() {
     topbar.appendChild(searchContainer);
 
     topbar.addEventListener('pointerdown', (event) => {
-        if (event.button === 2 && !event.target.closest('input')) {
+        if (event.button === 2 && !event.target.closest('input') && !event.target.closest('#wmpotify-tabs-container')) {
             WindhawkComm.openSpotifyMenu();
         }
     });
@@ -137,7 +172,42 @@ function addTab(btn) {
     const name = btn.getAttribute('aria-label');
     label.textContent = tabNameSubstitutes[name] || name;
     label.classList.add('wmpotify-tab-label');
+    btn.draggable = true;
+    btn.addEventListener('dragstart', (event) => {
+        tabsContainer.classList.add('dragging');
+        event.dataTransfer.setData('text/plain', label.textContent);
+        btn.dataset.dragging = true;
+    });
+    btn.addEventListener('dragend', () => {
+        delete btn.dataset.dragging;
+        tabsContainer.classList.remove('dragging');
+    });
+    btn.addEventListener('dragover', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+    });
+    btn.addEventListener('drop', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        const draggedTab = tabs.find((tab) => tab.dataset.dragging);
+        if (draggedTab) {
+            if (event.offsetX > btn.getBoundingClientRect().width / 2) {
+                tabsContainer.insertBefore(draggedTab, btn.nextElementSibling);
+            } else {
+                tabsContainer.insertBefore(draggedTab, btn);
+            }
+            tabs = Array.from(tabsContainer.querySelectorAll('button:not(#wmpotify-tabs-overflow-button)'));
+            handleTabOverflow();
+            localStorage.wmpotifyTabOrder = getTabOrder();
+        }
+    });
     btn.appendChild(label);
+}
+
+function getTabOrder() {
+    return tabs.map((tab) => {
+        return tab.dataset.identifier || tab.getAttribute('aria-label');
+    });
 }
 
 function handleTabOverflow() {
