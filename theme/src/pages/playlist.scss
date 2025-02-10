@@ -130,6 +130,7 @@ section[data-testid="playlist-page"],
 }
 
 .Root__main-view:has(.playlist-playlist-playlist),
+.Root__main-view:has(section[data-testid="playlist-page"]),
 :root[data-page^="/collection/"] .Root__main-view {
     header {
         .main-topBar-background {

@@ -33,7 +33,7 @@ const PageManager = {
 
         document.documentElement.dataset.page = location.pathname;
 
-        SidebarManager.updateSidebarWidth();
+        SidebarManager.updateSidebarWidth(true);
 
         if (location.pathname.startsWith('/wmpotify-standalone-libx')) {
             document.body.dataset.wmpotifyLibPageOpen = true;

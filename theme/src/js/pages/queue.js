@@ -3,11 +3,14 @@
 import Strings from '../strings';
 import { formatTime } from "../utils/functions";
 import { createMadMenu, MadMenu } from "../utils/MadMenu";
+import SidebarManager from '../managers/SidebarManager';
 
 let extraQueuePanelObserver;
 
 export function initQueuePanel() {
     console.log('WMPotify: Trying to initialize queue panel');
+
+    SidebarManager.updateSidebarWidth(true);
 
     // 1.2.55(53?) changed something with the right sidebar, making the npv panel always open
     const detectTarget = document.querySelector('.Root__right-sidebar > div > div > div:has(aside)');

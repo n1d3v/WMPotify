@@ -2,25 +2,9 @@
     --libx-sidebar-width: 170px;
 }
 
-.main-view-container__scroll-node-child:has(.main-yourLibraryX-libraryContainer) {
-    height: 100%;
-    padding-bottom: 0;
-    > main {
-        height: 100%;
-        > section {
-            height: 100%;
-        }
-    }
-}
-
 .main-yourLibraryX-libraryContainer {
     > div {
         box-shadow: none;
-    }
-
-    > div:last-child {
-        overflow: visible !important;
-        height: calc(100% - 55px);
     }
 
     .main-yourLibraryX-filterArea {
@@ -122,14 +106,6 @@
                 span:nth-child(2) {
                     background-image: url('resources/icon/grid.png');
                 }
-            }
-        }
-
-        > div:last-child {
-            height: 100%;
-
-            &:has(> .os-scrollbar-visible) {
-                height: calc(100% - 29px);
             }
         }
 
@@ -480,6 +456,22 @@ body[data-wmpotify-lib-page-open]:not(#Prio1):not(#Prio2):not(#Prio3) { /* dirty
 
         &:active {
             border-image-source: url('resources/topbar/tab_active_pressed.png');
+        }
+    }
+
+    .main-yourLibraryX-libraryContainer {
+        > div:last-child {
+            overflow: visible !important;
+            height: calc(100% - 55px);
+        }
+
+        &:has(ul[role="treegrid"]) {
+            > div:last-child {
+                height: 100%;
+                &:has(> .os-scrollbar-visible) {
+                    height: calc(100% - 29px);
+                }
+            }
         }
     }
 
