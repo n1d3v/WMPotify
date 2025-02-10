@@ -1,19 +1,33 @@
-#searchPage {
-    .main-gridContainer-gridContainer {
-        > div > a > div > span {
-            color: white;
+:root[data-page^="/content-feed"] {
+    div[data-testid="infinite-scroll-list"] {
+        hr {
+            display: none;
         }
-    }
 
-    div[data-testid="top-result-card"] {
-        > div > div {
-            > div:has(img) {
+        > div > div[draggable] > div {
+            border: solid 1px transparent;
+            border-radius: 3px;
+
+            &::after {
+                display: none;
+            }
+
+            > div::after {
+                display: none;
+            }
+
+            &:hover {
+                background: var(--item-hover-background);
+                border-color: var(--item-hover-border);
+            }
+
+            .x-entityImage-imageContainer {
                 box-shadow: var(--album-shadow-big);
                 border-radius: 0;
                 background: none;
             }
 
-            button {
+            .Button-buttonPrimary-useBrowserDefaultFocusStyle-data-is-icon-only {
                 width: 42px;
                 height: 43px;
                 background: url('resources/playerbar/play.png') no-repeat;

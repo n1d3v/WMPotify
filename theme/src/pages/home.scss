@@ -2,6 +2,14 @@
     background: transparent !important;
 }
 
+.main-home-filterChipsSection {
+    background: var(--wmp11-window) !important;
+
+    &::after {
+        background: var(--wmp11-window) !important;
+    }
+}
+
 .main-home-content {
     .view-homeShortcutsGrid-shortcut {
         border: solid 1px transparent;

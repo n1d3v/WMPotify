@@ -277,12 +277,12 @@
         margin: 2px;
         width: 225px;
         height: 24px;
+        padding: 1px;
         border: solid 1px #f4f7fc;
         background: linear-gradient(to bottom, #5e5f61, #c0c3c6);
 
         input[type="search"] {
-            margin: 1px;
-            width: calc(100% - 2px);
+            width: 100%;
             height: 20px;
             border: solid 1px white;
             background-color: #f6f9fc;

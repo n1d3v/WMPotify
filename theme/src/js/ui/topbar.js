@@ -66,6 +66,11 @@ export function setupTopbar() {
     }
     const rightButtons = document.querySelectorAll('.main-topBar-topbarContentRight > .main-actionButtons > button');
     for (const btn of rightButtons) {
+        if (btn.dataset.restoreFocusKey === 'buddy_feed') {
+            btn.dataset.identifier = 'buddy-feed';
+        } else if (rightButtons.length === 2) {
+            btn.dataset.identifier = 'content-feed';
+        }
         addTab(btn);
         tabs.push(btn);
     }
