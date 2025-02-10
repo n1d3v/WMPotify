@@ -101,17 +101,21 @@ export async function openWmpvisInstallDialog() {
     });
 }
 
-export async function openUpdateDialog(alreadyUpdated, tagName) {
+export async function openUpdateDialog(alreadyUpdated, tagName, content) {
     let version = tagName;
     let changelog = 'Failed to fetch changelog!';
-    try {
-        const res = await fetch('https://api.github.com/repos/Ingan121/WMPotify/releases/latest');
-        const data = await res.json();
-        version = data.name;
-        changelog = data.body?.replace(/\r\n/g, '<br>').replace(/\n/g, '<br>') || '';
-    } catch (e) {
-        // omg api rate limit
-        changelog = Strings.getString('THEME_CHANGELOG_PLACEHOLDER', `<a href="https://github.com/Ingan121/WMPotify/releases/tag/${version}">${Strings['UI_CLICK_HERE']}</a>`);
+    if (content) {
+        changelog = content.replace(/\r\n/g, '<br>').replace(/\n/g, '<br>');
+    } else {
+        try {
+            const res = await fetch('https://api.github.com/repos/Ingan121/WMPotify/releases/latest');
+            const data = await res.json();
+            version = data.name;
+            changelog = data.body?.replace(/\r\n/g, '<br>').replace(/\n/g, '<br>') || '';
+        } catch (e) {
+            // omg api rate limit
+            changelog = Strings.getString('THEME_CHANGELOG_PLACEHOLDER', `<a href="https://github.com/Ingan121/WMPotify/releases/tag/${version}">${Strings['UI_CLICK_HERE']}</a>`);
+        }
     }
 
     const dialogContent = document.createElement('div');
