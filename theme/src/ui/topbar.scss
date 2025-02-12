@@ -90,12 +90,12 @@
 
 .main-globalNav-searchContainer,
 .custom-navlinks-scrollable_container {
-    display: none;
+    animation: appear 8s;
 }
 
 .main-topBar-topbarContentRight > .main-actionButtons {
     > button {
-        display: none;
+        animation: appear 8s;
     }
 
     button {
@@ -105,6 +105,23 @@
         svg {
             color: white;
         }
+    }
+}
+
+:root[data-wmpotify-init-complete],
+.Root__globalNav:has(#wmpotify-tabs-container) {
+    .main-globalNav-searchContainer,
+    .custom-navlinks-scrollable_container,
+    .main-topBar-topbarContentRight > .main-actionButtons > button {
+        display: none;
+    }
+}
+
+:root[data-wmpotify-js-fail] {
+    .main-globalNav-searchContainer,
+    .custom-navlinks-scrollable_container,
+    .main-topBar-topbarContentRight > .main-actionButtons > button {
+        animation: none;
     }
 }
 

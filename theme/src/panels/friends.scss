@@ -1,15 +1,21 @@
-[data-testid*="buddy-feed"] {
-    * {
-        color: black !important;
+.Root__right-sidebar aside {
+    [data-testid*="buddy-feed"] {
+        * {
+            color: black !important;
+        }
+
+        a button span {
+            display: inline;
+            padding: 0;
+            color: var(--hot-tracking-color) !important;
+            background: none;
+            font-size: 12px;
+            font-weight: normal;
+            text-decoration: underline;
+        }
     }
 
-    a button span {
-        display: inline;
-        padding: 0;
-        color: var(--hot-tracking-color) !important;
-        background: none;
-        font-size: 12px;
-        font-weight: normal;
-        text-decoration: underline;
+    li[data-flip-id^="spotify:user:"] * {
+        color: black !important;
     }
 }

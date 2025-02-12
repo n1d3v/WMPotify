@@ -228,11 +228,13 @@ function waitForReady() {
             clearInterval(interval);
             try {
                 await init();
+                console.log('WMPotify: Theme loaded');
+                document.documentElement.dataset.wmpotifyInitComplete = true;
             } catch (e) {
                 (window.Spicetify?.showNotification || window.alert)('[WMPotify] ' + Strings['MAIN_MSG_ERROR_INIT']);
                 console.error('WMPotify: Error during init:', e);
+                document.documentElement.dataset.wmpotifyJsFail = true;
             }
-            console.log('WMPotify: Theme loaded');
         } else if (cnt++ > 80) {
             (window.Spicetify?.showNotification || window.alert)('[WMPotify] ' + Strings['MAIN_MSG_ERROR_LOAD_FAIL']);
             clearInterval(interval);

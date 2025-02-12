@@ -259,6 +259,46 @@ section[data-testid="artist-page"] {
                 background: var(--item-hover-background);
                 border-color: var(--item-hover-border);
             }
+
+            .main-card-imageContainer > div:first-child {
+                box-shadow: var(--album-shadow-big);
+                border-radius: 0;
+                background: none;
+
+                img {
+                    border-radius: 0;
+                }
+            }
+
+            button {
+                width: 42px;
+                height: 43px;
+                background: url('resources/playerbar/play.png') no-repeat;
+
+                &:hover {
+                    background-image: url('resources/playerbar/play_hover.png');
+                }
+
+                &:active {
+                    background-image: url('resources/playerbar/play_pressed.png');
+                }
+
+                span {
+                    opacity: 0;
+                }
+
+                &:has(path[d="M2.7 1a.7.7 0 0 0-.7.7v12.6a.7.7 0 0 0 .7.7h2.6a.7.7 0 0 0 .7-.7V1.7a.7.7 0 0 0-.7-.7H2.7zm8 0a.7.7 0 0 0-.7.7v12.6a.7.7 0 0 0 .7.7h2.6a.7.7 0 0 0 .7-.7V1.7a.7.7 0 0 0-.7-.7h-2.6z"]) {
+                    background-image: url('resources/playerbar/pause.png') !important;
+
+                    &:hover {
+                        background-image: url('resources/playerbar/pause_hover.png') !important;
+                    }
+
+                    &:active {
+                        background-image: url('resources/playerbar/pause_pressed.png') !important;
+                    }
+                }
+            }
         }
     }
 }

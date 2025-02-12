@@ -1,11 +1,4 @@
 section[data-testid="artist-page"] {
-    .main-entityHeader-headerText * {
-        text-shadow: var(--aero-text-glow);
-        h1 {
-            text-shadow: none;
-        }
-    }
-
     .main-actionBar-ActionBarRow {
         > span:first-child > div:first-child button {
             width: 42px;

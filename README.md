@@ -151,6 +151,7 @@ curl -fsSL https://raw.githubusercontent.com/Ingan121/WMPotify/master/installer/
 
 * Playback Speed Control
 ![config_speed_aero](screenshots/config_speed_aero.png)
+(This requires the x64 Windows version of Spotify, and the CEF/Spotify Tweaks Windhawk mod)
 
 ### Full Screen
 

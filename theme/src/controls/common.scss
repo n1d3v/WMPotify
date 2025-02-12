@@ -192,3 +192,31 @@
         }
     }
 }
+
+/* This somehow interferes with -webkit-app-region: drag */
+.main-entityHeader-container {
+    margin-top: 26px;
+
+    &.main-entityHeader-withBackgroundImage {
+        .main-entityHeader-headerText * {
+            text-shadow: var(--aero-text-glow);
+            color: black !important;
+
+            h1 {
+                text-shadow: none;
+                color: white !important;
+            }
+        }
+
+        .playlist-playlist-playlistDescription {
+            overflow: visible;
+        }
+    }
+}
+
+.main-view-container {
+    .under-main-view > div > div:last-child {
+        --spice-rgb-shadow: 0, 0, 0;
+        top: 2vh;
+    }
+}
