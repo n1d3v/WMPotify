@@ -14,7 +14,8 @@
     font-family: var(--ui-font);
 }
 
-#main * {
+.Root__globalNav,
+header * {
     -webkit-app-region: no-drag !important;
 }
 
