@@ -43,6 +43,7 @@ const lang = {
     'CONF_GENERAL_TITLE_STYLE_NATIVE': 'Native',
     'CONF_GENERAL_TITLE_STYLE_CUSTOM': 'Custom',
     'CONF_GENERAL_TITLE_STYLE_KEEPMENU': 'Keep Menu',
+    'CONF_GENERAL_CONTROL_STYLE': 'Control style (beta)',
     'CONF_GENERAL_APPLY': 'Apply (reload required)',
     'CONF_GENERAL_FONT': 'UI font',
     'CONF_GENERAL_CUSTOM_FONT_DLG_TITLE': 'Set custom font',

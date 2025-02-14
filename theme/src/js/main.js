@@ -127,6 +127,8 @@ function earlyInit() {
     }
     document.documentElement.dataset.wmpotifyStyle = style;
 
+    document.documentElement.dataset.wmpotifyControlStyle = localStorage.wmpotifyControlStyle || 'aero';
+
     window.addEventListener('resize', () => {
         if (style === 'aero') {
             if (window.innerHeight < 62) {
@@ -214,12 +216,10 @@ function isReady() {
         if (elementsRequired.every(selector => document.querySelector(selector))) {
             return true;
         } else {
-            console.error('WMPotify: Missing elements:', elementsRequired.filter(selector => !document.querySelector(selector)));
             return false;
         }
     } else {
-        console.error('WMPotify: Missing Spicetify API objects');
-        return false;
+        return null;
     }
 }
 
@@ -234,7 +234,8 @@ window.addEventListener('load', () => {
 function waitForReady() {
     let cnt = 0;
     const interval = setInterval(async () => {
-        if (isReady()) {
+        const ready = isReady();
+        if (ready) {
             clearInterval(interval);
             try {
                 await init();
@@ -253,6 +254,20 @@ function waitForReady() {
                 if (window.confirm('[WMPotify] ' + Strings[locId])) {
                     window.location.reload();
                 }
+            }
+            if (ready === false) {
+                console.error('WMPotify: Missing elements:', elementsRequired.filter(selector => !document.querySelector(selector)));
+            } else {
+                console.error('WMPotify: Missing API objects:', Object.entries({
+                    'Spicetify.Platform.PlayerAPI': window.Spicetify?.Platform?.PlayerAPI,
+                    'Spicetify.AppTitle': window.Spicetify.AppTitle,
+                    'Spicetify.Player.origin._state': window.Spicetify.Player?.origin?._state,
+                    'Spicetify.Menu': window.Spicetify.Menu,
+                    'Spicetify.Platform.History.listen': window.Spicetify.Platform.History?.listen,
+                    'Spicetify.Platform.LocalStorageAPI': window.Spicetify.Platform.LocalStorageAPI,
+                    'Spicetify.Platform.Translations': window.Spicetify.Platform.Translations,
+                    'Spicetify.Platform.PlatformData': window.Spicetify.Platform.PlatformData,
+                }).filter(([_, obj]) => !obj));
             }
             clearInterval(interval);
         }

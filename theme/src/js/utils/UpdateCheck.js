@@ -83,5 +83,3 @@ export function compareSpotifyVersion(target) {
     }
     return 0;
 }
-globalThis.compareVersions = compareVersions;
-globalThis.compareSpotifyVersion = compareSpotifyVersion;

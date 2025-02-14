@@ -1,14 +1,12 @@
 
 :root {
-    --surface: #f0f0f0;
-
     --active-border: #B4B4B4;
     --active-title: #99B4D1;
     --app-workspace: #ABABAB;
     --background: #000000;
     --button-alternate-face: #000000;
     --button-dk-shadow: #696969;
-    --button-face: #F0F0F0;
+    --surface: #f0f0f0; /* ButtonFace */
     --button-hilight: #FFFFFF;
     --button-light: #E3E3E3;
     --button-shadow-color: #A0A0A0;
@@ -48,6 +46,11 @@
     --underline: var(--menu-text);
     --underline-hilight: var(--hilight-text);
     --underline-disabled: var(--button-shadow-color);
+
+    --border-window-outer: inset -1px -1px var(--button-dk-shadow),
+        inset 1px 1px var(--button-light);
+    --border-window-inner: inset -2px -2px var(--button-shadow-color),
+        inset 2px 2px var(--button-hilight);
     
     --button-highlight: #fff;
     --button-face: #f2f2f2;
@@ -137,4 +140,45 @@
 
 [style*="--text-subdued"] {
     --text-subdued: var(--gray-text) !important;
+}
+
+:root[data-wmpotify-control-style="xp"] {
+    --active-border: #D4D0C8;
+    --active-title: #0054E3;
+    --app-workspace: #808080;
+    --background: #004E98;
+    --button-alternate-face: #B5B5B5;
+    --button-dk-shadow: #716F64;
+    --surface: #ECE9D8;
+    --button-hilight: #FFFFFF;
+    --button-light: #F1EFE2;
+    --button-shadow-color: #ACA899;
+    --button-text: #000000;
+    --gradient-active-title: #3D95FF;
+    --gradient-inactive-title: #9DB9EB;
+    --gray-text: #ACA899;
+    --hilight: #316AC5;
+    --hilight-text: #FFFFFF;
+    --hot-tracking-color: #000080;
+    --inactive-border: #D4D0C8;
+    --inactive-title: #7A96DF;
+    --inactive-title-text: #D8E4F8;
+    --info-text: #000000;
+    --info-window: #FFFFE1;
+    --menu: #FFFFFF;
+    --menu-bar: #ECE9D8;
+    --menu-hilight: #316AC5;
+    --menu-text: #000000;
+    --scrollbar: #D4D0C8;
+    --title-text: #FFFFFF;
+    --window: #FFFFFF;
+    --window-frame: #000000;
+    --window-text: #000000;
+    --scrollbar-size: 17px;
+    --menu-height: 19px;
+    --ui-font-default: Tahoma, Arial, var(--cjk-fontlink);
+    --caption-font: bold 10pt/1 "Trebuchet MS", var(--ui-font);
+    --menu-font: 11px/1 var(--ui-font);
+    --message-font: 11px var(--ui-font);
+    --status-font: 11px var(--ui-font);
 }

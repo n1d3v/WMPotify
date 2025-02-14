@@ -10,8 +10,8 @@ const lang = {
     'UI_CLICK_HERE': '여기를 클릭',
 
     'MAIN_MSG_ERROR_OLD_SPOTIFY': 'Spotify 버전이 너무 오래되어 WMPotify를 사용할 수 없습니다! Spotify를 1.2.45 이상으로 업데이트하십시오.',
-    'MAIN_MSG_ERROR_LOAD_FAIL': '테마 로드에 실패했습니다. 페이지를 새로 고쳐 다시 시도하십시오. 호환 가능한 버전의 Spotify가 설치되어 있는지 확인하십시오. OK를 클릭하여 다시 로드하십시오.',
-    'MAIN_MSG_ERROR_LOAD_FAIL_GLOBALNAV': '테마 로드에 실패했습니다. 페이지를 새로 고쳐 다시 시도하십시오. 실험적 기능에서 글로벌 네비게이션 바가 활성화되어 있는지 확인하십시오. OK를 클릭하여 다시 로드하십시오.',
+    'MAIN_MSG_ERROR_LOAD_FAIL': '테마 로드에 실패했습니다. OK를 클릭하여 다시 로드하십시오.',
+    'MAIN_MSG_ERROR_LOAD_FAIL_GLOBALNAV': '테마 로드에 실패했습니다. 실험적 기능에서 글로벌 네비게이션 바가 활성화되어 있는지 확인하십시오. OK를 클릭하여 다시 로드하십시오.',
     'MAIN_MSG_ERROR_INIT': '테마 로드 중 오류가 발생했습니다. 자세한 내용은 콘솔을 확인하십시오.',
     'MAIN_MSG_ERROR_INCOMPAT_EXT': '호환되지 않는 확장 프로그램 %s이(가) 감지되었습니다! WMPotify의 일부 기능이 비활성화됩니다.',
 
@@ -43,6 +43,7 @@ const lang = {
     'CONF_GENERAL_TITLE_STYLE_NATIVE': '시스템',
     'CONF_GENERAL_TITLE_STYLE_CUSTOM': '자체 구현',
     'CONF_GENERAL_TITLE_STYLE_KEEPMENU': '메뉴 유지',
+    'CONF_GENERAL_CONTROL_STYLE': '컨트롤 스타일 (베타)',
     'CONF_GENERAL_APPLY': '적용 (다시 로드 필요)',
     'CONF_GENERAL_FONT': 'UI 글꼴',
     'CONF_GENERAL_CUSTOM_FONT_DLG_TITLE': '사용자 정의 글꼴 설정',

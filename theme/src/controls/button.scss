@@ -88,24 +88,10 @@ button.Button-sc-y0gtbx-0,
 #context-menu button.Button-sc-1dqy6lx-0,
 #context-menu button.Button-sc-qlcn5g-0,
 .spicetify-exp-features button.reset:not(#Prio1):not(#Prio2) {
-  font: var(--font);
-  box-sizing: border-box;
-  border: var(--button-border);
-  border-color: var(--button-border-color);
-  border-radius: var(--border-radius);
-  border-image: none !important;
-  box-shadow: var(--button-shadow) !important;
-  color: #222;
-  min-width: 75px;
-  min-height: 23px;
-  padding: 0 12px;
-  text-align: center;
-  background: var(--button-gradient);
-  position: relative;
-  z-index: 0;
   cursor: default !important;
   transform: none !important;
   opacity: 1 !important;
+  font: var(--font);
 
   svg {
     display: none;
@@ -121,104 +107,177 @@ button.Button-sc-y0gtbx-0,
     min-block-size: 0;
     transform: none !important;
   }
+}
 
-  /* Button style on hovered */
-  &::before {
-    content: "";
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    padding: 0;
-    margin: 0;
-    top: 0;
-    left: 0;
+:root[data-wmpotify-control-style="aero"] {
+  button.wmpotify-aero,
+  button.Button-sc-y0gtbx-0,
+  .ReactModalPortal button.Button-sc-qlcn5g-0,
+  .ReactModalPortal button.Button-sc-1dqy6lx-0,
+  #context-menu button.Button-sc-1dqy6lx-0,
+  #context-menu button.Button-sc-qlcn5g-0,
+  .spicetify-exp-features button.reset:not(#Prio1):not(#Prio2) {
+    box-sizing: border-box;
+    border: var(--button-border);
+    border-color: var(--button-border-color);
     border-radius: var(--border-radius);
-    box-shadow: var(--button-shadow);
-    background: var(--button-gradient-hovered);
-    opacity: 0;
-    transition: opacity 0.3s;
-    z-index: -1;
-    border: none !important;
-    right: unset;
-    bottom: unset;
-  }
+    border-image: none !important;
+    box-shadow: var(--button-shadow) !important;
+    color: #222;
+    min-width: 75px;
+    min-height: 23px;
+    padding: 0 12px;
+    text-align: center;
+    background: var(--button-gradient);
+    position: relative;
+    z-index: 0;
 
-  /* Button style on clicked */
-  &::after {
-    content: "";
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    padding: 0;
-    margin: 0;
-    top: 0;
-    left: 0;
-    box-shadow: var(--button-shadow-active);
-    border-radius: 2px;
-    background: var(--button-gradient-active);
-    opacity: 0;
-    transition: opacity 0.3s;
-    z-index: -1;
-  }
+    /* Button style on hovered */
+    &::before {
+      content: "";
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      padding: 0;
+      margin: 0;
+      top: 0;
+      left: 0;
+      border-radius: var(--border-radius);
+      box-shadow: var(--button-shadow);
+      background: var(--button-gradient-hovered);
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: -1;
+      border: none !important;
+      right: unset;
+      bottom: unset;
+    }
 
-  &:disabled {
-    background: var(--button-face-disabled);
-    border-color: var(--button-border-color-disabled);
-    color: var(--button-text-color-disabled);
-  }
+    /* Button style on clicked */
+    &::after {
+      content: "";
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      padding: 0;
+      margin: 0;
+      top: 0;
+      left: 0;
+      box-shadow: var(--button-shadow-active);
+      border-radius: 2px;
+      background: var(--button-gradient-active);
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: -1;
+    }
 
-  &:not(:disabled) {
-    /* Animation when hovered */
-    &:hover {
-      border-color: var(--button-border-color-hovered);
-      transition: border-color 0.3s;
+    &:disabled {
+      background: var(--button-face-disabled);
+      border-color: var(--button-border-color-disabled);
+      color: var(--button-text-color-disabled);
+    }
 
-      &::before {
-        opacity: 1;
-        transition: opacity 0.3s;
+    &:not(:disabled) {
+      /* Animation when hovered */
+      &:hover {
+        border-color: var(--button-border-color-hovered);
+        transition: border-color 0.3s;
+
+        &::before {
+          opacity: 1;
+          transition: opacity 0.3s;
+        }
+      }
+
+      /* Animation when unhovered */
+      &:not(:hover) {
+        border-color: var(--button-border-color);
+        transition: border-color 1s linear;
+
+        &::before {
+          opacity: 0;
+          transition: opacity 1s linear;
+        }
+      }
+
+      &:active,
+      &[data-active],
+      &.active {
+        border-color: var(--button-border-color-active);
+        transition: border-color 0.3s;
+
+        &::after {
+          opacity: 1;
+          transition: opacity 0.3s;
+        }
       }
     }
 
-    /* Animation when unhovered */
-    &:not(:hover) {
-      border-color: var(--button-border-color);
-      transition: border-color 1s linear;
-
-      &::before {
-        opacity: 0;
-        transition: opacity 1s linear;
-      }
+    &:focus-visible,
+    &.focused,
+    &:has(.ButtonInner-medium) {
+      box-shadow: inset 0 0 0 2px var(--button-shade-light-active);
+      outline: 1px dotted #000;
+      outline-offset: -4px;
     }
 
-    &:active,
-    &[data-active],
-    &.active {
-      border-color: var(--button-border-color-active);
-      transition: border-color 0.3s;
-
-      &::after {
-        opacity: 1;
-        transition: opacity 0.3s;
-      }
+    &.default,
+    &:focus,
+    &.focused,
+    &:has(.ButtonInner-medium),
+    &:has(.ButtonInner-small) {
+      border-color: var(--button-border-color-default);
+      background-image: var(--button-gradient-hovered);
+      animation: 1s ease infinite alternate pulse-anim;
     }
   }
+}
 
-  &:focus-visible,
-  &.focused,
-  &:has(.ButtonInner-medium) {
-    box-shadow: inset 0 0 0 2px var(--button-shade-light-active);
-    outline: 1px dotted #000;
-    outline-offset: -4px;
-  }
+:root[data-wmpotify-control-style="xp"] {
+  button.wmpotify-aero,
+  button.Button-sc-y0gtbx-0,
+  .ReactModalPortal button.Button-sc-qlcn5g-0,
+  .ReactModalPortal button.Button-sc-1dqy6lx-0,
+  #context-menu button.Button-sc-1dqy6lx-0,
+  #context-menu button.Button-sc-qlcn5g-0,
+  .spicetify-exp-features button.reset:not(#Prio1):not(#Prio2) {
+    font-size: 11px;
+    box-sizing: border-box;
+    border: 1px solid #003c74;
+    background: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 1) 0%,
+        rgba(236, 235, 229, 1) 86%,
+        rgba(216, 208, 196, 1) 100%
+    );
+    box-shadow: none;
+    border-radius: 3px;
+    min-width: 75px;
+    min-height: 23px;
+    padding: 0 12px;
 
-  &.default,
-  &:focus,
-  &.focused,
-  &:has(.ButtonInner-medium),
-  &:has(.ButtonInner-small) {
-    border-color: var(--button-border-color-default);
-    background-image: var(--button-gradient-hovered);
-    animation: 1s ease infinite alternate pulse-anim;
+    &:not(:disabled) {
+        &:active,
+        &[data-active],
+        &.active {
+            box-shadow: none !important;
+            background: linear-gradient(
+                180deg,
+                rgba(205, 202, 195, 1) 0%,
+                rgba(227, 227, 219, 1) 8%,
+                rgba(229, 229, 222, 1) 94%,
+                rgba(242, 242, 241, 1) 100%
+            );
+        }
+        &:hover {
+            box-shadow: inset -1px 1px #fff0cf, inset 1px 2px #fdd889, inset -2px 2px #fbc761, inset 2px -2px #e5a01a;
+        }
+    }
+    &:focus,
+    &.focused {
+        box-shadow: inset -1px 1px #cee7ff, inset 1px 2px #98b8ea, inset -2px 2px #bcd4f6, inset 1px -1px #89ade4,
+            inset 2px -2px #89ade4;
+    }
   }
 }
 
