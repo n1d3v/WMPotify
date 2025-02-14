@@ -9,7 +9,9 @@ const lang = {
     'UI_CUSTOM': '사용자 지정',
     'UI_CLICK_HERE': '여기를 클릭',
 
-    'MAIN_MSG_ERROR_LOAD_FAIL': '테마 로드에 실패했습니다. 페이지를 새로 고쳐 다시 시도하십시오. 호환 가능한 버전의 Spotify가 설치되어 있는지 확인하십시오.',
+    'MAIN_MSG_ERROR_OLD_SPOTIFY': 'Spotify 버전이 너무 오래되어 WMPotify를 사용할 수 없습니다! Spotify를 1.2.45 이상으로 업데이트하십시오.',
+    'MAIN_MSG_ERROR_LOAD_FAIL': '테마 로드에 실패했습니다. 페이지를 새로 고쳐 다시 시도하십시오. 호환 가능한 버전의 Spotify가 설치되어 있는지 확인하십시오. OK를 클릭하여 다시 로드하십시오.',
+    'MAIN_MSG_ERROR_LOAD_FAIL_GLOBALNAV': '테마 로드에 실패했습니다. 페이지를 새로 고쳐 다시 시도하십시오. 실험적 기능에서 글로벌 네비게이션 바가 활성화되어 있는지 확인하십시오. OK를 클릭하여 다시 로드하십시오.',
     'MAIN_MSG_ERROR_INIT': '테마 로드 중 오류가 발생했습니다. 자세한 내용은 콘솔을 확인하십시오.',
     'MAIN_MSG_ERROR_INCOMPAT_EXT': '호환되지 않는 확장 프로그램 %s이(가) 감지되었습니다! WMPotify의 일부 기능이 비활성화됩니다.',
 

@@ -12,7 +12,7 @@ import { initQueuePanel } from './pages/queue';
 import WindhawkComm from './WindhawkComm';
 import PageManager from './managers/PageManager';
 import WindowManager from './managers/WindowManager';
-import { ver, checkUpdates, compareVersions } from './utils/UpdateCheck';
+import { ver, checkUpdates, compareVersions, compareSpotifyVersion } from './utils/UpdateCheck';
 import { openUpdateDialog } from './ui/dialogs';
 
 const elementsRequired = [
@@ -202,15 +202,25 @@ async function init() {
 }
 
 function isReady() {
-    return window.Spicetify?.Platform?.PlayerAPI &&
+    if (window.Spicetify?.Platform?.PlayerAPI &&
         window.Spicetify.AppTitle &&
         window.Spicetify.Player?.origin?._state &&
         window.Spicetify.Menu &&
         window.Spicetify.Platform.History?.listen &&
         window.Spicetify.Platform.LocalStorageAPI &&
         window.Spicetify.Platform.Translations &&
-        window.Spicetify.Platform.PlatformData &&
-        elementsRequired.every(selector => document.querySelector(selector));
+        window.Spicetify.Platform.PlatformData
+    ) {
+        if (elementsRequired.every(selector => document.querySelector(selector))) {
+            return true;
+        } else {
+            console.error('WMPotify: Missing elements:', elementsRequired.filter(selector => !document.querySelector(selector)));
+            return false;
+        }
+    } else {
+        console.error('WMPotify: Missing Spicetify API objects');
+        return false;
+    }
 }
 
 if (document.readyState === 'complete') {
@@ -236,15 +246,15 @@ function waitForReady() {
                 document.documentElement.dataset.wmpotifyJsFail = true;
             }
         } else if (cnt++ > 80) {
-            (window.Spicetify?.showNotification || window.alert)('[WMPotify] ' + Strings['MAIN_MSG_ERROR_LOAD_FAIL']);
-            clearInterval(interval);
-            const missing = [];
-            for (const selector of elementsRequired) {
-                if (!document.querySelector(selector)) {
-                    missing.push(selector);
+            if (compareSpotifyVersion('1.2.45') < 0) {
+                (window.Spicetify?.showNotification || window.alert)('[WMPotify] ' + Strings['MAIN_MSG_ERROR_OLD_SPOTIFY']);
+            } else {
+                const locId = compareSpotifyVersion('1.2.45') === 0 ? 'MAIN_MSG_ERROR_LOAD_FAIL_GLOBALNAV' : 'MAIN_MSG_ERROR_LOAD_FAIL';
+                if (window.confirm('[WMPotify] ' + Strings[locId])) {
+                    window.location.reload();
                 }
             }
-            console.log('WMPotify: Missing elements:', missing);
+            clearInterval(interval);
         }
     }, 100);
 }

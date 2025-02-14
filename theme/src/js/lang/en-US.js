@@ -9,7 +9,9 @@ const lang = {
     'UI_CUSTOM': 'Custom',
     'UI_CLICK_HERE': 'click here',
 
-    'MAIN_MSG_ERROR_LOAD_FAIL': 'Theme loading failed. Please refresh the page to try again. Please make sure you have a compatible version of Spotify installed.',
+    'MAIN_MSG_ERROR_OLD_SPOTIFY': 'Your Spotify version is too old for WMPotify! Please update to Spotify 1.2.45 or newer.',
+    'MAIN_MSG_ERROR_LOAD_FAIL': 'Theme loading failed. Please check the console for more information. Click OK to reload and try again.',
+    'MAIN_MSG_ERROR_LOAD_FAIL_GLOBALNAV': 'Theme loading failed. Please check the console for more information. Make sure global navbar is enabled in the experimental features. Click OK to reload and try again.',
     'MAIN_MSG_ERROR_INIT': 'An error occurred during initialization. Please check the console for more information.',
     'MAIN_MSG_ERROR_INCOMPAT_EXT': 'Incompatible extension %s detected! Some features of WMPotify will be disabled.',
 

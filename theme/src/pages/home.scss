@@ -80,7 +80,8 @@
                 border-color: var(--item-hover-border);
             }
 
-            div[class*="PromotionDefaultNative-module_image-container"] {
+            div[class*="PromotionDefaultNative-module_image-container"],
+            div[class*="PromotionDefaultNativeImage-module_image-container"] {
                 border-radius: 0;
                 box-shadow: var(--album-shadow-big);
             }

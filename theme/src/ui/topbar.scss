@@ -90,12 +90,12 @@
 
 .main-globalNav-searchContainer,
 .custom-navlinks-scrollable_container {
-    animation: appear 8s;
+    animation: appear 8s !important;
 }
 
 .main-topBar-topbarContentRight > .main-actionButtons {
     > button {
-        animation: appear 8s;
+        animation: appear 8s !important;
     }
 
     button {

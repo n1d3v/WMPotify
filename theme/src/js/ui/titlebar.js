@@ -94,7 +94,9 @@ async function initTitlebar(mode) {
                 ControlManager.setControlHeight(25);
             }
             Spicetify.AppTitle.sub((title) => {
-                titleText.textContent = title;
+                if (title?.trim()) {
+                    titleText.textContent = title;
+                }
             });
             break;
     }
