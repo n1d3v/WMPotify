@@ -41,7 +41,7 @@ section[data-testid="artist-page"] {
 
         > div:last-child {
             p[class*=encore-text] {
-                color: black;
+                color: var(--spice-text);
             }
         }
     }

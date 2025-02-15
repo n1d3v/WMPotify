@@ -14,7 +14,7 @@ header nav li,
   height: 21px;
   position: relative;
   font-size: 12px;
-  color: black !important;
+  color: var(--spice-text) !important;
   border: 3px solid transparent;
   border-image: 3 fill stretch;
   border-image-width: 3px;
@@ -25,12 +25,22 @@ header nav li,
 
   &:hover {
     border-image-source: url("resources/ui/toolbarbutton_hover.png");
+    color: black !important;
+
+    a, > span {
+      color: black !important;
+    }
   }
 
   &:active,
   &:has([class*="ctive"]),
   &[class*="-selected-"] {
     border-image-source: url("resources/ui/toolbarbutton_pressed.png");
+    color: black !important;
+
+    a, > span {
+      color: black !important;
+    }
   }
 
   a, > span {
@@ -38,7 +48,7 @@ header nav li,
     margin: 0 !important;
     padding: 0 5px !important;
     min-block-size: unset !important;
-    color: black !important;
+    color: var(--spice-text) !important;
     height: 100%;
     cursor: default !important;
   }
@@ -49,7 +59,7 @@ header nav li,
 }
 
 button.x-sortBox-sortDropdown {
-  color: black;
+  color: var(--spice-text);
   padding: 0;
   gap: 0;
   order: -1;
@@ -77,12 +87,16 @@ button.x-sortBox-sortDropdown {
   &::after {
       content: '⏷';
       font-size: 12px;
-      color: black;
+      color: var(--spice-text);
       margin-top: -2px;
       margin-left: 4px;
       margin-right: -2px;
       order: 2;
       inline-size: unset;
+  }
+
+  &:hover::after {
+    color: black;
   }
 }
 
@@ -106,7 +120,7 @@ button.Button-sc-y0gtbx-0,
   .ButtonInner-medium {
     display: block;
     background: none;
-    color: black;
+    color: var(--spice-text);
     padding-block: 0;
     padding-inline: 0;
     min-block-size: 0;

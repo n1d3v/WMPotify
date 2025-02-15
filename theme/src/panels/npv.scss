@@ -4,11 +4,11 @@
     }
 
     aside.NowPlayingView * {
-        color: black;
+        color: var(--spice-text);
     }
 
     .main-nowPlayingView-queue * {
-        color: black !important;
+        color: var(--spice-text) !important;
     }
 
     .main-nowPlayingView-coverArt {

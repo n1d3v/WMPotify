@@ -200,7 +200,7 @@
     &.main-entityHeader-withBackgroundImage {
         .main-entityHeader-headerText * {
             text-shadow: var(--aero-text-glow);
-            color: black !important;
+            color: var(--spice-text) !important;
 
             h1 {
                 text-shadow: none;

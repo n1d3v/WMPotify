@@ -60,7 +60,7 @@ const SearchDialog = React.memo(({ artist, title, albumTitle }) => {
 
             .wmpvis-lyrics-searchBar {
                 flex-grow: 1;
-                color: black;
+                color: var(--spice-text);
             }
 
             #wmpvis-lyrics-searchBtnAdvanced {
@@ -82,7 +82,7 @@ const SearchDialog = React.memo(({ artist, title, albumTitle }) => {
             }
 
             button.wmpotify-aero {
-                color: black;
+                color: var(--spice-text);
                 min-height: 23px;
                 min-width: 75px;
                 padding: 0 12px;
@@ -126,7 +126,7 @@ const SearchDialog = React.memo(({ artist, title, albumTitle }) => {
 export function openSearchDialog(artist, title, albumTitle, currentId) {
     Spicetify.PopupModal.display({
         title: Strings['LRCFIND_TITLE'],
-        content: <SearchDialog artist={artist} title={title} albumTitle={albumTitle} currentId={currentId} />,
+        content: <SearchDialog artist={artist} title={title} albumTitle={albumTitle} />,
     })
 
     init(currentId);

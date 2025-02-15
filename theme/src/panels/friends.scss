@@ -1,7 +1,7 @@
 .Root__right-sidebar aside {
     [data-testid*="buddy-feed"] {
         * {
-            color: black !important;
+            color: var(--spice-text) !important;
         }
 
         a button span {
@@ -16,6 +16,6 @@
     }
 
     li[data-flip-id^="spotify:user:"] * {
-        color: black !important;
+        color: var(--spice-text) !important;
     }
 }

@@ -6,7 +6,7 @@ canvas.height = 1;
 const context = canvas.getContext('2d');
 
 function getTintedBackgroundColor(hue, sat) {
-    context.fillStyle = '#EEF3FA';
+    context.fillStyle = document.documentElement.dataset.wmpotifyDarkMode ? '#222222' : '#EEF3FA';
     context.filter = `hue-rotate(${hue}deg) saturate(${sat}%)`;
     context.fillRect(0, 0, 1, 1);
     return 'rgba(' + context.getImageData(0, 0, 1, 1).data + ')';

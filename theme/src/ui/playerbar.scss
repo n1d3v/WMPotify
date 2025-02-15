@@ -760,16 +760,12 @@ div[data-testid='now-playing-widget'] {
 :root[data-wmpotify-style="basic"]:fullscreen {
     .wmpotify-track-info,
     .wmpotify-time-text {
+        color: var(--basic-pb-text, #002963);
         text-shadow: var(--aero-text-glow);
     }
 }
 
 :root[data-wmpotify-style="basic"]:not(:fullscreen) {
-    .wmpotify-track-info,
-    .wmpotify-time-text {
-        color: var(--basic-pb-text, #002963);
-    }
-
     .main-nowPlayingBar-nowPlayingBar svg {
         color: var(--basic-pb-text, #002963) !important;
     }

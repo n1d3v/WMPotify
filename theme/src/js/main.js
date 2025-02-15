@@ -151,6 +151,13 @@ function earlyInit() {
     if (whStatus && localStorage.wmpotifyLockTitle) {
         WindhawkComm.lockTitle(true);
     }
+
+    if (localStorage.wmpotifyDarkMode !== 'false' &&
+        (Spicetify.Config.color_scheme === 'dark' || localStorage.wmpotifyDarkMode === 'true' ||
+        (whStatus?.options.noforceddarkmode && window.matchMedia('(prefers-color-scheme: dark)').matches))
+    ) {
+        document.documentElement.dataset.wmpotifyDarkMode = true;
+    }
 }
 
 earlyInit();
