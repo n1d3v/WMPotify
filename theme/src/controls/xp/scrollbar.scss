@@ -1,0 +1,64 @@
+html[data-wmpotify-control-style="xp"] {
+  ::-webkit-scrollbar {
+    width: 17px !important;
+  }
+  ::-webkit-scrollbar-corner {
+    background: #ECE9D8 !important;
+  }
+  ::-webkit-scrollbar-track {
+    &:vertical {
+      background-image: url("resources/icon/xp/scroll-background.svg") !important;
+    }
+    &:horizontal {
+      background-image: url("resources/icon/xp/scroll-background-horizontal.svg") !important;
+    }
+  }
+  ::-webkit-scrollbar-thumb {
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    background-color: #c8d6fb !important;
+    background-size: 7px !important;
+    border: 1px solid white !important;
+    border-radius: 2px !important;
+    box-shadow: inset -3px 0 #bad1fc, inset 1px 1px #b7caf5 !important;
+    &:vertical {
+      background-image: url("resources/icon/xp/scroll-thumb.svg") !important;
+    }
+    &:horizontal {
+      background-size: 8px !important;
+      background-image: url("resources/icon/xp/scroll-thumb-horizontal.svg") !important;
+    }
+  }
+  ::-webkit-scrollbar-button {
+    border: none;
+    box-shadow: none !important;
+    background-position: unset !important;
+    &:vertical {
+      &:start {
+        height: 17px !important;
+        background-image: url("resources/icon/xp/scroll-arrow-up.svg") !important;
+      }
+      &:end {
+        height: 17px !important;
+        background-image: url("resources/icon/xp/scroll-arrow-down.svg") !important;
+      }
+    }
+    &:horizontal {
+      &:start {
+        width: 17px;
+        background-image: url("resources/icon/xp/scroll-arrow-left.svg") !important;
+      }
+      &:end {
+        width: 17px;
+        background-image: url("resources/icon/xp/scroll-arrow-right.svg") !important;
+      }
+    }
+
+    &:horizontal:start:increment,
+    &:horizontal:end:decrement,
+    &:vertical:start:increment,
+    &:vertical:end:decrement {
+      display: none !important;
+    }
+  }
+}

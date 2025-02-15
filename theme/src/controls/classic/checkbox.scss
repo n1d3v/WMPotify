@@ -1,0 +1,114 @@
+:root:not([data-wmpotify-control-style="aero"]):not([data-wmpotify-control-style="xp"]):not([data-wmpotify-control-style="10"]) {
+  --checkbox-width: 13px;
+  --radio-label-spacing: 6px;
+
+  --checkbox-total-width: calc(var(--checkbox-width) + var(--radio-label-spacing));
+  --checkbox-left: calc(-1 * var(--checkbox-total-width));
+  --checkmark-width: 7px;
+  --checkmark-top: 3px;
+  --checkmark-left: 3px;
+
+  --checkmark: url("resources/icon/98/checkmark.svg");
+
+  input.wmpotify-aero[type="checkbox"],
+  input.x-toggle-input[type="checkbox"] {
+    appearance: none;
+    font: var(--font);
+    background: none;
+    border: none;
+    margin: 0;
+    opacity: 0;
+
+    + label,
+    + .x-toggle-indicatorWrapper {
+      line-height: 13px;
+      position: relative;
+      margin-left: var(--checkbox-total-width);
+      width: auto;
+      background: none !important;
+
+      &::before {
+        content: "";
+        position: absolute;
+        left: var(--checkbox-left);
+        display: inline-block;
+        width: var(--checkbox-width);
+        height: var(--checkbox-width);
+        background: var(--window);
+        box-shadow: var(--border-field);
+        margin-right: var(--radio-label-spacing);
+      }
+
+      .x-toggle-indicator {
+        display: none;
+      }
+    }
+
+    &:focus {
+      + label,
+      + .x-toggle-indicatorWrapper {
+        outline: 1px dotted var(--button-text);
+      }
+    }
+
+    &:checked {
+      + label,
+      + .x-toggle-indicatorWrapper {
+        &::after {
+          content: "";
+          display: block;
+          width: var(--checkmark-width);
+          height: var(--checkmark-width);
+          position: absolute;
+          top: var(--checkmark-top);
+          left: calc(var(--checkbox-left) + var(--checkmark-left));
+          background: var(--checkmark);
+        }
+      }
+    }
+
+    &:active {
+      + label,
+      + .x-toggle-indicatorWrapper {
+        &::before {
+          background: var(--surface);
+        }
+      }
+    }
+
+    &:disabled {
+      + label,
+      + .x-toggle-indicatorWrapper {
+        background: var(--surface);
+      }
+
+      &:checked {
+        + label,
+        + .x-toggle-indicatorWrapper {
+          &::after {
+            background: url("resources/icon/98/checkmark-disabled.svg");
+          }
+        }
+      }
+    }
+  }
+
+  label[for="wmpotify-config-tint-playerbar"] {
+    margin-left: 25px !important;
+  }
+
+  label[for="wmpotify-config-auto-updates"] {
+    &::after {
+      top: 2px;
+    }
+  }
+
+  #wmpotify-config-tab-general {
+    input[type="checkbox"] + label {
+      padding-bottom: 5px;
+      &::after {
+        top: 2px !important;
+      }
+    }
+  }
+}

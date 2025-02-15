@@ -1,5 +1,4 @@
-[role="search"],
-.spicetify-exp-features .search-container {
+[role="search"] {
     position: relative;
     margin: 2px;
     width: 225px;
@@ -8,8 +7,7 @@
     background: linear-gradient(to bottom, #5e5f61, #c0c3c6);
     margin-top: -1px;
 
-    .x-filterBox-filterInput,
-    input.search {
+    .x-filterBox-filterInput {
         position: absolute;
         top: 0;
         left: 0;

@@ -1,0 +1,47 @@
+:root[data-wmpotify-control-style="xp"] {
+  select.wmpotify-aero,
+  .main-dropDown-dropDown {
+    font-size: 11px;
+    padding: 3px 4px;
+    box-sizing: border-box;
+    appearance: none;
+    border-radius: 0;
+    appearance: none;
+    position: relative;
+    padding-right: 32px;
+    border: 1px solid #7f9db9 !important;
+    height: 23px;
+    box-shadow: none;
+    color: black;
+    background: white;
+    background-image: url("resources/icon/xp/dropdown.svg") !important;
+    background-size: 15px !important;
+    background-position: top 2px right 2px !important;
+    background-repeat: no-repeat;
+    box-shadow: none !important;
+
+    &:focus {
+      box-shadow: inset 2px 2px white, inset -2px -2px white !important;
+      outline: none;
+      color: #fff;
+      background-color: #2267cb;
+
+      option {
+          color: #000;
+          background-color: #fff;
+      }
+    }
+
+    &:not(:disabled):hover {
+      background-image: url("resources/icon/xp/dropdown-hover.svg") !important;
+    }
+
+    &:not(:disabled):active {
+      background-image: url("resources/icon/xp/dropdown-active.svg") !important;
+    }
+
+    &:disabled {
+      background-color: transparent !important;
+    }
+  }
+}

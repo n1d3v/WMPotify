@@ -1,0 +1,38 @@
+:root:not([data-wmpotify-control-style="aero"]):not([data-wmpotify-control-style="xp"]):not([data-wmpotify-control-style="10"]) {
+  button.wmpotify-aero,
+  button.Button-sc-y0gtbx-0,
+  .ReactModalPortal button.Button-sc-qlcn5g-0,
+  .ReactModalPortal button.Button-sc-1dqy6lx-0,
+  #context-menu button.Button-sc-1dqy6lx-0,
+  #context-menu button.Button-sc-qlcn5g-0,
+  .spicetify-exp-features button.reset:not(#Prio1):not(#Prio2) {
+    font-size: 11px;
+    box-sizing: border-box;
+    border: none;
+    color: transparent;
+    text-shadow: 0 0 var(--button-text);
+    background: var(--surface);
+    box-shadow: var(--border-raised-outer), var(--border-raised-inner);
+    border-radius: 0;
+
+    min-width: 75px;
+    min-height: 23px;
+    padding: 0 12px;
+
+    &:not(:disabled) {
+      &:active,
+      &[data-active],
+      &.active {
+        box-shadow: var(--border-sunken-outer), var(--border-sunken-inner);
+        text-shadow: 1px 1px var(--button-text);
+      }
+    }
+
+    &:focus,
+    &:focus-visible,
+    &.focused {
+      outline: 1px dotted var(--button-text);
+      outline-offset: -4px;
+    }
+  }
+}

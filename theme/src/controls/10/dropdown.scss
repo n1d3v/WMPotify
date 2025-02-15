@@ -1,0 +1,41 @@
+:root[data-wmpotify-control-style="10"] {
+  select.wmpotify-aero,
+  .main-dropDown-dropDown {
+    font: var(--font);
+    height: 23px;
+    padding: 2px 3px;
+    border: solid 1px #adadad;
+    border-radius: 0;
+    box-sizing: border-box;
+    color: #222;
+    appearance: none;
+    position: relative;
+    padding-right: 30px;
+    background: url("resources/icon/10/expand.svg"), #e1e1e1;
+    background-position: center right 3px;
+    background-repeat: no-repeat;
+    background-size: 10px 10px;
+
+    &:not(:disabled):hover {
+      border-color: #0078d7;
+      background-color: #e5f1fb;
+    }
+
+    &:not(:disabled):active {
+      outline: none;
+      border-color: #005499;
+      background-color: #cce4f7;
+    }
+
+    &:not(:disabled):focus {
+      color: #222;
+      outline: 1px dotted #000;
+      outline-offset: -4px;
+    }
+
+    option {
+      color: #000;
+      background-color: #fff;
+    }
+  }
+}

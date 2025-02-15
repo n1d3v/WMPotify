@@ -1,0 +1,107 @@
+:root[data-wmpotify-control-style="10"] {
+  --checkbox-width: 14px;
+  --checkbox-label-spacing: 6px;
+  --checkbox-total-width-precalc: 0;
+  --checkbox-total-width: calc(var(--checkbox-total-width-precalc));
+  --checkmark-top: 0;
+  --checkmark-left: 0;
+
+  --checkmark: url("resources/icon/10/checkmark.svg");
+  --checkmark-hover: url("resources/icon/10/checkmark-hover.svg");
+  --checkmark-active: url("resources/icon/10/checkmark-active.svg");
+
+  input.wmpotify-aero[type="checkbox"],
+  input.x-toggle-input[type="checkbox"] {
+    appearance: none;
+    font: var(--font);
+    background: none;
+    border: none;
+    margin: 0;
+    opacity: 0;
+
+    + label,
+    + .x-toggle-indicatorWrapper {
+      font: var(--font);
+      align-items: center;
+      position: relative;
+      margin-left: var(--checkbox-total-width);
+      width: auto;
+      background: none !important;
+
+      &::before {
+        content: "";
+        display: inline-block;
+        width: var(--checkbox-width);
+        height: var(--checkbox-width);
+        margin-right: var(--checkbox-label-spacing);
+        background: white;
+        border: 1px solid;
+        border-color: #333333;
+        box-sizing: border-box;
+        transition: 0.4s;
+        left: unset;
+        position: unset;
+      }
+
+      &:hover::before {
+        border-color: #0078d7;
+      }
+
+      &:active::before {
+        border-color: #005499;
+        background: #cce4f7;
+      }
+
+      .x-toggle-indicator {
+        display: none;
+      }
+    }
+
+    &:focus-visible {
+      + label,
+      + .x-toggle-indicatorWrapper {
+        outline: 1px dotted #000;
+      }
+    }
+
+    &:checked {
+      + label,
+      + .x-toggle-indicatorWrapper {
+        &::after {
+          content: "";
+          display: block;
+          width: var(--checkbox-width);
+          height: var(--checkbox-width);
+          position: absolute;
+          top: var(--checkmark-top);
+          left: var(--checkmark-left);
+          background: var(--checkmark);
+        }
+        &:hover::after {
+          background: var(--checkmark-hover);
+        }
+        &:active::after {
+          background: var(--checkmark-active);
+        }
+      }
+    }
+
+    &:disabled {
+      + label,
+      + .x-toggle-indicatorWrapper {
+        opacity: 0.6;
+      }
+    }
+  }
+
+  #wmpotify-config {
+    label[for="wmpotify-config-show-libx"],
+    label[for="wmpotify-config-lock-title"],
+    label[for="wmpotify-config-auto-updates"],
+    label[for="wmpotify-config-hide-pbleftbtn"] {
+      &::after {
+        top: -2px !important;
+      }
+    }
+  }
+}

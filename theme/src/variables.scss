@@ -47,6 +47,15 @@
     --underline-hilight: var(--hilight-text);
     --underline-disabled: var(--button-shadow-color);
 
+    /* Border styles for classic styling */
+    --border-raised-outer: inset -1px -1px var(--button-dk-shadow),
+        inset 1px 1px var(--button-hilight);
+    --border-raised-inner: inset -2px -2px var(--button-shadow-color),
+        inset 2px 2px var(--button-light);
+    --border-sunken-outer: inset -1px -1px var(--button-hilight),
+        inset 1px 1px var(--button-dk-shadow);
+    --border-sunken-inner: inset -2px -2px var(--button-light),
+        inset 2px 2px var(--button-shadow-color);
     --border-window-outer: inset -1px -1px var(--button-dk-shadow),
         inset 1px 1px var(--button-light);
     --border-window-inner: inset -2px -2px var(--button-shadow-color),
@@ -178,6 +187,91 @@
     --menu-height: 19px;
     --ui-font-default: Tahoma, Arial, var(--cjk-fontlink);
     --caption-font: bold 10pt/1 "Trebuchet MS", var(--ui-font);
+    --menu-font: 11px/1 var(--ui-font);
+    --message-font: 11px var(--ui-font);
+    --status-font: 11px var(--ui-font);
+}
+
+:root[data-wmpotify-control-style="classic"] {
+    --active-border: #c0c0c0;
+    --active-title: #000080;
+    --app-workspace: #808080;
+    --background: #008080;
+    --button-alternate-face: #b4b4b4;
+    --button-dk-shadow: #000000;
+    --surface: #c0c0c0;
+    --button-hilight: #ffffff;
+    --button-light: #dfdfdf;
+    --button-shadow-color: #808080;
+    --button-text: #000000;
+    --gradient-active-title: #1084d0;
+    --gradient-inactive-title: #b5b5b5;
+    --gray-text: #808080;
+    --hilight: #000080;
+    --hilight-text: #ffffff;
+    --hot-tracking-color: #000080;
+    --inactive-border: #c0c0c0;
+    --inactive-title: #808080;
+    --inactive-title-text: #c0c0c0;
+    --info-text: #000000;
+    --info-window: #ffffe1;
+    --menu: #c0c0c0;
+    --menu-bar: #c0c0c0;
+    --menu-hilight: #000080;
+    --menu-text:  #000000;
+    --scrollbar: #c0c0c0;
+    --title-text: #ffffff;
+    --window: #ffffff;
+    --window-frame: #000000;
+    --window-text: #000000;
+    --scrollbar-size: 16px;
+    --menu-height: 18px;
+    --ui-font-default: "MS Sans Serif", Arial, var(--cjk-fontlink);
+    --caption-font: bold 11px var(--ui-font);
+    --menu-font: 11px var(--ui-font);
+    --message-font: 11px var(--ui-font);
+    --status-font: 11px var(--ui-font);
+}
+
+:root[data-wmpotify-control-style="standard"] {
+    --active-border: #D4D0C8;
+    --active-title: #0A246A;
+    --app-workspace: #808080;
+    --background: #3A6EA5;
+    --button-alternate-face: #B5B5B5;
+    --button-dk-shadow: #404040;
+    --surface: #D4D0C8;
+    --button-hilight: #FFFFFF;
+    --button-light: #D4D0C8;
+    --button-shadow-color: #808080;
+    --button-text: #000000;
+    --gradient-active-title: #A6CAF0;
+    --gradient-inactive-title: #C0C0C0;
+    --gray-text: #808080;
+    --hilight: #0A246A;
+    --hilight-text: #FFFFFF;
+    --hot-tracking-color: #000080;
+    --inactive-border: #D4D0C8;
+    --inactive-title: #808080;
+    --inactive-title-text: #D4D0C8;
+    --info-text: #000000;
+    --info-window: #FFFFE1;
+    --menu: #D4D0C8;
+    --menu-bar: #D4D0C8;
+    --menu-hilight: #0A246A;
+    --menu-text: #000000;
+    --scrollbar: #D4D0C8;
+    --title-text: #FFFFFF;
+    --window: #FFFFFF;
+    --window-frame: #000000;
+    --window-text: #000000;
+    --flat-menus: none;
+    --menu-animation: fade;
+    --menu-shadow: false;
+    --scrollbar-size: 16px;
+    --menu-height: 18px;
+    --ui-font-default: Tahoma, Arial, var(--cjk-fontlink);
+    --caption-font: bold 11px/1.4 var(--ui-font);
     --menu-font: 11px/1 var(--ui-font);
     --message-font: 11px var(--ui-font);
     --status-font: 11px var(--ui-font);

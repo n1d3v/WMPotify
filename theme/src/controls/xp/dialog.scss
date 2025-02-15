@@ -1,0 +1,52 @@
+:root[data-wmpotify-control-style="xp"] {
+  .spicetify-exp-features {
+    > .setting-row {
+      button.switch {
+        position: relative;
+        width: var(--checkbox-width);
+        height: var(--checkbox-width);
+        line-height: 13px;
+        position: relative;
+        margin-left: var(--checkbox-total-width);
+        width: auto;
+        background: none !important;
+        cursor: default !important;
+
+        &::before {
+          content: "";
+          position: absolute;
+          left: 0;
+          display: inline-block;
+          width: var(--checkbox-width);
+          height: var(--checkbox-width);
+          border: var(--radio-border);
+          background: var(--radio-bg);
+          margin-right: var(--radio-label-spacing);
+        }
+
+        &:hover::before {
+          box-shadow: var(--radio-inner-shadow-hover);
+        }
+
+        &:active::before {
+          background: var(--radio-bg-active);
+        }
+
+        &:not(.disabled)::after {
+          content: "";
+          display: block;
+          width: var(--checkmark-width);
+          height: var(--checkmark-width);
+          position: absolute;
+          background: var(--checkmark);
+          top: 3px;
+          left: 2px;
+        }
+
+        svg {
+          display: none;
+        }
+      }
+    }
+  }
+}

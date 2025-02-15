@@ -243,7 +243,7 @@ export class MadMenu {
         const calculatedMenuWidth = this.calcMenuWidth(menuName);
         menuBg.style.width = calculatedMenuWidth + ')';
         menuBg.style.minWidth = 0;
-        menu.style.width = calculatedMenuWidth + (localStorage.wmpotifyControlStyle === 'aero' ? ' - 2px)' : ')');
+        menu.style.width = calculatedMenuWidth + (['aero', '10', undefined].includes(localStorage.wmpotifyControlStyle) ? ' - 2px)' : ')');
         menuBg.style.height = this.calcMenuHeight(menuName) + 'px';
         if (!standalone) {
             if (isSubmenu) {

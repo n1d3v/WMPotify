@@ -1,0 +1,120 @@
+:root[data-wmpotify-control-style="10"] {
+  button.wmpotify-aero,
+  button.Button-sc-y0gtbx-0,
+  .ReactModalPortal button.Button-sc-qlcn5g-0,
+  .ReactModalPortal button.Button-sc-1dqy6lx-0,
+  #context-menu button.Button-sc-1dqy6lx-0,
+  #context-menu button.Button-sc-qlcn5g-0,
+  .spicetify-exp-features button.reset:not(#Prio1):not(#Prio2) {
+    box-sizing: border-box;
+    box-shadow: inset 1px 1px 0 0 #adadad, inset -1px -1px 0 0 #adadad;
+    border: none;
+    border-radius: 0;
+    border-image: none !important;
+    color: #222;
+    min-width: 75px;
+    min-height: 23px;
+    padding: 0 12px;
+    text-align: center;
+    background: #e1e1e1;
+    position: relative;
+    z-index: 0;
+
+    /* Button style on hovered */
+    &::before {
+      content: "";
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      padding: 0;
+      margin: 0;
+      top: 0;
+      left: 0;
+      box-shadow: inset 1px 1px 0 0 #0078d7, inset -1px -1px 0 0 #0078d7;
+      border-radius: 0;
+      background: #e5f1fb;
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: -1;
+      border: none !important;
+      right: unset;
+      bottom: unset;
+    }
+
+    /* Button style on clicked */
+    &::after {
+      content: "";
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      padding: 0;
+      margin: 0;
+      top: 0;
+      left: 0;
+      box-shadow: inset 1px 1px 0 0 #005499, inset -1px -1px 0 0 #005499;
+      border-radius: 0;
+      background: #cce4f7;
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: -1;
+      box-sizing: border-box;
+    }
+
+    &:disabled {
+      background: var(--button-face-disabled);
+      border-color: var(--button-border-color-disabled);
+      color: var(--button-text-color-disabled);
+    }
+
+    &:not(:disabled) {
+      /* Animation when hovered */
+      &:hover {
+        border-color: var(--button-border-color-hovered);
+        transition: border-color 0.3s;
+
+        &::before {
+          opacity: 1;
+          transition: opacity 0.3s;
+        }
+      }
+
+      /* Animation when unhovered */
+      &:not(:hover) {
+        border-color: var(--button-border-color);
+        transition: border-color 1s linear;
+
+        &::before {
+          opacity: 0;
+          transition: opacity 1s linear;
+        }
+      }
+
+      &:active,
+      &[data-active],
+      &.active {
+        border-color: var(--button-border-color-active);
+        transition: border-color 0.3s;
+
+        &::after {
+          opacity: 1;
+          transition: opacity 0.3s;
+        }
+      }
+    }
+
+    &:focus-visible,
+    &.focused,
+    &:has(.ButtonInner-medium) {
+      outline: 1px dotted #000;
+      outline-offset: -4px;
+    }
+
+    &.default,
+    &:focus,
+    &.focused,
+    &:has(.ButtonInner-medium),
+    &:has(.ButtonInner-small) {
+      box-shadow: inset 2px 2px 0 0 #0078d7, inset -2px -2px 0 0 #0078d7;
+    }
+  }
+}

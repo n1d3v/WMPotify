@@ -1,0 +1,8 @@
+:root:not([data-wmpotify-control-style="aero"]):not([data-wmpotify-control-style="10"]) {
+  .main-contextMenu-tippy {
+    border: 1px solid var(--info-text);
+    border-radius: 0;
+    color: var(--info-text);
+    background: var(--info-window);
+  }
+}
