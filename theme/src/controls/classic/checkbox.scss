@@ -10,6 +10,10 @@
 
   --checkmark: url("resources/icon/98/checkmark.svg");
 
+  &[data-wmpotify-dark-mode] {
+    --checkmark: url("resources/icon/98dark/checkmark.svg");
+  }
+
   input.wmpotify-aero[type="checkbox"],
   input.x-toggle-input[type="checkbox"] {
     appearance: none;

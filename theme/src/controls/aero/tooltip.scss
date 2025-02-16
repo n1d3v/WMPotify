@@ -1,9 +1,9 @@
 :root[data-wmpotify-control-style="aero"],
 :root[data-wmpotify-control-style="10"] {
   .main-contextMenu-tippy {
-    border: 1px solid #767676;
+    border: 1px solid var(--tooltip-border-color);
     border-radius: 3px;
     box-shadow: 5px 5px 3px -3px rgba(0, 0, 0, 0.4);
-    background: linear-gradient(to bottom, white, var(--button-shade-light));
+    background: linear-gradient(to bottom, var(--tooltip-shade-top), var(--tooltip-shade-bottom));
   }
 }

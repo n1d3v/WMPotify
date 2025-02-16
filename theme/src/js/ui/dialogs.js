@@ -2,7 +2,51 @@
 
 import Strings from '../strings';
 
-export function promptModal(title, message, text, hint) {
+export function confirmModal(title = "WMPotify", message, confirmText = Strings['UI_OK'], cancelText = Strings['UI_CANCEL']) {
+    return new Promise((resolve, reject) => {
+        const modalContent = document.createElement('div');
+        modalContent.id = 'wmpotify-confirm-modal';
+        const msgElem = document.createElement('p');
+        msgElem.textContent = message;
+        modalContent.appendChild(msgElem);
+
+        const observer = new MutationObserver(() => {
+            if (!document.contains(modalContent)) {
+                observer.disconnect();
+                resolve(false);
+            }
+        });
+        const buttonContainer = document.createElement('div');
+        buttonContainer.classList.add('wmpotify-modal-bottom-buttons');
+        const okButton = document.createElement('button');
+        okButton.classList.add('wmpotify-aero');
+        okButton.textContent = confirmText;
+        okButton.addEventListener('click', (event) => {
+            observer.disconnect();
+            Spicetify.PopupModal.hide();
+            resolve(true);
+            event.preventDefault();
+            event.stopPropagation();
+        });
+        buttonContainer.appendChild(okButton);
+        const cancelButton = document.createElement('button');
+        cancelButton.classList.add('wmpotify-aero');
+        cancelButton.textContent = cancelText;
+        cancelButton.addEventListener('click', (event) => {
+            observer.disconnect();
+            Spicetify.PopupModal.hide();
+            resolve(false);
+            event.preventDefault();
+            event.stopPropagation();
+        });
+        buttonContainer.appendChild(cancelButton);
+        modalContent.appendChild(buttonContainer);
+        Spicetify.PopupModal.display({ title: title, content: modalContent });
+        observer.observe(document.body, { childList: true });
+    });
+}
+
+export function promptModal(title = "WMPotify", message, text, hint) {
     return new Promise((resolve, reject) => {
         const modalContent = document.createElement('div');
         modalContent.id = 'wmpotify-prompt-modal';
@@ -162,3 +206,6 @@ export async function openUpdateDialog(alreadyUpdated, tagName, content) {
         });
     }
 }
+
+globalThis.openWmpvisInstallDialog = openWmpvisInstallDialog;
+globalThis.openUpdateDialog = openUpdateDialog;

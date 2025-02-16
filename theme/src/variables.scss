@@ -1,5 +1,6 @@
 
 :root {
+    /* Windows Classic Color Schemes + WindowMetrics + Fonts */
     --active-border: #B4B4B4;
     --active-title: #99B4D1;
     --app-workspace: #ABABAB;
@@ -60,7 +61,8 @@
         inset 1px 1px var(--button-light);
     --border-window-inner: inset -2px -2px var(--button-shadow-color),
         inset 2px 2px var(--button-hilight);
-    
+
+    /* Button styles (Aero) */
     --button-highlight: #fff;
     --button-face: #f2f2f2;
     --button-face-hover: #eaf6fd;
@@ -71,6 +73,8 @@
     --button-shade-light-active: #98d1ef;
     --button-shade-dark: #cfcfcf;
     --button-shade-dark-hovered: #a7d9f5;
+    --button-shade-top-active: #e5f4fc;
+    --button-shade-bottom-active: #68b3db;
     --button-shadow: inset 0 0 0 1px #fffc;
     --button-shadow-active: inset 1px 1px 0 #0003, inset -1px 1px 0 #0001;
     --button-border: 1px solid;
@@ -81,6 +85,9 @@
     --button-border-color-disabled: #aeb2b5;
     --button-text-color: #222;
     --button-text-color-disabled: #838383;
+    --tooltip-shade-top: #ffffff;
+    --tooltip-shade-bottom: #ebebeb;
+    --tooltip-border-color: #767676;
     --button-gradient: linear-gradient(
         to bottom,
         var(--button-face) 45%,
@@ -95,11 +102,45 @@
     );
     --button-gradient-active: linear-gradient(
         to bottom,
-        #e5f4fc,
+        var(--button-shade-top-active),
         var(--button-face-active) 30% 50%,
         var(--button-shade-light-active) 50%,
-        #68b3db
+        var(--button-shade-bottom-active)
     );
+
+    /* Menu styles (Aero) */
+    --menu-padding: 3px;
+    --item-offset-left: 30px;
+    --menu-background-color: #f0f0f0;
+    --menu-border-color: #979797;
+    --menu-inner-border-color: #f5f5f5;
+    --menu-icon-separator-shadow: inset 1px 0 rgba(0, 0, 0, 0.15), inset -1px 0 #fff;
+    --menu-icon-background-border-color: #b3d3f9;
+    --menu-icon-checkmark-color: #0c12a1;
+    --menu-icon-radio-dot-outer-color: #333583;
+    --menu-icon-radio-dot-inner-color: #d5d4ea;
+    --menu-icon-radio-dot-border-color: #1a1490;
+    --menu-separator-border-top-color: rgba(0, 0, 0, 0.15);
+    --menu-separator-border-bottom-color: #ffffff;
+    --menu-item-hover-border-color: #b8d6fb;
+    --menu-item-hover-border-color-disabled: #d4d3d3;
+    --menu-item-hover-background: linear-gradient(
+        to bottom,
+        #fff9,
+        #e6ecf5cc 90%,
+        #fffc
+    );
+    --menu-item-hover-background-disabled: linear-gradient(
+        to bottom,
+        #fff9,
+        #e6e6e6cc 90%,
+        #fffc
+    );
+
+    --code-block-background-color: #d3d3d3;
+
+    --scrollbar-y: linear-gradient(to right, #e5e5e5, var(--surface) 20%);
+    --scrollbar-x: linear-gradient(to bottom, #e5e5e5, var(--surface) 20%);
 
     --element-spacing: 8px;
     --grouped-element-spacing: 6px;
@@ -107,19 +148,20 @@
     --border-radius: 3px;
     --border-width: 1px;
 
-    --spice-player: var(--surface);
     --spice-tab-active: var(--hilight);
 
     --player-bar-height: 60px;
     --queue-item-height: 19px;
 
+    /* WMP11 colors */
     --wmp11-window: var(--spice-main);
     --wmp11-text-hilight: #2871e9;
+    --wmp11-subtext: #77797d;
     --wmp11-separator-shadow: #a9b7c9;
     --wmp11-separator-light: #f2f7fc;
     --wmp11-search-border-outer: #f4f7fc;
     --wmp11-search-border-inner: #ffffff;
-    --wmp11-search-background: linear-gradient(to bottom, #5e5f61, #c0c3c6);
+    --wmp11-search-gradient: linear-gradient(to bottom, #5e5f61, #c0c3c6);
     --wmp11-search-face: #f6f9fc;
     --wmp11-queue-hover: #d7dbe1;
 
@@ -145,6 +187,7 @@
     );
     --item-hover-border: #cde9f8;
 
+    --listview-header: url('resources/ui/listview_header.png');
     --logo-16: url('resources/frame/spotify_16.png');
     --logo-32: url('resources/icon/wmpotify.png');
 }
@@ -284,27 +327,67 @@
 }
 
 :root[data-wmpotify-dark-mode] {
-    --spice-main: #222222;
+    /* Prevent tinting.js from changing --spice-main */
+    --spice-main: #222222 !important;
     --spice-subtext: #A0A4AC;
     --spice-shadow: #303030;
     --spice-text: #E0E4EC;
     --spice-card: #222222;
     --spice-sidebar: #222222;
+    --spice-player: #101010;
+    --spice-rgb-selected-row: 0, 0, 0;
 
     --button-face: #4a4a4a;
     --button-shade-light: #3c3c3c;
     --button-shade-dark: #222222;
     --button-face-hover: #484e60;
+    --button-face-disabled: #373737;
     --button-shade-light-hovered: #3b4255;
     --button-shade-dark-hovered: #366685;
     --button-border-color: #9f9f9f;
     --button-border-color-default: #9fa7bf;
     --button-border-color-hovered: #9ea6be;
     --button-border-color-active: #8e96ae;
+    --button-border-color-disabled: #6f7175;
     --button-text-color: #ffffff;
+    --button-text-color-disabled: #838383;
+    --button-shadow: inset 0 0 0 1px #000c;
+    --button-shade-top-active: #4b5166;
+    --button-face-active: #384058;
+    --button-shade-light-active: #2a344d;
+    --button-shade-bottom-active: #2a5579;
+    --tooltip-shade-top: #3f404c;
+    --tooltip-shade-bottom: #303030;
+    --tooltip-border-color: #b9b9b9;
 
-    --wmp11-separator-shadow: #111111;
-    --wmp11-separator-light: #424242;
+    --menu-background-color: #282828;
+    --menu-border-color: #6c6c6c;
+    --menu-inner-border-color: #303030;
+    --menu-icon-separator-shadow: inset 1px 0 #191919, inset -1px 0 #404040;
+    --menu-icon-background-border-color: #32537c;
+    --menu-icon-checkmark-color: #aac9fe;
+    --menu-icon-radio-dot-outer-color: #b8c6e2;
+    --menu-icon-radio-dot-inner-color: #d5d4ea;
+    --menu-icon-radio-dot-border-color: #9fabca;
+    --menu-separator-border-top-color: #191919;
+    --menu-separator-border-bottom-color: #404040;
+    --menu-item-hover-border-color: #375273;
+    --menu-item-hover-border-color-disabled: #565656;
+    --menu-item-hover-background: linear-gradient(
+        to bottom,
+        #303b4499,
+        #30383dcc 75%,
+        #30373ccc
+    );
+
+    --code-block-background-color: #2b2b2b;
+
+    --scrollbar-y: #111111;
+    --scrollbar-x: #111111;
+
+    --wmp11-subtext: #A0A4AC;
+    --wmp11-separator-shadow: rgb(17, 17, 17);
+    --wmp11-separator-light: rgb(66, 66, 66);
     --wmp11-search-border-outer: #222222;
     --wmp11-search-border-inner: #121212;
     --wmp11-search-gradient: linear-gradient(to bottom, #3d3e39, #4c4e4d);
@@ -327,35 +410,57 @@
     );
     --item-hover-border: #2f4d73;
 
-    --active-border: #000000;
-    --active-title: #101010;
-    --app-workspace: #383838;
-    --background: #000000;
-    --button-alternate-face: #000000;
-    --button-dk-shadow: #202020;
-    --surface: #101010;
-    --button-hilight: #505050;
-    --button-light: #040404;
-    --button-shadow-color: #303030;
-    --button-text: #E0E4EC;
-    --gradient-active-title: #101010;
-    --gradient-inactive-title: #101010;
-    --gray-text: #B0B0B0;
-    --hilight: #0066CC;
-    --hilight-text: #FFFFFF;
-    --hot-tracking-color: #3399FF;
-    --inactive-border: #000000;
-    --inactive-title: #10101080;
-    --inactive-title-text: #A0A4AC;
-    --info-text: #FFFFFF;
-    --info-window: #282819;
-    --menu: #101010;
-    --menu-bar: #101010;
-    --menu-hilight: #0066CC;
-    --menu-text: #FFFFFF;
-    --scrollbar: #282828;
-    --title-text: #FFFFFF;
-    --window: #191919;
-    --window-frame: #A0A0A0;
-    --window-text: #E0E4EC;
+    --listview-header: url('resources/ui/listview_header_dark.png');
+
+    .encore-dark-theme {
+        --background-base: #2e2e2e;
+    }
+
+    &:not([data-wmpotify-control-style="xp"]):not([data-wmpotify-control-style="10"]) {
+        --active-border: #000000;
+        --active-title: #101010;
+        --app-workspace: #383838;
+        --background: #000000;
+        --button-alternate-face: #000000;
+        --button-dk-shadow: #202020;
+        --surface: #101010;
+        --button-hilight: #505050;
+        --button-light: #040404;
+        --button-shadow-color: #303030;
+        --button-text: #E0E4EC;
+        --gradient-active-title: #101010;
+        --gradient-inactive-title: #101010;
+        --gray-text: #B0B0B0;
+        --hilight: #0066CC;
+        --hilight-text: #FFFFFF;
+        --hot-tracking-color: #3399FF;
+        --inactive-border: #000000;
+        --inactive-title: #10101080;
+        --inactive-title-text: #A0A4AC;
+        --info-text: #FFFFFF;
+        --info-window: #282819;
+        --menu: #101010;
+        --menu-bar: #101010;
+        --menu-hilight: #0066CC;
+        --menu-text: #FFFFFF;
+        --scrollbar: #282828;
+        --title-text: #FFFFFF;
+        --window: #191919;
+        --window-frame: #A0A0A0;
+        --window-text: #E0E4EC;
+    }
+}
+
+:root:not([data-wmpotify-dark-mode]),
+/* These two control styles don't support dark mode */
+:root[data-wmpotify-control-style="xp"] .GenericModal__overlay,
+:root[data-wmpotify-control-style="10"] .GenericModal__overlay {
+    --spice-main: #EEF3FA;
+    --spice-subtext: #434E54;
+    --spice-shadow: #A0A0A0;
+    --spice-text: #000000;
+    --spice-card: #EEF3FA;
+    --spice-sidebar: #EEF3FA;
+    --spice-player: #F0F0F0;
+    --code-block-background-color: #d3d3d3;
 }

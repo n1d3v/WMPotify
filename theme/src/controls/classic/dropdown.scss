@@ -27,8 +27,8 @@
       outline: none;
 
       option {
-          color: #000;
-          background-color: #fff;
+        color: var(--window-text);
+        background-color: var(--window);
       }
     }
 
@@ -49,6 +49,17 @@
   
       &:not(:disabled):active {
         background-image: url("resources/icon/2k/button-down-active.svg");
+      }
+    }
+  }
+
+  &[data-wmpotify-dark-mode] {
+    select.wmpotify-aero,
+    .main-dropDown-dropDown {
+      background-image: url("resources/icon/98dark/button-down.svg");
+  
+      &:not(:disabled):active {
+        background-image: url("resources/icon/98dark/button-down-active.svg");
       }
     }
   }

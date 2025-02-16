@@ -14,6 +14,7 @@ import PageManager from './managers/PageManager';
 import WindowManager from './managers/WindowManager';
 import { ver, checkUpdates, compareVersions, compareSpotifyVersion } from './utils/UpdateCheck';
 import { openUpdateDialog } from './ui/dialogs';
+import ThemeManager from './managers/ThemeManager';
 
 const elementsRequired = [
     '.Root__globalNav',
@@ -152,11 +153,21 @@ function earlyInit() {
         WindhawkComm.lockTitle(true);
     }
 
-    if (localStorage.wmpotifyDarkMode !== 'false' &&
-        (Spicetify.Config.color_scheme === 'dark' || localStorage.wmpotifyDarkMode === 'true' ||
-        (whStatus?.options.noforceddarkmode && window.matchMedia('(prefers-color-scheme: dark)').matches))
+    let darkMode = 'follow_scheme';
+    if (['follow_scheme', 'system', 'always', 'never'].includes(localStorage.wmpotifyDarkMode)) {
+        darkMode = localStorage.wmpotifyDarkMode;
+    } else if (whStatus?.options?.noforceddarkmode) {
+        darkMode = 'system';
+    }
+    const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    if (darkMode === 'always' ||
+        (darkMode === 'follow_scheme' && window.Spicetify?.Config?.color_scheme === 'dark') ||
+        (darkMode === 'system' && darkQuery.matches)
     ) {
         document.documentElement.dataset.wmpotifyDarkMode = true;
+    }
+    if (darkMode === 'system') {
+        ThemeManager.addDarkModeListener();
     }
 }
 

@@ -111,4 +111,33 @@ html:not([data-wmpotify-control-style="aero"]):not([data-wmpotify-control-style=
       }
     }
   }
+
+  &[data-wmpotify-dark-mode] {
+    ::-webkit-scrollbar {
+      &-track {
+        background-image: url("resources/icon/98dark/scrollbar-background.svg");
+      }
+
+      &-button {
+        &:horizontal {
+          &:start {
+            background-image: url("resources/icon/98dark/button-left.svg");
+          }
+
+          &:end {
+            background-image: url("resources/icon/98dark/button-right.svg");
+          }
+        }
+
+        &:vertical {
+          &:start {
+            background-image: url("resources/icon/98dark/button-up.svg");
+          }
+          &:end {
+            background-image: url("resources/icon/98dark/button-down.svg");
+          }
+        }
+      }
+    }
+  }
 }

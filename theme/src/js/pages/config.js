@@ -1,12 +1,13 @@
 'use strict';
 
 import Strings from "../strings";
-import { promptModal } from "../ui/dialogs";
+import { confirmModal, promptModal } from "../ui/dialogs";
 import FontDetective from "../utils/FontDetective";
 import { setTintColor } from "../ui/tinting";
 import WindhawkComm from "../WindhawkComm";
 import WindowManager from "../managers/WindowManager";
 import { checkUpdates } from "../utils/UpdateCheck";
+import ThemeManager from "../managers/ThemeManager";
 
 const configWindow = document.createElement('div');
 let tabs = null;
@@ -71,6 +72,13 @@ function init() {
                 <option value="xp">Windows XP</option>
                 <option value="aero" selected>Windows Aero</option>
                 <option value="10">Windows 10</option>
+            </select>
+            <label for="wmpotify-config-dark-mode">${Strings['CONF_GENERAL_DARK_MODE']}</label>
+            <select id="wmpotify-config-dark-mode" class="wmpotify-aero">
+                <option value="follow_scheme" selected>${Strings['CONF_GENERAL_DARK_MODE_FOLLOW_SCHEME']}</option>
+                <option value="system">${Strings['CONF_GENERAL_DARK_MODE_SYSTEM']}</option>
+                <option value="always">${Strings['CONF_GENERAL_DARK_MODE_ALWAYS']}</option>
+                <option value="never">${Strings['CONF_GENERAL_DARK_MODE_NEVER']}</option>
             </select><br>
             <label for="wmpotify-config-font">${Strings['CONF_GENERAL_FONT']}</label>
             <select id="wmpotify-config-font" class="wmpotify-aero">
@@ -148,6 +156,7 @@ function init() {
     elements.style = configWindow.querySelector('#wmpotify-config-style');
     elements.titleStyle = configWindow.querySelector('#wmpotify-config-title-style');
     elements.controlStyle = configWindow.querySelector('#wmpotify-config-control-style');
+    elements.darkMode = configWindow.querySelector('#wmpotify-config-dark-mode');
     elements.fontSelector = configWindow.querySelector('#wmpotify-config-font');
     elements.fontCustom = configWindow.querySelector('#wmpotify-config-font option');
     elements.hidePbLeftBtn = configWindow.querySelector('#wmpotify-config-hide-pbleftbtn');
@@ -186,6 +195,33 @@ function init() {
     elements.controlStyle.addEventListener('change', () => {
         localStorage.wmpotifyControlStyle = elements.controlStyle.value;
         document.documentElement.dataset.wmpotifyControlStyle = elements.controlStyle.value;
+    });
+    elements.darkMode.addEventListener('change', async () => {
+        const darkMode = elements.darkMode.value;
+        if (darkMode === 'system' && !whStatus?.options?.noforceddarkmode) {
+            const locId = 'CONF_GENERAL_DARK_MODE_SYSTEM_MSG_' + (navigator.userAgent.includes('Windows') ? 'WIN' : 'UNIX');
+            if (!await confirmModal(Strings['CONF_GENERAL_DARK_MODE_SYSTEM'], Strings[locId])) {
+                elements.darkMode.value = localStorage.wmpotifyDarkMode || 'follow_scheme';
+                return;
+            }
+        }
+
+        localStorage.wmpotifyDarkMode = darkMode;
+        const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        if (darkMode === 'always' ||
+            (darkMode === 'follow_scheme' && window.Spicetify?.Config?.color_scheme === 'dark') ||
+            (darkMode === 'system' && darkQuery.matches)
+        ) {
+            document.documentElement.dataset.wmpotifyDarkMode = true;
+        } else {
+            delete document.documentElement.dataset.wmpotifyDarkMode;
+        }
+
+        if (darkMode === 'system') {
+            ThemeManager.addDarkModeListener();
+        } else {
+            ThemeManager.removeDarkModeListener();
+        }
     });
     elements.fontSelector.addEventListener('change', async () => {
         if (elements.fontSelector.value === 'custom') {
@@ -346,6 +382,11 @@ function init() {
     }
     if (localStorage.wmpotifyControlStyle) {
         elements.controlStyle.value = localStorage.wmpotifyControlStyle;
+    }
+    if (['follow_scheme', 'system', 'always', 'never'].includes(localStorage.wmpotifyDarkMode)) {
+        elements.darkMode.value = localStorage.wmpotifyDarkMode;
+    } else if (whStatus?.options?.noforceddarkmode) {
+        elements.darkMode.value = 'system';
     }
     if (localStorage.wmpotifyHidePbLeftBtn) {
         elements.hidePbLeftBtn.checked = true;

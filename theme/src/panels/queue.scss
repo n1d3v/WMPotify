@@ -231,7 +231,7 @@
                 }
 
                 p[data-encore-id="listRowSubtitle"] {
-                    color: #77797d !important;
+                    color: var(--wmp11-subtext) !important;
                     position: relative;
 
                     span:has(> a)::before {

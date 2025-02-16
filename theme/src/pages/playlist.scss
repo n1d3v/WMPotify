@@ -17,7 +17,7 @@ section[data-testid="playlist-page"],
 
     .main-trackList-trackListHeader {
         background: none !important;
-        border-image: url('resources/ui/listview_header.png') 0 0 1 2 fill stretch;
+        border-image: var(--listview-header) 0 0 1 2 fill stretch;
         border-image-width: 0 0 1px 2px;
         height: 23.3px;
         box-shadow: var(--wmp11-separator-light) 0 -1px 0 0, var(--wmp11-separator-shadow) 0 -2px 0 0; 
@@ -29,25 +29,45 @@ section[data-testid="playlist-page"],
 
             .main-trackList-sortable,
             .main-trackList-rowSectionIndex > div {
-                color: #77797d;
+                [class*=encore-text] {
+                    color: var(--wmp11-subtext) !important;
+                }
             }
 
             > div {
-                border-image: url('resources/ui/listview_header.png') 0 2 1 2 fill stretch;
+                border-image: var(--listview-header) 0 2 1 2 fill stretch;
                 border-image-width: 0 2px 1px 2px;
                 padding-left: 5px;
 
-                &:has(button) {
-                    &:focus-within {
-                        border-image-source: url('resources/ui/listview_header_selected.png');
+                &:has(.Svg-img-icon-small-textBrightAccent) {
+                    border-image-source: url('resources/ui/listview_header_selected.png');
+                    [class*=encore-text] {
+                        color: black !important;
                     }
+                    .Svg-img-icon-small-textBrightAccent {
+                        fill: black !important;
+                    }
+                }
 
+                &:has(button) {
                     &:hover {
                         border-image-source: url('resources/ui/listview_header_hover.png');
+                        [class*=encore-text] {
+                            color: black !important;
+                        }
+                        .Svg-img-icon-small-textBrightAccent {
+                            fill: black !important;
+                        }
                     }
 
                     &:active {
                         border-image-source: url('resources/ui/listview_header_pressed.png');
+                        [class*=encore-text] {
+                            color: black !important;
+                        }
+                        .Svg-img-icon-small-textBrightAccent {
+                            fill: black !important;
+                        }
                     }
                 }
 
@@ -59,7 +79,7 @@ section[data-testid="playlist-page"],
                         justify-content: flex-start;
 
                         .Svg-img-icon-small-textBrightAccent {
-                            fill: black !important;
+                            fill: var(--window-text) !important;
                             order: 1;
                             width: 11px;
                             margin-top: -2px;
@@ -203,6 +223,19 @@ ul[id*="sortboxlist-"] {
     button:has(svg:not(:first-child)) {
         svg:first-child {
             display: none;
+        }
+    }
+}
+
+:root[data-wmpotify-dark-mode] {
+    .playlist-playlist-playlist,
+    section[data-testid="playlist-page"],
+    &[data-page^="/collection/"] main {
+        .main-entityHeader-backgroundColor {
+            background-color: #222222 !important;
+        }
+        .main-actionBar-ActionBar {
+            background-color: #222222;
         }
     }
 }

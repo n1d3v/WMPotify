@@ -119,7 +119,7 @@ button.Button-sc-y0gtbx-0,
   .ButtonInner-small,
   .ButtonInner-medium {
     display: block;
-    background: none;
+    background: none !important;
     color: var(--spice-text);
     padding-block: 0;
     padding-inline: 0;

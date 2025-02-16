@@ -66,7 +66,7 @@
     /* listview header */
     .main-yourLibraryX-filterArea + div {
         background: none !important;
-        border-image: url('resources/ui/listview_header.png') 0 0 1 2 fill stretch;
+        border-image: var(--listview-header) 0 0 1 2 fill stretch;
         border-image-width: 0 0 1px 2px;
         box-shadow: var(--wmp11-separator-light) 0 -1px 0 0, var(--wmp11-separator-shadow) 0 -2px 0 0;
         height: 25px;
@@ -76,10 +76,10 @@
 
         > span {
             height: 25px;
-            border-image: url('resources/ui/listview_header.png') 0 2 1 2 fill stretch;
+            border-image: var(--listview-header) 0 2 1 2 fill stretch;
             border-image-width: 0 2px 1px 2px;
             padding-left: 5px;
-            color: #77797d;
+            color: var(--wmp11-subtext);
             line-height: 2;
             font-size: 12px;
             font-weight: normal;
@@ -529,5 +529,15 @@ body[data-wmpotify-lib-page-open]:not(#Prio1):not(#Prio2):not(#Prio3) { /* dirty
         .Root:has(.Root__right-sidebar aside) #Desktop_LeftSidebar_Id {
             width: calc(100vw - var(--panel-width, var(--right-sidebar-width)) * 1px - var(--panel-gap) * 2 - 2px);
         }
+    }
+}
+
+:root[data-wmpotify-dark-mode] body[data-wmpotify-lib-page-open] {
+    .main-yourLibraryX-libraryRootlist {
+        background: #2e2e2e;
+    }
+    .main-yourLibraryX-filterArea,
+    #wmpotify-libx-sidebar {
+        background: #222222;
     }
 }

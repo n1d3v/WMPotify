@@ -189,9 +189,9 @@ curl -fsSL https://raw.githubusercontent.com/Ingan121/WMPotify/master/installer/
     * Using the extension is only recommended if you cannot use the Windhawk mod, such as on Linux or macOS.
     * To install the extension, you have to enable DevTools with `spicetify enable-devtools`, right-click any empty space, click `Show Chrome Tools`, open `chrome://extensions`, enable developer mode, and load the unpacked extension. If the extension installation doesn't work, run `spicetify enable-devtools` again and try again.
     * Note that Chrome extensions only work if DevTools is enabled. Spotify will randomly disable DevTools after a while and all extensions will stop working. To permanently enable DevTools and extensions, hex-patch the Spotify executable to fill the `disable-extensions` string to something invalid.
-
-## TODO
-* Dark mode support + dynamic theme support
+4. **Q:** This theme is too slow!
+    * **A1:** Make sure hardware acceleration is enabled in Spotify settings. 
+    * **A2:** Remove the Beautiful Lyrics extension if you have it installed. This extension is known to slow down Spotify. This theme doesn't really support the extension either. Use WMPotify NowPlaying instead.
 
 ## Credits
 * [Spicetify](https://spicetify.app/)

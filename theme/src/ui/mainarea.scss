@@ -7,6 +7,16 @@
     background: black;
 }
 
+:root[data-wmpotify-dark-mode] {
+    .Root__main-view {
+        background: #2e2e2e;
+
+        .main-topBar-container {
+            background: #222222;
+        }
+    }
+}
+
 .Root__top-container {
     background: transparent;
 
@@ -83,6 +93,7 @@ body[data-hide-libx],
 
 .marketplace-header {
     top: 12px;
+    background: #2e2e2e;
 }
 
 .Root__right-sidebar {

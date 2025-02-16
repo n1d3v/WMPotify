@@ -38,7 +38,7 @@
 
         &:not(.disabled) {
           &::after {
-            font-family: var(--ui-font-default);
+            font-family: "Segoe UI", "SegoeUI", "Noto Sans", sans-serif;
             content: "\2714";
             font-weight: bold;
             display: block;

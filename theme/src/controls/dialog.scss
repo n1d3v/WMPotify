@@ -111,7 +111,7 @@ generic-modal {
 
   .wmpotify-code-container {
     display: flex;
-    background-color: lightgray;
+    background-color: var(--code-block-background-color);
     padding: 10px;
     margin: 10px 0;
     overflow-x: auto;
