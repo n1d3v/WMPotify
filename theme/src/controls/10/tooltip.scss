@@ -1,7 +1,14 @@
 :root[data-wmpotify-control-style="10"] {
   .main-contextMenu-tippy {
-    border-radius: 0 !important;
-    background: white !important;
-    box-shadow: none;
+    border: 1px solid #767676;
+    border-radius: 0;
+    box-shadow: 5px 5px 3px -3px rgba(0, 0, 0, 0.4);
+    background: white;
+  }
+
+  &[data-wmpotify-dark-mode] {
+    .main-contextMenu-tippy {
+      background: #2b2b2b;
+    }
   }
 }

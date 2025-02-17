@@ -7,7 +7,7 @@ html[data-wmpotify-control-style="10"] {
     }
 
     &-corner {
-      background: var(--button-face) !important;
+      background: #ffffff !important;
     }
 
     &-track {
@@ -96,6 +96,87 @@ html[data-wmpotify-control-style="10"] {
 
           &:active {
             background-image: url("resources/icon/10/scroll-right-active.png") !important;
+          }
+        }
+      }
+    }
+  }
+
+  &[data-wmpotify-dark-mode] {
+    ::-webkit-scrollbar {  
+      &-corner {
+        background: #202020 !important;
+      }
+  
+      &-track {
+        &:vertical {
+          background: #171717 !important;
+        }
+  
+        &:horizontal {
+          background: #171717 !important;
+        }
+      }
+  
+      &-thumb {
+        background-color: #4d4d4d !important;
+  
+        &:hover {
+          background-color: #7a7a7a !important;
+        }
+  
+        &:active {
+          background-color: #a6a6a6 !important;
+        }
+      }
+  
+      &-button {
+        &:vertical {
+          &:start {
+            background-image: url("resources/icon/10dark/scroll-up.png") !important;
+  
+            &:hover {
+              background-image: url("resources/icon/10dark/scroll-up-hover.png") !important;
+            }
+  
+            &:active {
+              background-image: url("resources/icon/10dark/scroll-up-active.png") !important;
+            }
+          }
+          &:end {
+            background-image: url("resources/icon/10dark/scroll-down.png") !important;
+  
+            &:hover {
+              background-image: url("resources/icon/10dark/scroll-down-hover.png") !important;
+            }
+  
+            &:active {
+              background-image: url("resources/icon/10dark/scroll-down-active.png") !important;
+            }
+          }
+        }
+        &:horizontal {
+          &:start {
+            background-image: url("resources/icon/10dark/scroll-left.png") !important;
+  
+            &:hover {
+              background-image: url("resources/icon/10dark/scroll-left-hover.png") !important;
+            }
+  
+            &:active {
+              background-image: url("resources/icon/10dark/scroll-left-active.png") !important;
+            }
+          }
+          &:end {
+            background-image: url("resources/icon/10dark/scroll-right.png") !important;
+  
+            &:hover {
+              background-image: url("resources/icon/10dark/scroll-right-hover.png") !important;
+            }
+  
+            &:active {
+              background-image: url("resources/icon/10dark/scroll-right-active.png") !important;
+            }
           }
         }
       }

@@ -9,7 +9,7 @@
             height: 23px;
         }
     }
-    
+
     input.wmpotify-aero[type="text"],
     input.search[type="text"],
     .main-trackCreditsModal-originalCredits input[type="text"],
@@ -23,17 +23,22 @@
     .main-trackCreditsModal-originalCredits textarea {
         font: var(--font);
         padding: 3px 4px 5px;
-        border: 1px solid #ccc;
-        border-top-color: var(--button-border-color);
+        border: 1px solid var(--textbox-border-color);
+        border-top-color: var(--textbox-border-top-color);
         border-radius: 2px;
-        background-color: var(--button-hilight) !important;
+        background-color: var(--textbox-background-color) !important;
         box-sizing: border-box;
         box-shadow: none;
-    
+        color: var(--button-text-color);
+
         &:focus {
             outline: none;
-            border-color: var(--button-shade-light-hovered);
-            border-top-color: var(--button-shade-light-active);
+            border-color: var(--textbox-border-color-focused);
+            border-top-color: var(--textbox-border-top-color-focused);
+        }
+        &::selection {
+            background-color: var(--hilight);
+            color: var(--hilight-text);
         }
     }
 }

@@ -207,5 +207,5 @@ export async function openUpdateDialog(alreadyUpdated, tagName, content) {
     }
 }
 
-globalThis.openWmpvisInstallDialog = openWmpvisInstallDialog;
-globalThis.openUpdateDialog = openUpdateDialog;
+globalThis.wmpotifyOpenWmpvisInstallDialog = openWmpvisInstallDialog;
+globalThis.wmpotifyOpenUpdateDialog = openUpdateDialog;

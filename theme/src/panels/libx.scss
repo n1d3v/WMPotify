@@ -532,12 +532,17 @@ body[data-wmpotify-lib-page-open]:not(#Prio1):not(#Prio2):not(#Prio3) { /* dirty
     }
 }
 
-:root[data-wmpotify-dark-mode] body[data-wmpotify-lib-page-open] {
-    .main-yourLibraryX-libraryRootlist {
-        background: #2e2e2e;
-    }
-    .main-yourLibraryX-filterArea,
-    #wmpotify-libx-sidebar {
+:root[data-wmpotify-dark-mode] {
+    .main-yourLibraryX-library {
         background: #222222;
+    }
+    body[data-wmpotify-lib-page-open] {
+        .main-yourLibraryX-libraryRootlist {
+            background: #2e2e2e;
+        }
+        .main-yourLibraryX-filterArea,
+        #wmpotify-libx-sidebar {
+            background: #222222;
+        }
     }
 }

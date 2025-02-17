@@ -1,4 +1,30 @@
 :root[data-wmpotify-control-style="10"] {
+  --button-face: #e1e1e1;
+  --button-face-hover: #e5f1fb;
+  --button-face-active: #cce4f7;
+  --button-face-disabled: #cccccc;
+  --button-border-color: #adadad;
+  --button-border-color-hovered: #0078d7;
+  --button-border-color-active: #005499;
+  --button-border-color-disabled: #bfbfbf;
+  --button-border-color-inner: transparent;
+  --button-border-color-inner-focus: #0078d7;
+  --button-focus-outline-color: #111111;
+
+  &[data-wmpotify-dark-mode] {
+    --button-face: #333333;
+    --button-face-hover: #454545;
+    --button-face-active: #666666;
+    --button-face-disabled: #333333;
+    --button-border-color: #f0f0f0;
+    --button-border-color-hovered: #f0f0f0;
+    --button-border-color-active: #f0f0f0;
+    --button-border-color-disabled: #f0f0f0;
+    --button-border-color-inner: #9b9b9b;
+    --button-border-color-inner-focus: #ffffff;
+    --button-focus-outline-color: #c3c3c3;
+  }
+
   button.wmpotify-aero,
   button.Button-sc-y0gtbx-0,
   .ReactModalPortal button.Button-sc-qlcn5g-0,
@@ -7,16 +33,16 @@
   #context-menu button.Button-sc-qlcn5g-0,
   .spicetify-exp-features button.reset:not(#Prio1):not(#Prio2) {
     box-sizing: border-box;
-    box-shadow: inset 1px 1px 0 0 #adadad, inset -1px -1px 0 0 #adadad;
+    box-shadow: inset 1px 1px 0 0 var(--button-border-color), inset -1px -1px 0 0 var(--button-border-color);
     border: none;
     border-radius: 0;
     border-image: none !important;
-    color: #222;
+    color: var(--button-text-color);
     min-width: 75px;
     min-height: 23px;
     padding: 0 12px;
     text-align: center;
-    background: #e1e1e1;
+    background: var(--button-face);
     position: relative;
     z-index: 0;
 
@@ -30,9 +56,10 @@
       margin: 0;
       top: 0;
       left: 0;
-      box-shadow: inset 1px 1px 0 0 #0078d7, inset -1px -1px 0 0 #0078d7;
+      box-shadow: inset 1px 1px 0 0 var(--button-border-color-hovered), inset -1px -1px 0 0 var(--button-border-color-hovered),
+        inset 2px 2px 0 0 var(--button-border-color-inner), inset -2px -2px 0 0 var(--button-border-color-inner);
       border-radius: 0;
-      background: #e5f1fb;
+      background: var(--button-face-hover);
       opacity: 0;
       transition: opacity 0.3s;
       z-index: -1;
@@ -51,9 +78,10 @@
       margin: 0;
       top: 0;
       left: 0;
-      box-shadow: inset 1px 1px 0 0 #005499, inset -1px -1px 0 0 #005499;
+      box-shadow: inset 1px 1px 0 0 var(--button-border-color-active), inset -1px -1px 0 0 var(--button-border-color-active),
+        inset 2px 2px 0 0 var(--button-border-color-inner), inset -2px -2px 0 0 var(--button-border-color-inner);
       border-radius: 0;
-      background: #cce4f7;
+      background: var(--button-face-active);
       opacity: 0;
       transition: opacity 0.3s;
       z-index: -1;
@@ -105,7 +133,7 @@
     &:focus-visible,
     &.focused,
     &:has(.ButtonInner-medium) {
-      outline: 1px dotted #000;
+      outline: 1px dotted var(--button-focus-outline-color);
       outline-offset: -4px;
     }
 
@@ -114,7 +142,8 @@
     &.focused,
     &:has(.ButtonInner-medium),
     &:has(.ButtonInner-small) {
-      box-shadow: inset 2px 2px 0 0 #0078d7, inset -2px -2px 0 0 #0078d7;
+      box-shadow: inset 1px 1px 0 0 var(--button-border-color-hovered), inset -1px -1px 0 0 var(--button-border-color-hovered),
+        inset 2px 2px 0 0 var(--button-border-color-inner-focus), inset -2px -2px 0 0 var(--button-border-color-inner-focus);
     }
   }
 }

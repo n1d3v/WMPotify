@@ -33,21 +33,10 @@ function init() {
         <div id="wmpotify-config-topborder" class="wmpotify-tintable"></div>
         <button id="wmpotify-config-prev"></button>
         <button id="wmpotify-config-next"></button>
-        <p id="wmpotify-config-title">${Strings['CONF_COLOR_TITLE']}</p>
+        <p id="wmpotify-config-title">${Strings['CONF_GENERAL_TITLE']}</p>
         <span id="wmpotify-config-wh-message">${Strings['CONF_GENERAL_WH_MESSAGE']}</span>
         <button id="wmpotify-config-close"></button>
-        <section id="wmpotify-config-tab-color" class="wmpotify-config-tab-content" data-tab-title="${Strings['CONF_COLOR_TITLE']}" style="display: block;">
-            <section class="field-row">
-                <a href="#" id="wmpotify-config-color-reset">${Strings['UI_RESET']}</a>
-                <input type="checkbox" id="wmpotify-config-tint-playerbar" class="wmpotify-aero">
-                <label for="wmpotify-config-tint-playerbar">${Strings['CONF_COLOR_TINTPB']}</label>
-            </section>
-            <label>${Strings['CONF_COLOR_HUE']}</label><br>
-            <input type="range" id="wmpotify-config-hue" class="wmpotify-aero no-track" min="0" max="360" step="1" value="180"><br>
-            <label>${Strings['CONF_COLOR_SAT']}</label><br>
-            <input type="range" id="wmpotify-config-sat" class="wmpotify-aero no-track" min="0" max="354" step="1" value="121"><br>
-        </section>
-        <section id="wmpotify-config-tab-general" class="wmpotify-config-tab-content" data-tab-title="${Strings['CONF_GENERAL_TITLE']}">
+        <section id="wmpotify-config-tab-general" class="wmpotify-config-tab-content" data-tab-title="${Strings['CONF_GENERAL_TITLE']}" style="display: block;">
             <label for="wmpotify-config-style">${Strings['CONF_GENERAL_STYLE']}</label>
             <select id="wmpotify-config-style" class="wmpotify-aero">
                 <option value="auto">${Strings['UI_AUTO']}</option>
@@ -103,6 +92,17 @@ function init() {
             <label for="wmpotify-config-show-libx">${Strings['CONF_GENERAL_SHOW_LIBX']}</label><br>
             <input type="checkbox" id="wmpotify-config-lock-title" class="wmpotify-aero" disabled>
             <label for="wmpotify-config-lock-title">${Strings['CONF_GENERAL_LOCK_TITLE']}</label>
+        </section>
+        <section id="wmpotify-config-tab-color" class="wmpotify-config-tab-content" data-tab-title="${Strings['CONF_COLOR_TITLE']}">
+            <section class="field-row">
+                <a href="#" id="wmpotify-config-color-reset">${Strings['UI_RESET']}</a>
+                <input type="checkbox" id="wmpotify-config-tint-playerbar" class="wmpotify-aero">
+                <label for="wmpotify-config-tint-playerbar">${Strings['CONF_COLOR_TINTPB']}</label>
+            </section>
+            <label>${Strings['CONF_COLOR_HUE']}</label><br>
+            <input type="range" id="wmpotify-config-hue" class="wmpotify-aero no-track" min="0" max="360" step="1" value="180"><br>
+            <label>${Strings['CONF_COLOR_SAT']}</label><br>
+            <input type="range" id="wmpotify-config-sat" class="wmpotify-aero no-track" min="0" max="354" step="1" value="121"><br>
         </section>
         ${whStatus?.speedModSupported ? `
         <section id="wmpotify-config-tab-speed" class="wmpotify-config-tab-content" data-tab-title="${Strings['CONF_SPEED_TITLE']}" data-wh-speedmod-required="true">
@@ -198,7 +198,8 @@ function init() {
     });
     elements.darkMode.addEventListener('change', async () => {
         const darkMode = elements.darkMode.value;
-        if (darkMode === 'system' && !whStatus?.options?.noforceddarkmode) {
+        const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        if (darkMode === 'system' && !whStatus?.options?.noforceddarkmode && darkQuery.matches) {
             const locId = 'CONF_GENERAL_DARK_MODE_SYSTEM_MSG_' + (navigator.userAgent.includes('Windows') ? 'WIN' : 'UNIX');
             if (!await confirmModal(Strings['CONF_GENERAL_DARK_MODE_SYSTEM'], Strings[locId])) {
                 elements.darkMode.value = localStorage.wmpotifyDarkMode || 'follow_scheme';
@@ -207,7 +208,6 @@ function init() {
         }
 
         localStorage.wmpotifyDarkMode = darkMode;
-        const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
         if (darkMode === 'always' ||
             (darkMode === 'follow_scheme' && window.Spicetify?.Config?.color_scheme === 'dark') ||
             (darkMode === 'system' && darkQuery.matches)

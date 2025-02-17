@@ -106,7 +106,7 @@
     &.focused,
     &:has(.ButtonInner-medium) {
       box-shadow: inset 0 0 0 2px var(--button-shade-light-active);
-      outline: 1px dotted #000;
+      outline: 1px dotted var(--button-focus-outline-color);
       outline-offset: -4px;
     }
 
