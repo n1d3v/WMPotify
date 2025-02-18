@@ -91,7 +91,7 @@ function earlyInit() {
     }
 
     if (whStatus && !localStorage.wmpotifyStyle && titleStyle === 'native' && whStatus.isThemingEnabled) {
-        if (whStatus.options.transparentrendering && whStatus.isDwmEnabled) {
+        if (WindhawkComm.getModule()?.initialOptions.transparentrendering && whStatus.isDwmEnabled) {
             style = 'aero';
         } else if (!whStatus.isDwmEnabled) {
             style = 'basic';
@@ -156,7 +156,7 @@ function earlyInit() {
     let darkMode = 'follow_scheme';
     if (['follow_scheme', 'system', 'always', 'never'].includes(localStorage.wmpotifyDarkMode)) {
         darkMode = localStorage.wmpotifyDarkMode;
-    } else if (whStatus?.options?.noforceddarkmode) {
+    } else if (WindhawkComm.getModule()?.initialOptions.noforceddarkmode) {
         darkMode = 'system';
     }
     const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');

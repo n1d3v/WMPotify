@@ -199,7 +199,7 @@ function init() {
     elements.darkMode.addEventListener('change', async () => {
         const darkMode = elements.darkMode.value;
         const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
-        if (darkMode === 'system' && !whStatus?.options?.noforceddarkmode && darkQuery.matches) {
+        if (darkMode === 'system' && !WindhawkComm.getModule()?.initialOptions.noforceddarkmode && darkQuery.matches) {
             const locId = 'CONF_GENERAL_DARK_MODE_SYSTEM_MSG_' + (navigator.userAgent.includes('Windows') ? 'WIN' : 'UNIX');
             if (!await confirmModal(Strings['CONF_GENERAL_DARK_MODE_SYSTEM'], Strings[locId])) {
                 elements.darkMode.value = localStorage.wmpotifyDarkMode || 'follow_scheme';
@@ -219,10 +219,12 @@ function init() {
 
         if (darkMode === 'system') {
             ThemeManager.addSystemDarkModeListener();
-        } else if (darkMode === 'follow_scheme') {
-            ThemeManager.addMarketplaceSchemeObserver();
         } else {
             ThemeManager.removeSystemDarkModeListener();
+        }
+        if (darkMode === 'follow_scheme') {
+            ThemeManager.addMarketplaceSchemeObserver();
+        } else {
             ThemeManager.removeMarketplaceSchemeObserver();
         }
     });
@@ -388,7 +390,7 @@ function init() {
     }
     if (['follow_scheme', 'system', 'always', 'never'].includes(localStorage.wmpotifyDarkMode)) {
         elements.darkMode.value = localStorage.wmpotifyDarkMode;
-    } else if (whStatus?.options?.noforceddarkmode) {
+    } else if (WindhawkComm.getModule()?.initialOptions.noforceddarkmode) {
         elements.darkMode.value = 'system';
     }
     if (localStorage.wmpotifyHidePbLeftBtn) {

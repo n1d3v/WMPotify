@@ -48,7 +48,7 @@ const lang = {
     'CONF_GENERAL_DARK_MODE': '다크 모드',
     'CONF_GENERAL_DARK_MODE_FOLLOW_SCHEME': '색 구성표 따르기',
     'CONF_GENERAL_DARK_MODE_SYSTEM': '시스템 설정 따르기',
-    'CONF_GENERAL_DARK_MODE_SYSTEM_MSG_WIN': '이 옵션을 사용하려면 CEF/Spotify Tweaks Windhawk 모드를 설치하고 \'강제 다크 모드 비활성화\' 옵션을 활성화하거나 Spotify 실행 파일에서 \'force-dark-mode\' 플래그를 제거해야 합니다. 그렇지 않으면 항상 다크 모드가 활성화됩니다. 계속하시겠습니까?',
+    'CONF_GENERAL_DARK_MODE_SYSTEM_MSG_WIN': '이 옵션을 사용하려면 CEF/Spotify Tweaks Windhawk 모드를 설치하고 \'Disable forced dark mode\' 옵션을 활성화하거나 Spotify 실행 파일에서 \'force-dark-mode\' 플래그를 제거해야 합니다. 그렇지 않으면 항상 다크 모드가 활성화됩니다. 계속하시겠습니까?',
     'CONF_GENERAL_DARK_MODE_SYSTEM_MSG_UNIX': '이 옵션을 사용하려면 Spotify 실행 파일에서 \'force-dark-mode\' 플래그를 제거해야 합니다. 그렇지 않으면 항상 다크 모드가 활성화됩니다. 계속하시겠습니까?',
     'CONF_GENERAL_DARK_MODE_ALWAYS': '항상',
     'CONF_GENERAL_DARK_MODE_NEVER': '안함',
