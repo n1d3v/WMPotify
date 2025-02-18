@@ -140,7 +140,7 @@ function init() {
                 </svg>
             </button>
             <p>${Strings['CONF_ABOUT_DESC']}</p>
-            <p>${Strings['CONF_ABOUT_VERSION']}: 1.0 Beta 3<span id="wmpotify-about-ctewh-ver"></span></p>
+            <p>${Strings['CONF_ABOUT_VERSION']}: 1.0 Beta 4<span id="wmpotify-about-ctewh-ver"></span></p>
             <p>${Strings['CONF_ABOUT_AUTHOR']} - <a href="https://www.ingan121.com/" target="_blank">www.ingan121.com</a></p>
             <input type="checkbox" id="wmpotify-config-auto-updates" class="wmpotify-aero" checked>
             <label for="wmpotify-config-auto-updates">${Strings['CONF_ABOUT_AUTO_UPDATES']}</label>
@@ -218,9 +218,12 @@ function init() {
         }
 
         if (darkMode === 'system') {
-            ThemeManager.addDarkModeListener();
+            ThemeManager.addSystemDarkModeListener();
+        } else if (darkMode === 'follow_scheme') {
+            ThemeManager.addMarketplaceSchemeObserver();
         } else {
-            ThemeManager.removeDarkModeListener();
+            ThemeManager.removeSystemDarkModeListener();
+            ThemeManager.removeMarketplaceSchemeObserver();
         }
     });
     elements.fontSelector.addEventListener('change', async () => {

@@ -71,7 +71,7 @@
       }
     }
 
-    &:active {
+    &:not(:disabled):active {
       + label,
       + .x-toggle-indicatorWrapper {
         &::before {
@@ -83,7 +83,9 @@
     &:disabled {
       + label,
       + .x-toggle-indicatorWrapper {
-        background: var(--surface);
+        &::before {
+          background: var(--surface);
+        }
       }
 
       &:checked {

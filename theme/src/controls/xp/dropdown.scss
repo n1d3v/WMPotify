@@ -41,7 +41,8 @@
     }
 
     &:disabled {
-      background-color: transparent !important;
+      color: #ACA899;
+      background-color: #ECE9D8 !important;
     }
   }
 }

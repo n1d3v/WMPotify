@@ -34,5 +34,10 @@
       outline: 1px dotted var(--button-text);
       outline-offset: -4px;
     }
+
+    &:disabled {
+      color: var(--button-shadow-color);
+      text-shadow: 1px 1px 0 var(--button-hilight);
+    }
   }
 }

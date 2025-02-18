@@ -167,7 +167,9 @@ function earlyInit() {
         document.documentElement.dataset.wmpotifyDarkMode = true;
     }
     if (darkMode === 'system') {
-        ThemeManager.addDarkModeListener();
+        ThemeManager.addSystemDarkModeListener();
+    } else if (darkMode === 'follow_scheme') {
+        ThemeManager.addMarketplaceSchemeObserver();
     }
 }
 

@@ -39,6 +39,10 @@
         background: var(--logo-16) no-repeat;
         -webkit-app-region: no-drag !important;
         z-index: 1000;
+
+        &.logo2013 {
+            background-image: var(--logo-16-2013);
+        }
     }
 
     #wmpotify-title-bar {

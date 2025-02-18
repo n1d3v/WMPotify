@@ -7,7 +7,7 @@
 
 ## **Installation** / Updating
 
-### **Manual installation using Scripts (recomended):**
+### **Manual installation using Scripts (recommended):**
 
 #### **Windows (Powershell)**
 
@@ -69,7 +69,7 @@ curl -fsSL https://raw.githubusercontent.com/Ingan121/WMPotify/master/installer/
 
 ## **Uninstallation**
 
-### **Manual uninstallation using Scripts (recomended):**
+### **Manual uninstallation using Scripts (recommended):**
 
 #### **Windows (Powershell)**
 ```powershell
@@ -81,6 +81,16 @@ iex "& { $(iwr -useb 'https://raw.githubusercontent.com/Ingan121/WMPotify/master
 ```bash
 curl -fsSL https://raw.githubusercontent.com/Ingan121/WMPotify/master/installer/uninstall.sh | sh
 ```
+
+### **Manual uninstallation**
+1. Run the following commands in Command Prompt / PowerShell / Terminal:
+    ```cmd
+    spicetify config custom_apps wmpvis-
+    spicetify config current_theme marketplace
+    spicetify apply
+    ```
+    Replace the second line with `spicetify config current_theme " "` if you don't plan to use themes from the Spicetify Marketplace, or you don't have Marketplace installed.
+2. Delete the `Themes\WMPotify` and `CustomApps\wmpvis` folders in the Spicetify directory. Find the directory with `spicetify config-dir` or `spicetify path userdata`.
 
 ## **Screenshots**
 
@@ -204,7 +214,7 @@ curl -fsSL https://raw.githubusercontent.com/Ingan121/WMPotify/master/installer/
     * [7.css](https://khang-nd.github.io/7.css) by Khang-ND
     * [XP.css](https://botoxparty.github.io/XP.css/) by botoxparty
     * [98.css](https://jdan.github.io/98.css/) by jdan
-    * Actually my own forks of these three from ModernActiveDesktop were used too
+    * My forks of these three from ModernActiveDesktop were used too
     * 10 style is my own work based on 7.css
 * For WMPotify NowPlaying visualizations:
     * Some codes from [spicetify-visualizer](https://github.com/Konsl/spicetify-visualizer) by Konsl
@@ -214,7 +224,7 @@ curl -fsSL https://raw.githubusercontent.com/Ingan121/WMPotify/master/installer/
 * Dark mode inspirations:
     * General look: above concept image
     * Controls (Aero & the classic scheme): the Dark7 theme from [21h2to7](https://www.deviantart.com/imswordqueeen/art/Windows-10-21H2-22H2-to-7-Transformation-Pack-1081353677) by ImSwordQueeen
-    * Controls (10): Built-in Windows 10 Win32 dark mode controls
+    * Controls (10): Windows 10 Win32 dark mode controls
 * Installation PowerShell script from [Spicetify-Lucid](https://github.com/sanoojes/Spicetify-Lucid) by sanoojes
 * [font-detective](https://github.com/1j01/font-detective) by 1j01
 * Some codes are from my previous [ModernActiveDesktop](https://github.com/Ingan121/ModernActiveDesktop) project, including the bars visualization and the lyrics engine

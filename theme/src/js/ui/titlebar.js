@@ -10,6 +10,17 @@ function createTitlebarSkeleton() {
     titleBar.id = 'wmpotify-title-bar';
     const titleIcon = document.createElement('div');
     titleIcon.id = 'wmpotify-title-icon';
+    titleIcon.addEventListener('click', () => {
+        titleIcon.classList.toggle('logo2013');
+        if (titleIcon.classList.contains('logo2013')) {
+            localStorage.wmpotifyUse2013Icon = true;
+        } else {
+            delete localStorage.wmpotifyUse2013Icon;
+        }
+    });
+    if (localStorage.wmpotifyUse2013Icon) {
+        titleIcon.classList.add('logo2013');
+    }
     titleIcon.addEventListener('dblclick', () => {
         closeWindow();
     });

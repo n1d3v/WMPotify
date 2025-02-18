@@ -140,7 +140,7 @@
                   var(--menu-icon-radio-dot-inner-color),
                   var(--menu-icon-radio-dot-outer-color)
                 );
-                border: 1px solid var(--menu-icon-radio-border-color);
+                border: 1px solid var(--menu-icon-radio-dot-border-color);
                 box-shadow: none;
                 border-radius: 50%;
                 box-sizing: border-box;
@@ -371,7 +371,7 @@
         var(--menu-icon-radio-dot-inner-color),
         var(--menu-icon-radio-dot-outer-color)
       );
-      border: 1px solid var(--menu-icon-radio-border-color);
+      border: 1px solid var(--menu-icon-radio-dot-border-color);
       box-shadow: none;
       border-radius: 50%;
       box-sizing: border-box;

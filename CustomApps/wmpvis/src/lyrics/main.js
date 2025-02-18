@@ -30,6 +30,7 @@ let scrolling = false;
 
 const intersectionObserver = new IntersectionObserver((entries) => {
     if (entries[0].isIntersecting) {
+        processProperties();
         processTimeline(true);
     }
 });
@@ -687,6 +688,9 @@ async function loadLyrics(idOrLrc, addOverride) {
 }
 
 async function processProperties() {
+    if (!localStorage.wmpotifyVisShowLyrics) {
+        return;
+    }
     lyricsView.innerHTML = Strings['LRC_STATUS_LOADING'];
     const spotifyNowPlayingLocal = await getSpotifyNowPlaying();
     if (spotifyNowPlayingLocal && spotifyNowPlayingLocal.item) {
@@ -770,6 +774,7 @@ function processTimeline(init) {
     }
 }
 
+// #region Utils
 function getNearestLyricIndex(time) {
     if (lastSyncedLyricsParsed) {
         if (time < lastSyncedLyricsParsed[0].time) {
@@ -980,6 +985,7 @@ function escapeHTML(str) {
 function getFilename (str) {
     return str.split('/').pop().split('.').slice(0, -1).join('.');
 }
+// #endregion
 // #endregion
 
 // #region Initialization

@@ -55,7 +55,7 @@ const lang = {
     'CONF_GENERAL_FONT': 'UI font',
     'CONF_GENERAL_CUSTOM_FONT_DLG_TITLE': 'Set custom font',
     'CONF_GENERAL_CUSTOM_FONT_MSG': 'Enter a valid CSS font-family name',
-    'CONF_GENERAL_HIDE_PBLEFTBTN': 'Hide like button in the now playing bar',
+    'CONF_GENERAL_HIDE_PBLEFTBTN': 'Hide the like button in the now playing bar',
     'CONF_GENERAL_TOPMOST': 'Always on top',
     'CONF_GENERAL_TOPMOST_ALWAYS': 'Always',
     'CONF_GENERAL_TOPMOST_MINIMODE': 'In mini mode',
