@@ -996,7 +996,6 @@ async function init(lv) {
 
     overrides = await madIdb.getItem('lyricsOverrides') || {};
     lyricsView = lv;
-    processProperties();
     Spicetify.Player.addEventListener('songchange', processProperties);
     Spicetify.Player.addEventListener('onprogress', processTimeline);
     window.addEventListener('focus', forceProcessTimeline);
