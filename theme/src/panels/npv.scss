@@ -20,6 +20,10 @@
         display: none;
     }
 
+    .main-nowPlayingView-aboutArtistButton.main-nowPlayingView-aboutArtistHasImage * {
+        color: white !important;
+    }
+
     .main-nowPlayingView-aboutArtistV2Button {
         background: transparent;
     }

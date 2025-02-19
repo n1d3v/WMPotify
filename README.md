@@ -2,7 +2,7 @@
 * A Windows Media Player 11 inspired Spicetify theme for Spotify
 * Supported versions: 1.2.45 - 1.2.57
     * Primarily tested on 1.2.52
-    * 1.2.45: global navbar must be enabled in the experimental features
+    * 1.2.45: `Show Global nav bar with home button, search input and user avatar` must be set to `home-next-to-search` in the experimental features
     * 1.2.44 and below are not supported
 
 ## **Installation** / Updating

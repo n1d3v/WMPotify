@@ -195,14 +195,12 @@
 
 /* This somehow interferes with -webkit-app-region: drag */
 .main-entityHeader-container {
-    margin-top: 26px;
-
     &.main-entityHeader-withBackgroundImage {
         .main-entityHeader-headerText * {
             text-shadow: var(--aero-text-glow);
             color: black !important;
 
-            h1 {
+            .encore-text-headline-large {
                 text-shadow: none;
                 color: white !important;
             }

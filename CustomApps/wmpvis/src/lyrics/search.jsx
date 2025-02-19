@@ -35,10 +35,10 @@ const SearchDialog = React.memo(({ artist, title, albumTitle }) => {
             }
 
             .wmpvis-lyrics-row {
-                    display: flex;
-                    flex-direction: row;
-                    align-items: center;
-                    margin-bottom: 5px;
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                margin-bottom: 5px;
             }
 
             .wmpvis-lyrics-row label {
@@ -60,7 +60,7 @@ const SearchDialog = React.memo(({ artist, title, albumTitle }) => {
 
             .wmpvis-lyrics-searchBar {
                 flex-grow: 1;
-                color: var(--spice-text);
+                color: black;
             }
 
             #wmpvis-lyrics-searchBtnAdvanced {
@@ -82,7 +82,7 @@ const SearchDialog = React.memo(({ artist, title, albumTitle }) => {
             }
 
             button.wmpotify-aero {
-                color: var(--spice-text);
+                color: black;
                 min-height: 23px;
                 min-width: 75px;
                 padding: 0 12px;

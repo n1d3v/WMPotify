@@ -277,6 +277,13 @@ function waitForReady() {
             }
             if (ready === false) {
                 console.error('WMPotify: Missing elements:', elementsRequired.filter(selector => !document.querySelector(selector)));
+                if (!document.querySelector('.Root__globalNav')) {
+                    // Show headers and sidebar when global nav is missing
+                    // To allow users to access experimental features, marketplace, etc.
+                    document.documentElement.dataset.wmpotifyNoGlobalNav = true;
+                    delete document.body.dataset.hideLibx;
+                    console.error('WMPotify: Global nav not found');
+                }
             } else {
                 console.error('WMPotify: Missing API objects:', Object.entries({
                     'Spicetify.Platform.PlayerAPI': window.Spicetify?.Platform?.PlayerAPI,

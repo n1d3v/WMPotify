@@ -536,6 +536,18 @@ body[data-wmpotify-lib-page-open]:not(#Prio1):not(#Prio2):not(#Prio3) { /* dirty
     .main-yourLibraryX-library {
         background: #222222;
     }
+    #wmpotify-libx-sidebar {
+        .wmpotify-libx-sidebar-item-container {
+            .wmpotify-libx-sidebar-chevron:not(:hover) {
+                background-image: url('resources/library/chevron_dark.png');
+            }
+        }
+        &.rootCollapsed, .collapsed {
+            .wmpotify-libx-sidebar-chevron:not(:hover) {
+                background-image: url('resources/library/chevron_collapsed_dark.png');
+            }
+        }
+    }
     body[data-wmpotify-lib-page-open] {
         .main-yourLibraryX-libraryRootlist {
             background: #2e2e2e;
