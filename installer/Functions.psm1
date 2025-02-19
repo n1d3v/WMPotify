@@ -705,6 +705,8 @@ function Install-WMPotify {
         [Parameter(Mandatory)]
         [string]$Config,
         
+        [string]$ColorScheme,
+        
         [string]$Tag = 'latest',
         [string]$Branch,
 
@@ -790,7 +792,10 @@ function Install-WMPotify {
         if (-not $SkipTheme) {
             spicetify config inject_css 1 replace_colors 1 overwrite_assets 1 inject_theme_js 1
             spicetify config current_theme 'WMPotify'
-            spicetify config color_scheme 'aero'
+            
+            if ($ColorScheme) {
+                spicetify config color_scheme $ColorScheme
+            }
         }
 
         if ($GetWMPVis) {

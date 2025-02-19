@@ -90,12 +90,12 @@
 
 .main-globalNav-searchContainer,
 .custom-navlinks-scrollable_container {
-    display: none;
+    animation: appear 8s !important;
 }
 
 .main-topBar-topbarContentRight > .main-actionButtons {
     > button {
-        display: none;
+        animation: appear 8s !important;
     }
 
     button {
@@ -105,6 +105,23 @@
         svg {
             color: white;
         }
+    }
+}
+
+:root[data-wmpotify-init-complete],
+.Root__globalNav:has(#wmpotify-tabs-container) {
+    .main-globalNav-searchContainer,
+    .custom-navlinks-scrollable_container,
+    .main-topBar-topbarContentRight > .main-actionButtons > button {
+        display: none;
+    }
+}
+
+:root[data-wmpotify-js-fail] {
+    .main-globalNav-searchContainer,
+    .custom-navlinks-scrollable_container,
+    .main-topBar-topbarContentRight > .main-actionButtons > button {
+        animation: none;
     }
 }
 
@@ -278,23 +295,25 @@
         width: 225px;
         height: 24px;
         padding: 1px;
-        border: solid 1px #f4f7fc;
-        background: linear-gradient(to bottom, #5e5f61, #c0c3c6);
+        border: solid 1px var(--wmp11-search-border-outer);
+        background: var(--wmp11-search-gradient);
 
         input[type="search"] {
             width: 100%;
             height: 20px;
-            border: solid 1px white;
-            background-color: #f6f9fc;
+            border: solid 1px var(--wmp11-search-border-inner);
+            background-color: var(--wmp11-search-face);
             font-size: 12px;
             border-radius: 0;
             min-height: 0;
             padding-inline: 4px;
             padding-block: unset;
             box-shadow: none;
+            color: var(--spice-text);
             cursor: text !important;
 
             &::placeholder {
+                color: var(--gray-text);
                 font-style: italic;
             }
         }

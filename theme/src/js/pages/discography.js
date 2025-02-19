@@ -17,7 +17,7 @@ export async function initDiscographyPage(wait) {
     document.querySelector('.main-topBar-topbarContent').appendChild(document.querySelector('.artist-artistDiscography-topBar'));
 
     if (section.querySelector('.artist-artistDiscography-cardGrid')) {
-        return;
+        await waitForFullRender(section, true);
     }
 
     const artistName = document.querySelector('.main-topBar-topbarContent .artist-artistDiscography-topBar a').textContent;
@@ -73,11 +73,11 @@ export async function initDiscographyPage(wait) {
     observer.observe(section.querySelector('[data-testid="infinite-scroll-list"]'), { childList: true });
 }
 
-function waitForFullRender(section) {
-    if (!section.querySelector('.artist-artistDiscography-tracklist')) {
+function waitForFullRender(section, noGridView) {
+    if (!section.querySelector('.artist-artistDiscography-tracklist') && (noGridView || !section.querySelector('.artist-artistDiscography-cardGrid'))) {
         return new Promise(resolve => {
             const observer = new MutationObserver(() => {
-                if (section.querySelector('.artist-artistDiscography-tracklist')) {
+                if (section.querySelector('.artist-artistDiscography-tracklist') || (!noGridView && section.querySelector('.artist-artistDiscography-cardGrid'))) {
                     observer.disconnect();
                     resolve();
                 }

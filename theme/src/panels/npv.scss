@@ -4,11 +4,11 @@
     }
 
     aside.NowPlayingView * {
-        color: black;
+        color: var(--spice-text);
     }
 
     .main-nowPlayingView-queue * {
-        color: black !important;
+        color: var(--spice-text) !important;
     }
 
     .main-nowPlayingView-coverArt {
@@ -18,6 +18,10 @@
 
     .main-nowPlayingView-contextItemInfo::before {
         display: none;
+    }
+
+    .main-nowPlayingView-aboutArtistButton.main-nowPlayingView-aboutArtistHasImage * {
+        color: white !important;
     }
 
     .main-nowPlayingView-aboutArtistV2Button {

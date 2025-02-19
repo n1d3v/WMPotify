@@ -2,12 +2,12 @@
 * A Windows Media Player 11 inspired Spicetify theme for Spotify
 * Supported versions: 1.2.45 - 1.2.57
     * Primarily tested on 1.2.52
-    * 1.2.45: global navbar must be enabled in the experimental features
+    * 1.2.45: `Show Global nav bar with home button, search input and user avatar` must be set to `home-next-to-search` in the experimental features
     * 1.2.44 and below are not supported
 
 ## **Installation** / Updating
 
-### **Manual installation using Scripts (recomended):**
+### **Manual installation using Scripts (recommended):**
 
 #### **Windows (Powershell)**
 
@@ -69,7 +69,7 @@ curl -fsSL https://raw.githubusercontent.com/Ingan121/WMPotify/master/installer/
 
 ## **Uninstallation**
 
-### **Manual uninstallation using Scripts (recomended):**
+### **Manual uninstallation using Scripts (recommended):**
 
 #### **Windows (Powershell)**
 ```powershell
@@ -82,12 +82,25 @@ iex "& { $(iwr -useb 'https://raw.githubusercontent.com/Ingan121/WMPotify/master
 curl -fsSL https://raw.githubusercontent.com/Ingan121/WMPotify/master/installer/uninstall.sh | sh
 ```
 
+### **Manual uninstallation**
+1. Run the following commands in Command Prompt / PowerShell / Terminal:
+    ```cmd
+    spicetify config custom_apps wmpvis-
+    spicetify config current_theme marketplace
+    spicetify apply
+    ```
+    Replace the second line with `spicetify config current_theme " "` if you don't plan to use themes from the Spicetify Marketplace, or you don't have Marketplace installed.
+2. Delete the `Themes\WMPotify` and `CustomApps\wmpvis` folders in the Spicetify directory. Find the directory with `spicetify config-dir` or `spicetify path userdata`.
+
 ## **Screenshots**
 
 ### Home
 
 * Aero
 ![home_aero](screenshots/home_aero.png)
+
+* Aero (Dark mode)
+![home_aero_dark](screenshots/home_aero_dark.png)
 
 * Basic
 ![home_basic](screenshots/home_basic.png)
@@ -151,6 +164,7 @@ curl -fsSL https://raw.githubusercontent.com/Ingan121/WMPotify/master/installer/
 
 * Playback Speed Control
 ![config_speed_aero](screenshots/config_speed_aero.png)
+(This requires the x64 Windows version of Spotify, and the CEF/Spotify Tweaks Windhawk mod)
 
 ### Full Screen
 
@@ -188,22 +202,32 @@ curl -fsSL https://raw.githubusercontent.com/Ingan121/WMPotify/master/installer/
     * Using the extension is only recommended if you cannot use the Windhawk mod, such as on Linux or macOS.
     * To install the extension, you have to enable DevTools with `spicetify enable-devtools`, right-click any empty space, click `Show Chrome Tools`, open `chrome://extensions`, enable developer mode, and load the unpacked extension. If the extension installation doesn't work, run `spicetify enable-devtools` again and try again.
     * Note that Chrome extensions only work if DevTools is enabled. Spotify will randomly disable DevTools after a while and all extensions will stop working. To permanently enable DevTools and extensions, hex-patch the Spotify executable to fill the `disable-extensions` string to something invalid.
-
-## TODO
-* Dark mode support + dynamic theme support
+4. **Q:** This theme is too slow!
+    * **A1:** Make sure hardware acceleration is enabled in Spotify settings. 
+    * **A2:** Remove the Beautiful Lyrics extension if you have it installed. This extension is known to slow down Spotify. This theme doesn't really support the extension either. Use WMPotify NowPlaying instead.
 
 ## Credits
 * [Spicetify](https://spicetify.app/)
 * [Spotify](https://www.spotify.com/)
-* Several resources from Windows Media Player / Windows Vista by Microsoft Corporation
-* Some codes from [spicetify-visualizer](https://github.com/Konsl/spicetify-visualizer) by Konsl
-* [7.css](https://khang-nd.github.io/7.css) by Khang-ND - used for some controls like buttons, menus, etc. Actually from my own fork from ModernActiveDesktop
-* [font-detective](https://github.com/1j01/font-detective) by 1j01
-* [Butterchurn](https://butterchurnviz.com/) by Jordan Berg, based on [MilkDrop](https://en.wikipedia.org/wiki/MilkDrop) by Geiss
-* Some codes from [Butterchurn adaptation for Wallpaper Engine](https://steamcommunity.com/sharedfiles/filedetails/?id=2962616483) by SeiferX7
+* Several resources from Windows Media Player / Microsoft Windows by Microsoft Corporation
+* For various controls like buttons, menus, etc.:
+    * [7.css](https://khang-nd.github.io/7.css) by Khang-ND
+    * [XP.css](https://botoxparty.github.io/XP.css/) by botoxparty
+    * [98.css](https://jdan.github.io/98.css/) by jdan
+    * My forks of these three from ModernActiveDesktop were used too
+    * 10 style is my own work based on 7.css
+* For WMPotify NowPlaying visualizations:
+    * Some codes from [spicetify-visualizer](https://github.com/Konsl/spicetify-visualizer) by Konsl
+    * [Butterchurn](https://butterchurnviz.com/) by Jordan Berg, based on [MilkDrop](https://en.wikipedia.org/wiki/MilkDrop) by Geiss
+    * Some codes from [Butterchurn adaptation for Wallpaper Engine](https://steamcommunity.com/sharedfiles/filedetails/?id=2962616483) by SeiferX7
 * Some inspiration from [this concept image](https://x.com/tehmondspartan/status/1671430592087613441) by MondySpartan (user button, lyrics overlay on top of visualization, etc.)
+* Dark mode inspirations:
+    * General look: above concept image
+    * Controls (Aero & the classic scheme): the Dark7 theme from [21h2to7](https://www.deviantart.com/imswordqueeen/art/Windows-10-21H2-22H2-to-7-Transformation-Pack-1081353677) by ImSwordQueeen
+    * Controls (10): Windows 10 Win32 dark mode controls
 * Installation PowerShell script from [Spicetify-Lucid](https://github.com/sanoojes/Spicetify-Lucid) by sanoojes
-* Some codes are from my previous [ModernActiveDesktop](https://github.com/Ingan121/ModernActiveDesktop) project
+* [font-detective](https://github.com/1j01/font-detective) by 1j01
+* Some codes are from my previous [ModernActiveDesktop](https://github.com/Ingan121/ModernActiveDesktop) project, including the bars visualization and the lyrics engine
 * For the CEF/Spotify Tweaks mod:
     * [Windhawk](https://windhawk.net/)
     * [Visual Studio Anti-Rich-Header](https://windhawk.net/mods/visual-studio-anti-rich-header) by m417z

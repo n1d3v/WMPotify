@@ -1,169 +1,144 @@
+@import "aero/dialog.scss";
+@import "xp/dialog.scss";
+@import "classic/dialog.scss";
+@import "10/dialog.scss";
+
 .ReactModalPortal,
 generic-modal {
-    .GenericModal__overlay {
-        background: none;
-        transition: none !important;
+  .GenericModal__overlay {
+    background: none;
+    transition: none !important;
 
-        [role="dialog"] {
-            transition: none !important;
-            border-radius: 0;
+    [role="dialog"] {
+      transition: none !important;
+      border-radius: 0;
 
-            > div {
-                border-radius: 0;
-                background-color: var(--button-face);
-                color: var(--button-text);
-                border: solid 1px black;
-                box-shadow: inset 0 0 0 1px #fffa;
-            }
-        }
-
-        .main-duplicateTrackModal-buttonContainer {
-            justify-content: flex-end;
-            gap: 8px;
-        }
-
-        /* For Spicetify.PopupModal */
-        .main-embedWidgetGenerator-container {
-            max-height: calc(100vh - 50px);
-        }
-
-        .main-trackCreditsModal-header {
-            padding: 8px;
-
-            h1 {
-                font: var(--caption-font);
-            }
-
-            .main-trackCreditsModal-closeBtn {
-                width: 25px;
-                height: 15px;
-                background: url('resources/icon/close.png') no-repeat;
-                transform: none !important;
-
-                &:hover {
-                    background: url('resources/icon/close_hover.png') no-repeat;
-                }
-
-                &:active {
-                    background: url('resources/icon/close_pressed.png') no-repeat;
-                }
-
-                svg {
-                    display: none;
-                }
-            }
-        }
-
-        .main-trackCreditsModal-mainSection {
-            padding: 8px;
-            scrollbar-width: none;
-
-            * {
-                font: var(--message-font);
-            }
-        }
-
-        .main-trackCreditsModal-originalCredits {
-            padding-bottom: 0;
-        }
-
-        .wmpotify-modal-bottom-buttons {
-            display: flex;
-            flex-direction: row;
-            justify-content: flex-end;
-            margin-top: 8px;
-            margin-bottom: 5px;
-
-            button + button {
-                margin-left: 6px;
-            }
-        }
-
-        /* For Spicetify experimental features */
-        .spicetify-exp-features {
-            > .setting-row {
-                padding: 2px 0;
-
-                button.switch {
-                    position: relative;
-                    width: var(--checkbox-width);
-                    height: var(--checkbox-width);
-                    margin-right: var(--checkbox-label-spacing);
-                    background: #f6f6f6;
-                    border: 1px solid;
-                    border-color: var(--button-border-color);
-                    box-shadow: inset 0 0 0 1px #f4f4f4, inset 1px 1px 0 1px #aeaeae,
-                        inset -1px -1px 0 1px #ddd, inset 3px 3px 6px #ccc;
-                    box-sizing: border-box;
-                    border-radius: 0;
-                    padding: 0;
-                    transition: 0.4s;
-
-                    &:hover {
-                        background: #e9f7fe;
-                        border-color: var(--button-border-color-hovered);
-                        box-shadow: inset 0 0 0 1px #def9fa, inset 1px 1px 0 1px #79c6f9,
-                            inset -1px -1px 0 1px #c6e9fc, inset 3px 3px 6px #b1dffd;
-                    }
-
-                    &:not(.disabled) {
-                        &::after {
-                            content: "\2714";
-                            font-weight: bold;
-                            display: block;
-                            position: absolute;
-                            top: -2px;
-                            left: 1px;
-                            color: #4a5f97;
-                            background: unset;
-                        }
-                    }
-
-                    svg {
-                        display: none;
-                    }
-                }
-            }
-        }
+      > div {
+        border-radius: 0;
+        background-color: var(--surface);
+        color: var(--button-text);
+        box-shadow: var(--border-window-outer), var(--border-window-inner);
+      }
     }
+
+    .main-duplicateTrackModal-buttonContainer {
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    /* For Spicetify.PopupModal */
+    .main-embedWidgetGenerator-container {
+      max-height: calc(100vh - 50px);
+    }
+
+    .main-trackCreditsModal-header {
+      padding: 8px;
+      border-bottom: none;
+
+      h1 {
+        font: var(--caption-font);
+      }
+
+      .main-trackCreditsModal-closeBtn {
+        width: 25px;
+        height: 15px;
+        background: url("resources/icon/close.png") no-repeat;
+        transform: none !important;
+
+        &:hover {
+          background: url("resources/icon/close_hover.png") no-repeat;
+        }
+
+        &:active {
+          background: url("resources/icon/close_pressed.png") no-repeat;
+        }
+
+        svg {
+          display: none;
+        }
+      }
+    }
+
+    .main-trackCreditsModal-mainSection {
+      padding: 8px;
+      scrollbar-width: none;
+
+      * {
+        font: var(--message-font);
+      }
+    }
+
+    .main-trackCreditsModal-originalCredits {
+      padding-bottom: 0;
+    }
+
+    .wmpotify-modal-bottom-buttons {
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-end;
+      margin-top: 8px;
+      margin-bottom: 5px;
+
+      button + button {
+        margin-left: 6px;
+      }
+    }
+
+    /* For Spicetify experimental features */
+    .spicetify-exp-features {
+      > .setting-row {
+        padding: 2px 0;
+        .search-container svg {
+          display: none;
+        }
+
+        > .col.action:has(button.switch) {
+          width: 16px;
+          button.switch {
+            margin: 0;
+          }
+        }
+      }
+    }
+  }
 }
 
 /* WMPotify / WMPotify NowPlaying install / update dialog */
 #wmpotify-instructions-dialog {
-    img {
-        width: 100%;
+  img {
+    width: 100%;
+  }
+
+  .wmpotify-code-container {
+    display: flex;
+    background-color: var(--code-block-background-color);
+    padding: 10px;
+    margin: 10px 0;
+    overflow-x: auto;
+
+    button {
+      width: 16px;
+      height: 16px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      margin-top: auto;
+      margin-right: 5px;
     }
 
-    .wmpotify-code-container {
-        display: flex;
-        background-color: lightgray;
-        padding: 10px;
-        margin: 10px 0;
-        overflow-x: auto;
-
-        button {
-            width: 16px;
-            height: 16px;
-            border: none;
-            background: transparent;
-            cursor: pointer;
-            margin-top: auto;
-            margin-right: 5px;
-        }
-
-        code {
-            display: block;
-            white-space: nowrap;
-            user-select: text;
-        }
+    code {
+      display: block;
+      white-space: nowrap;
+      user-select: text;
     }
+  }
 
-    a {
-        color: var(--hot-tracking-color);
-    }
+  a {
+    color: var(--hot-tracking-color);
+  }
 
-    button.wmpotify-aero {
-        margin-top: 5px;
-        float: right;
-    }
+  button.wmpotify-aero {
+    margin-top: 5px;
+    float: right;
+  }
 }

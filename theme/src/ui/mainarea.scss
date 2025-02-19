@@ -7,6 +7,20 @@
     background: black;
 }
 
+:root[data-wmpotify-dark-mode] {
+    .Root__main-view {
+        background: #2e2e2e;
+
+        .main-topBar-container {
+            background: #222222;
+        }
+
+        .marketplace-header {
+            background: #2e2e2e;
+        }
+    }
+}
+
 .Root__top-container {
     background: transparent;
 
@@ -78,6 +92,14 @@ body[data-hide-libx],
         nav ul {
             display: flex;
         }
+    }
+}
+
+/* Make the top bar visible when the theme failed to init because of missing global nav */
+/* to allow users to access the account button and experimental features */
+:root[data-wmpotify-no-global-nav] {
+    .main-topBar-container {
+        display: flex !important;
     }
 }
 

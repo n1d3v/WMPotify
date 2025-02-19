@@ -201,6 +201,7 @@ process {
                 ThemePath   = $spicetifyFolders.themePath
                 VisAppPath  = $spicetifyFolders.visAppPath
                 Config      = $spicetifyFolders.configPath
+                ColorScheme = (Get-WindowsAppsTheme)
                 GetWMPVis   = 'wmpvis' -in $Install
                 SkipTheme   = 'wmpotify' -notin $Install
             }

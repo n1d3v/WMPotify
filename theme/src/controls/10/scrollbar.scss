@@ -1,0 +1,185 @@
+html[data-wmpotify-control-style="10"] {
+  ::-webkit-scrollbar {
+    width: 16px !important;
+
+    &:horizontal {
+      height: 17px !important;
+    }
+
+    &-corner {
+      background: #ffffff !important;
+    }
+
+    &-track {
+      &:vertical {
+        background: #f0f0f0 !important;
+      }
+
+      &:horizontal {
+        background: #f0f0f0 !important;
+      }
+    }
+
+    &-thumb {
+      border-radius: 0 !important;
+      background-color: #cdcdcd !important;
+
+      &:hover {
+        background-color: #a6a6a6 !important;
+      }
+
+      &:active {
+        background-color: #606060 !important;
+      }
+    }
+
+    &-button:horizontal:start:increment,
+    &-button:horizontal:end:decrement,
+    &-button:vertical:start:increment,
+    &-button:vertical:end:decrement {
+      /* https://stackoverflow.com/a/67476494/3916702 */
+      display: none !important;
+    }
+
+    &-button {
+      /* Add an invisible border to prevent shifting
+          when hovering the scrollbar buttons */
+      border: var(--button-border) transparent !important;
+      background-position: center !important;
+
+      &:vertical {
+        &:start {
+          height: 17px !important;
+          background-image: url("resources/icon/10/scroll-up.png") !important;
+
+          &:hover {
+            background-image: url("resources/icon/10/scroll-up-hover.png") !important;
+          }
+
+          &:active {
+            background-image: url("resources/icon/10/scroll-up-active.png") !important;
+          }
+        }
+        &:end {
+          height: 17px !important;
+          background-image: url("resources/icon/10/scroll-down.png") !important;
+
+          &:hover {
+            background-image: url("resources/icon/10/scroll-down-hover.png") !important;
+          }
+
+          &:active {
+            background-image: url("resources/icon/10/scroll-down-active.png") !important;
+          }
+        }
+      }
+      &:horizontal {
+        &:start {
+          width: 17px !important;
+          background-image: url("resources/icon/10/scroll-left.png") !important;
+
+          &:hover {
+            background-image: url("resources/icon/10/scroll-left-hover.png") !important;
+          }
+
+          &:active {
+            background-image: url("resources/icon/10/scroll-left-active.png") !important;
+          }
+        }
+        &:end {
+          width: 17px !important;
+          background-image: url("resources/icon/10/scroll-right.png") !important;
+
+          &:hover {
+            background-image: url("resources/icon/10/scroll-right-hover.png") !important;
+          }
+
+          &:active {
+            background-image: url("resources/icon/10/scroll-right-active.png") !important;
+          }
+        }
+      }
+    }
+  }
+
+  &[data-wmpotify-dark-mode] {
+    ::-webkit-scrollbar {  
+      &-corner {
+        background: #202020 !important;
+      }
+  
+      &-track {
+        &:vertical {
+          background: #171717 !important;
+        }
+  
+        &:horizontal {
+          background: #171717 !important;
+        }
+      }
+  
+      &-thumb {
+        background-color: #4d4d4d !important;
+  
+        &:hover {
+          background-color: #7a7a7a !important;
+        }
+  
+        &:active {
+          background-color: #a6a6a6 !important;
+        }
+      }
+  
+      &-button {
+        &:vertical {
+          &:start {
+            background-image: url("resources/icon/10dark/scroll-up.png") !important;
+  
+            &:hover {
+              background-image: url("resources/icon/10dark/scroll-up-hover.png") !important;
+            }
+  
+            &:active {
+              background-image: url("resources/icon/10dark/scroll-up-active.png") !important;
+            }
+          }
+          &:end {
+            background-image: url("resources/icon/10dark/scroll-down.png") !important;
+  
+            &:hover {
+              background-image: url("resources/icon/10dark/scroll-down-hover.png") !important;
+            }
+  
+            &:active {
+              background-image: url("resources/icon/10dark/scroll-down-active.png") !important;
+            }
+          }
+        }
+        &:horizontal {
+          &:start {
+            background-image: url("resources/icon/10dark/scroll-left.png") !important;
+  
+            &:hover {
+              background-image: url("resources/icon/10dark/scroll-left-hover.png") !important;
+            }
+  
+            &:active {
+              background-image: url("resources/icon/10dark/scroll-left-active.png") !important;
+            }
+          }
+          &:end {
+            background-image: url("resources/icon/10dark/scroll-right.png") !important;
+  
+            &:hover {
+              background-image: url("resources/icon/10dark/scroll-right-hover.png") !important;
+            }
+  
+            &:active {
+              background-image: url("resources/icon/10dark/scroll-right-active.png") !important;
+            }
+          }
+        }
+      }
+    }
+  }
+}

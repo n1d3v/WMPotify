@@ -1,0 +1,75 @@
+:root[data-wmpotify-control-style="xp"] {
+  /* For Spotify menus */
+  #context-menu:not(#Prio1):not(#Prio2) {
+    ul:not([id*="curation-"]) {
+      &[role="menu"] {
+        background: white;
+        box-shadow: #aca899 -1px -1px inset, #aca899 1px 1px inset,
+          5px 5px 4px -4px rgba(0, 0, 0, 0.75);
+
+        > [role="menuitem"],
+        .main-contextMenu-menuItem {
+          > a,
+          > button,
+          > label,
+          &[aria-haspopup="true"] {
+            &:hover,
+            &:focus-visible {
+              background: #316ac5;
+              color: white;
+            }
+          }
+
+          > button,
+          > a {
+            &[class*=" "] {
+              &::before {
+                top: -7px;
+                left: 0;
+                width: 100%;
+                border: none;
+                border-top: solid 1px #aca899;
+                border-bottom: solid 1px transparent;
+              }
+              margin-top: 9px;
+            }
+          }
+        }
+        
+        &:has(+ [role="menu"]) {
+          &::after {
+            background: white;
+            border: none;
+          }
+        }
+      }
+    }
+
+    /* Add to playlist menu */
+    form,
+    ul[id*="curation-folder-submenu-"] {
+      background: white;
+      border: solid 1px #aca899;
+      box-shadow: 5px 5px 4px -4px rgba(0, 0, 0, 0.75);
+    }
+  }
+
+  &[data-wmpotify-dark-mode] {
+    #context-menu:not(#Prio1):not(#Prio2) {
+      form,
+      ul[id*="curation-folder-submenu-"] {
+        background: #101010;
+      }
+    }
+  }
+
+  /* Flat menus for MadMenu */
+  .contextMenuBg {
+    box-shadow: var(--button-shadow-color) -1px -1px inset, var(--button-shadow-color) 1px 1px inset, 5px 5px 4px -4px rgba(0, 0, 0, 0.75) !important;
+  }
+
+  .contextMenuItem[data-active] {
+    box-shadow: var(--hilight) -1px -1px inset, var(--hilight) 1px 1px inset;
+    background-color: var(--menu-hilight);
+  }
+}

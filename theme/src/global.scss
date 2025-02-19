@@ -1,8 +1,22 @@
+@keyframes appear {
+    0% {
+        opacity: 0;
+    }
+    99% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
 *, body, button, input, select, textarea {
     font-family: var(--ui-font);
 }
 
-#main * {
+.Root__globalNav,
+.body-drag-top,
+header * {
     -webkit-app-region: no-drag !important;
 }
 

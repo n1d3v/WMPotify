@@ -1,0 +1,431 @@
+:root[data-wmpotify-control-style="10"] {
+  --menu-padding: 3px;
+  --item-offset-left: 30px;
+  --checkmark-menu: url("resources/icon/10/checkmark-menu.svg");
+  --menu-background-color: #f2f2f2;
+  --menu-border-color: #cccccc;
+  --menu-icon-area-color: #f0f0f0;
+  --menu-item-hover-color: #91c9f7;
+  --menu-item-radio-dot-color: black;
+
+  &[data-wmpotify-dark-mode] {
+    --menu-background-color: #2b2b2b;
+    --menu-border-color: #808080;
+    --menu-icon-area-color: #2b2b2b;
+    --menu-item-hover-color: #414141;
+    --menu-item-radio-dot-color: white;
+
+    #context-menu {
+      ul:not([id*="curation-"]) {
+        &[role="menu"] {
+          > [role="menuitem"],
+        .main-contextMenu-menuItem {
+          > a,
+          > button,
+          > label,
+          &[aria-haspopup="true"] {
+            &:has(
+                path[d="M15.53 2.47a.75.75 0 0 1 0 1.06L4.907 14.153.47 9.716a.75.75 0 0 1 1.06-1.06l3.377 3.376L14.47 2.47a.75.75 0 0 1 1.06 0z"]
+              ) {
+                &:not(:has(svg.activeStyle)) span::before {
+                  filter: invert(1);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    .contextMenuItem {
+      .checkedItem::before {
+        filter: invert(1);
+      }
+    }
+  }
+
+  /* For Spotify menus */
+  #context-menu {
+    ul:not([id*="curation-"]) {
+      &[role] {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        cursor: default;
+      }
+
+      &[role="menu"] {
+        min-width: 150px;
+        padding: 2px;
+        background: var(--menu-background-color);
+        color: var(--menu-text);
+        border: 1px solid var(--menu-border-color);
+        box-shadow: 4px 4px 3px -2px rgba(0, 0, 0, 0.5);
+        border-radius: 0;
+        overflow-x: hidden;
+        animation: fade 0.2s;
+
+        .main-contextMenu-filterPlaylistSearchContainer {
+          height: unset;
+        }
+
+        .main-contextMenu-filterPlaylistSearch {
+          display: none;
+        }
+
+        &::before {
+          content: "";
+          pointer-events: none;
+          position: absolute;
+          left: 2px;
+          width: var(--item-offset-left);
+          height: calc(100% - 4px);
+          background: var(--menu-icon-area-color);
+        }
+
+        [role="menuitem"] & {
+          display: none;
+          position: absolute;
+          left: 0;
+          top: 100%;
+          z-index: 99;
+        }
+
+        & [role="menuitem"] > [role="menu"] {
+          top: -4px;
+          left: 100%;
+        }
+
+        > [role="menuitem"],
+        .main-contextMenu-menuItem {
+          &:has(> span) {
+            display: none;
+          }
+
+          .main-contextMenu-menuItemButton {
+            height: 24px;
+
+            span {
+              margin-left: 21px;
+              line-height: 1.1;
+              overflow: visible;
+            }
+          }
+
+          > a,
+          > button,
+          > label,
+          &[aria-haspopup="true"] {
+            all: unset;
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            padding: 4px 10px 4px 10px;
+            box-sizing: border-box;
+            border: 1px solid transparent;
+            border-radius: 0;
+            white-space: nowrap;
+
+            &:hover,
+            &:focus-visible {
+              background: var(--menu-item-hover-color);
+              border-color: var(--menu-item-hover-color);
+            }
+
+            span {
+              font: var(--menu-font);
+            }
+
+            /* Checkmark */
+            &:has(
+                path[d="M15.53 2.47a.75.75 0 0 1 0 1.06L4.907 14.153.47 9.716a.75.75 0 0 1 1.06-1.06l3.377 3.376L14.47 2.47a.75.75 0 0 1 1.06 0z"]
+              ) {
+              svg:has(
+                  path[d="M15.53 2.47a.75.75 0 0 1 0 1.06L4.907 14.153.47 9.716a.75.75 0 0 1 1.06-1.06l3.377 3.376L14.47 2.47a.75.75 0 0 1 1.06 0z"]
+                ) {
+                display: none;
+              }
+
+              &::after {
+                content: "";
+                background: var(--menu-item-hover-color);
+                border-radius: inherit;
+                box-sizing: border-box;
+                position: absolute;
+                top: -1px;
+                left: -1px;
+                width: 22px;
+                height: 22px;
+              }
+
+              > span::before {
+                content: "";
+                display: block;
+                position: absolute;
+                top: 3px;
+                left: 4px;
+                width: 12px;
+                height: 12px;
+                background: var(--checkmark-menu) center no-repeat;
+                z-index: 2;
+              }
+
+              &:has(svg.activeStyle) > span::before {
+                content: "";
+                top: 7px;
+                left: 7px;
+                background: radial-gradient(
+                  circle at 75% 25%,
+                  var(--menu-item-radio-dot-color),
+                  var(--menu-item-radio-dot-color)
+                );
+                border: 1px solid var(--menu-item-radio-dot-color);
+                box-shadow: none;
+                border-radius: 50%;
+                box-sizing: border-box;
+                height: 6px;
+                width: 6px;
+                position: absolute;
+                z-index: 2;
+              }
+            }
+          }
+
+          > button,
+          > a {
+            &::after {
+              content: none;
+            }
+
+            span:not(:first-child) svg.Svg-img-icon-small {
+              /* submenu mark */
+              left: auto;
+              top: 3px;
+              right: -3px;
+              transform: scale(0.6) rotate(90deg);
+            }
+
+            &[class*=" "] {
+              /* has multiple classes, usually meaning a separator on top or bottom */
+              /* :not(:first-child) - dirty workaround for non-separator class being used in artist context menu ('Create Discog Collection') */
+              /* assume top here */
+              &::before {
+                top: -7px;
+                left: 29px;
+                width: calc(100% - 29px);
+                border: none;
+                border-top: solid 1px var(--menu-separator-border-top-color);
+                border-bottom: solid 1px var(--menu-separator-border-bottom-color);
+              }
+              margin-top: 9px;
+            }
+          }
+
+          svg {
+            position: absolute;
+            left: 4px;
+            transform: scale(0.75);
+          }
+        }
+
+        li:first-child,
+        li:nth-child(2),
+        li:nth-child(3),
+        li:nth-child(4),
+        li:nth-child(5),
+        li:nth-child(6) {
+          button[class*=" "] {
+            /* has multiple classes, usually meaning a separator on top or bottom */
+            /* assume bottom here */
+            &::before {
+              content: "";
+              position: absolute;
+              top: unset !important;
+              bottom: -6px;
+              pointer-events: none;
+            }
+            margin-top: 0 !important;
+            margin-bottom: 9px;
+          }
+        }
+
+        /* Bottom separator, verified classname being consistent in Spotify 1.2.45, .52, .53, .55, and .56 */
+        .Vz3pFUXmll6fKB5Fc4nd:not(#Prio1):not(#Prio2) {
+          &::before {
+            content: "";
+            position: absolute;
+            top: unset !important;
+            bottom: -6px;
+            pointer-events: none;
+          }
+          margin-top: 0 !important;
+          margin-bottom: 9px;
+        }
+
+        /* Hide the bottom separator if there is no menu below */
+        &:not(:has(+ [role="menu"])) {
+          .main-contextMenu-menuItem:not(:has(+ .main-contextMenu-menuItem)) {
+            .Vz3pFUXmll6fKB5Fc4nd:not(#Prio1):not(#Prio2) {
+              &::before {
+                display: none;
+              }
+            }
+          }
+        }
+
+        &:has(+ [role="menu"]) {
+          border-bottom: 0;
+
+          + [role="menu"] {
+            border-top: 0;
+            padding-top: 0;
+            margin-top: -2px;
+          }
+        }
+      }
+    }
+
+    /* Add to playlist menu */
+    form,
+    ul[id*="curation-folder-submenu-"] {
+      background: var(--surface);
+      border-radius: 0;
+      border: solid 1px black;
+      box-shadow: inset 0 0 0 1px #fffa;
+
+      > div:last-child {
+        background: transparent;
+      }
+
+      [role="search"] {
+        width: 100%;
+      }
+    }
+  }
+
+  /* For MadMenu */
+  .contextMenuBg {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    padding: var(--menu-padding) !important;
+    background: var(--menu-background-color) !important;
+    color: var(--menu-text);
+    box-shadow: var(--menu-border-color) -1px -1px inset, var(--menu-border-color) 1px 1px inset,
+      5px 5px 4px -4px rgba(0, 0, 0, 0.75);
+    z-index: 1;
+
+    hr {
+      border-top-color: var(--menu-separator-border-top-color);
+      border-bottom-color: var(--menu-separator-border-bottom-color);
+      margin-left: 29px;
+      width: calc(100% - 27px);
+    }
+  }
+
+  .contextMenu {
+    right: 5px;
+  }
+
+  .contextMenu::before {
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    left: 0;
+    width: var(--item-offset-left);
+    height: 100%;
+    background: var(--menu-icon-area-color);
+  }
+
+  .contextMenuItem {
+    position: relative;
+    width: calc(100% + 2px);
+    height: 24px !important;
+    padding: 2px 10px 4px 12px;
+    border: 1px solid transparent;
+    border-radius: 0;
+    white-space: nowrap;
+    color: var(--menu-text);
+
+    &[data-active] {
+      background: var(--menu-item-hover-color);
+      border-color: var(--menu-item-hover-color);
+    }
+
+    &.disabled {
+      color: #6d6d6d !important;
+      text-shadow: none !important;
+      &[data-active] {
+        background: #e6e6e6;
+        border-color: #d4d3d3;
+      }
+    }
+
+    p {
+      padding-top: 0 !important;
+      padding-left: 20px !important;
+      &::before {
+        display: none;
+      }
+    }
+
+    .submenuMark {
+      transform: translateY(calc(-50% - 2px));
+    }
+
+    &::after {
+      background: var(--menu-item-hover-color);
+      border-radius: inherit;
+      box-sizing: border-box;
+      position: absolute;
+      top: -1px;
+      left: -1px;
+      width: 22px;
+      height: 22px;
+    }
+    &::before {
+      position: absolute;
+      top: 50%;
+      right: 2px;
+      transform: translateY(-50%);
+      z-index: 2;
+    }
+
+    &.activeStyle,
+    &.checkedItem {
+      &::after {
+        content: "";
+      }
+    }
+    &.activeStyle::before {
+      content: "";
+      top: 10px;
+      left: 7px;
+      background: radial-gradient(
+        circle at 75% 25%,
+        var(--menu-item-radio-dot-color),
+        var(--menu-item-radio-dot-color)
+      );
+      border: 1px solid var(--menu-item-radio-dot-color);
+      box-shadow: none;
+      border-radius: 50%;
+      box-sizing: border-box;
+      height: 6px;
+      width: 6px;
+      position: absolute;
+      z-index: 2;
+    }
+    &.checkedItem::before {
+      content: "";
+      display: block;
+      position: absolute;
+      top: 3px;
+      left: 4px;
+      width: 12px;
+      height: 12px;
+      background: var(--checkmark-menu) center no-repeat;
+      z-index: 2;
+    }
+  }
+}

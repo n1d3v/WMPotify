@@ -24,7 +24,7 @@
     [role="combobox"] {
         top: -3px;
         min-height: 0;
-        color: black;
+        color: var(--spice-text);
         padding: 0;
         opacity: 1 !important;
         transform: none !important;
@@ -50,19 +50,23 @@
         &::after {
             content: '⏷';
             font-size: 12px;
-            color: black;
+            color: var(--spice-text);
             margin-top: -2px;
             margin-left: 4px;
             margin-right: -2px;
             order: 2;
             inline-size: unset;
         }
+
+        &:hover::after {
+          color: black;
+        }
     }
 
     /* listview header */
     .main-yourLibraryX-filterArea + div {
         background: none !important;
-        border-image: url('resources/ui/listview_header.png') 0 0 1 2 fill stretch;
+        border-image: var(--listview-header) 0 0 1 2 fill stretch;
         border-image-width: 0 0 1px 2px;
         box-shadow: var(--wmp11-separator-light) 0 -1px 0 0, var(--wmp11-separator-shadow) 0 -2px 0 0;
         height: 25px;
@@ -72,10 +76,10 @@
 
         > span {
             height: 25px;
-            border-image: url('resources/ui/listview_header.png') 0 2 1 2 fill stretch;
+            border-image: var(--listview-header) 0 2 1 2 fill stretch;
             border-image-width: 0 2px 1px 2px;
             padding-left: 5px;
-            color: #77797d;
+            color: var(--wmp11-subtext);
             line-height: 2;
             font-size: 12px;
             font-weight: normal;
@@ -301,10 +305,14 @@
             &:not(:last-child)::after {
                 content: '⏵';
                 font-size: 12px;
-                color: black;
+                color: var(--spice-text);
                 margin-top: -2px;
                 margin-left: 4px;
                 margin-right: -2px;
+            }
+
+            &:hover::after {
+                color: black;
             }
         }
 
@@ -332,7 +340,7 @@
             border-radius: 3px;
             background: none;
             font-size: 12px;
-            color: black;
+            color: var(--spice-text);
             text-align: left;
             height: 18px;
             padding-right: 5px;
@@ -520,6 +528,33 @@ body[data-wmpotify-lib-page-open]:not(#Prio1):not(#Prio2):not(#Prio3) { /* dirty
 
         .Root:has(.Root__right-sidebar aside) #Desktop_LeftSidebar_Id {
             width: calc(100vw - var(--panel-width, var(--right-sidebar-width)) * 1px - var(--panel-gap) * 2 - 2px);
+        }
+    }
+}
+
+:root[data-wmpotify-dark-mode] {
+    .main-yourLibraryX-library {
+        background: #222222;
+    }
+    #wmpotify-libx-sidebar {
+        .wmpotify-libx-sidebar-item-container {
+            .wmpotify-libx-sidebar-chevron:not(:hover) {
+                background-image: url('resources/library/chevron_dark.png');
+            }
+        }
+        &.rootCollapsed, .collapsed {
+            .wmpotify-libx-sidebar-chevron:not(:hover) {
+                background-image: url('resources/library/chevron_collapsed_dark.png');
+            }
+        }
+    }
+    body[data-wmpotify-lib-page-open] {
+        .main-yourLibraryX-libraryRootlist {
+            background: #2e2e2e;
+        }
+        .main-yourLibraryX-filterArea,
+        #wmpotify-libx-sidebar {
+            background: #222222;
         }
     }
 }

@@ -1,29 +1,27 @@
-[role="search"],
-.spicetify-exp-features .search-container {
+[role="search"] {
     position: relative;
     margin: 2px;
     width: 225px;
     height: 24px;
-    border: solid 1px #f4f7fc;
-    background: linear-gradient(to bottom, #5e5f61, #c0c3c6);
+    border: solid 1px var(--wmp11-search-border-outer);
+    background: var(--wmp11-search-gradient);
     margin-top: -1px;
 
-    .x-filterBox-filterInput,
-    input.search {
+    .x-filterBox-filterInput {
         position: absolute;
         top: 0;
         left: 0;
         margin: 1px;
         width: calc(100% - 2px);
         height: 20px;
-        border: solid 1px white;
-        background-color: #f6f9fc;
+        border: solid 1px var(--wmp11-search-border-inner);
+        background-color: var(--wmp11-search-face);
         font-size: 12px;
         border-radius: 0;
         min-height: 0;
         padding-inline: 4px;
         box-shadow: none;
-        color: black;
+        color: var(--spice-text);
         opacity: 1;
         padding-top: 0;
         padding-bottom: 0;

@@ -35,10 +35,10 @@ const SearchDialog = React.memo(({ artist, title, albumTitle }) => {
             }
 
             .wmpvis-lyrics-row {
-                    display: flex;
-                    flex-direction: row;
-                    align-items: center;
-                    margin-bottom: 5px;
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                margin-bottom: 5px;
             }
 
             .wmpvis-lyrics-row label {
@@ -126,7 +126,7 @@ const SearchDialog = React.memo(({ artist, title, albumTitle }) => {
 export function openSearchDialog(artist, title, albumTitle, currentId) {
     Spicetify.PopupModal.display({
         title: Strings['LRCFIND_TITLE'],
-        content: <SearchDialog artist={artist} title={title} albumTitle={albumTitle} currentId={currentId} />,
+        content: <SearchDialog artist={artist} title={title} albumTitle={albumTitle} />,
     })
 
     init(currentId);

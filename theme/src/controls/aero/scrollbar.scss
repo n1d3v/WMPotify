@@ -1,0 +1,255 @@
+/* Somehow :root breaks the scrollbar styling */
+html[data-wmpotify-control-style="aero"] {
+  --scroll-thumb: url("resources/icon/scroll-thumb.png");
+  --scroll-thumb-horizontal: url("resources/icon/scroll-thumb-horizontal.png");
+
+  ::-webkit-scrollbar {
+    width: 16px !important;
+
+    &:horizontal {
+      height: 17px !important;
+    }
+
+    &-corner {
+      background: var(--button-face) !important;
+    }
+
+    &-track {
+      &:vertical {
+        background: var(--scrollbar-y) !important;
+      }
+
+      &:horizontal {
+        background: var(--scrollbar-x) !important;
+      }
+    }
+
+    &-thumb {
+      border: var(--button-border) !important;
+      border-color: var(--button-border-color) !important;
+      border-radius: var(--border-radius) !important;
+      box-shadow: var(--button-shadow) !important;
+      background-color: var(--button-face) !important;
+
+      &:vertical {
+        background: var(--scroll-thumb)
+            no-repeat center,
+          linear-gradient(
+            to right,
+            var(--button-face) 45%,
+            var(--button-shade-light) 45%,
+            var(--button-shade-dark)
+          ) !important;
+      }
+
+      &:horizontal {
+        background: var(--scroll-thumb-horizontal)
+            no-repeat center,
+          linear-gradient(
+            to bottom,
+            var(--button-face) 45%,
+            var(--button-shade-light) 45%,
+            var(--button-shade-dark)
+          ) !important;
+      }
+
+      &:hover {
+        &:vertical {
+          border-color: var(--button-border-color-hovered) !important;
+          background: var(--scroll-thumb)
+              no-repeat center,
+            linear-gradient(
+              to right,
+              var(--button-face-hover) 45%,
+              var(--button-shade-light-hovered) 45%
+            ) !important;
+        }
+
+        &:horizontal {
+          border-color: var(--button-border-color-hovered) !important;
+          background: var(--scroll-thumb-horizontal)
+              no-repeat center,
+            linear-gradient(
+              to bottom,
+              var(--button-face-hover) 45%,
+              var(--button-shade-light-hovered) 45%
+            ) !important;
+        }
+      }
+
+      &:active {
+        &:vertical {
+          border-color: var(--button-border-color-active) !important;
+          background: var(--scroll-thumb)
+              no-repeat center,
+            linear-gradient(
+              to right,
+              var(--button-face-active) 45%,
+              var(--button-shade-light-active) 45%
+            ) !important;
+        }
+
+        &:horizontal {
+          border-color: var(--button-border-color-active) !important;
+          background: var(--scroll-thumb-horizontal)
+              no-repeat center,
+            linear-gradient(
+              to bottom,
+              var(--button-face-active) 45%,
+              var(--button-shade-light-active) 45%
+            ) !important;
+        }
+      }
+    }
+
+    &-button:horizontal:start:increment,
+    &-button:horizontal:end:decrement,
+    &-button:vertical:start:increment,
+    &-button:vertical:end:decrement {
+      /* https://stackoverflow.com/a/67476494/3916702 */
+      display: none !important;
+    }
+
+    &-button {
+      /* Add an invisible border to prevent shifting
+          when hovering the scrollbar buttons */
+      border: var(--button-border) transparent !important;
+
+      &:vertical {
+        height: 17px !important;
+        box-shadow: none !important;
+
+        &:start {
+          background: url("resources/icon/button-up.svg"), var(--scrollbar-y) !important;
+        }
+
+        &:end {
+          background: url("resources/icon/button-down.svg"), var(--scrollbar-y) !important;
+        }
+      }
+
+      &:horizontal {
+        width: 16px !important;
+        box-shadow: none !important;
+
+        &:start {
+          background: url("resources/icon/button-left.svg"), var(--scrollbar-x) !important;
+        }
+
+        &:end {
+          background: url("resources/icon/button-right.svg"), var(--scrollbar-x) !important;
+        }
+      }
+
+      &:hover {
+        border-color: var(--button-border-color) !important;
+        border-radius: var(--border-radius) !important;
+        box-shadow: var(--button-shadow) !important;
+        background-color: var(--button-face) !important;
+
+        &:vertical {
+          height: 17px !important;
+
+          &:start {
+            border-color: var(--button-border-color-hovered) !important;
+            background: url("resources/icon/button-up.svg"),
+              linear-gradient(
+                to right,
+                var(--button-face-hover) 45%,
+                var(--button-shade-light-hovered) 45%
+              ) !important;
+          }
+
+          &:end {
+            border-color: var(--button-border-color-hovered) !important;
+            background: url("resources/icon/button-down.svg"),
+              linear-gradient(
+                to right,
+                var(--button-face-hover) 45%,
+                var(--button-shade-light-hovered) 45%
+              ) !important;
+          }
+        }
+
+        &:horizontal {
+          width: 16px !important;
+
+          &:start {
+            border-color: var(--button-border-color-hovered) !important;
+            background: url("resources/icon/button-left.svg"),
+              linear-gradient(
+                to bottom,
+                var(--button-face-hover) 45%,
+                var(--button-shade-light-hovered) 45%
+              ) !important;
+          }
+
+          &:end {
+            border-color: var(--button-border-color-hovered) !important;
+            background: url("resources/icon/button-right.svg"),
+              linear-gradient(
+                to bottom,
+                var(--button-face-hover) 45%,
+                var(--button-shade-light-hovered) 45%
+              ) !important;
+          }
+        }
+      }
+
+      &:active {
+        border-color: var(--button-border-color) !important;
+        border-radius: var(--border-radius) !important;
+        box-shadow: var(--button-shadow) !important;
+        background-color: var(--button-face) !important;
+
+        &:vertical {
+          height: 17px !important;
+
+          &:start {
+            border-color: var(--button-border-color-active) !important;
+            background: url("resources/icon/button-up.svg"),
+              linear-gradient(
+                to right,
+                var(--button-face-active) 45%,
+                var(--button-shade-light-active) 45%
+              ) !important;
+          }
+
+          &:end {
+            border-color: var(--button-border-color-active) !important;
+            background: url("resources/icon/button-down.svg"),
+              linear-gradient(
+                to right,
+                var(--button-face-active) 45%,
+                var(--button-shade-light-active) 45%
+              ) !important;
+          }
+        }
+
+        &:horizontal {
+          width: 16px !important;
+
+          &:start {
+            border-color: var(--button-border-color-active) !important;
+            background: url("resources/icon/button-left.svg"),
+              linear-gradient(
+                to bottom,
+                var(--button-face-active) 45%,
+                var(--button-shade-light-active) 45%
+              ) !important;
+          }
+
+          &:end {
+            border-color: var(--button-border-color-active) !important;
+            background: url("resources/icon/button-right.svg"),
+              linear-gradient(
+                to bottom,
+                var(--button-face-active) 45%,
+                var(--button-shade-light-active) 45%
+              ) !important;
+          }
+        }
+      }
+    }
+  }
+}

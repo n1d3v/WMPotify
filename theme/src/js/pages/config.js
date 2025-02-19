@@ -1,12 +1,13 @@
 'use strict';
 
 import Strings from "../strings";
-import { promptModal } from "../ui/dialogs";
+import { confirmModal, promptModal } from "../ui/dialogs";
 import FontDetective from "../utils/FontDetective";
 import { setTintColor } from "../ui/tinting";
 import WindhawkComm from "../WindhawkComm";
 import WindowManager from "../managers/WindowManager";
 import { checkUpdates } from "../utils/UpdateCheck";
+import ThemeManager from "../managers/ThemeManager";
 
 const configWindow = document.createElement('div');
 let tabs = null;
@@ -32,20 +33,10 @@ function init() {
         <div id="wmpotify-config-topborder" class="wmpotify-tintable"></div>
         <button id="wmpotify-config-prev"></button>
         <button id="wmpotify-config-next"></button>
-        <p id="wmpotify-config-title">${Strings['CONF_COLOR_TITLE']}</p>
+        <p id="wmpotify-config-title">${Strings['CONF_GENERAL_TITLE']}</p>
+        <span id="wmpotify-config-wh-message">${Strings['CONF_GENERAL_WH_MESSAGE']}</span>
         <button id="wmpotify-config-close"></button>
-        <section class="wmpotify-config-tab-content" data-tab-title="${Strings['CONF_COLOR_TITLE']}" style="display: block;">
-            <section class="field-row">
-                <a href="#" id="wmpotify-config-color-reset">${Strings['UI_RESET']}</a>
-                <input type="checkbox" id="wmpotify-config-tint-playerbar" class="wmpotify-aero">
-                <label for="wmpotify-config-tint-playerbar">${Strings['CONF_COLOR_TINTPB']}</label>
-            </section>
-            <label>${Strings['CONF_COLOR_HUE']}</label><br>
-            <input type="range" id="wmpotify-config-hue" class="wmpotify-aero no-track" min="0" max="360" step="1" value="180"><br>
-            <label>${Strings['CONF_COLOR_SAT']}</label><br>
-            <input type="range" id="wmpotify-config-sat" class="wmpotify-aero no-track" min="0" max="354" step="1" value="121"><br>
-        </section>
-        <section class="wmpotify-config-tab-content" data-tab-title="${Strings['CONF_GENERAL_TITLE']}">
+        <section id="wmpotify-config-tab-general" class="wmpotify-config-tab-content" data-tab-title="${Strings['CONF_GENERAL_TITLE']}" style="display: block;">
             <label for="wmpotify-config-style">${Strings['CONF_GENERAL_STYLE']}</label>
             <select id="wmpotify-config-style" class="wmpotify-aero">
                 <option value="auto">${Strings['UI_AUTO']}</option>
@@ -63,12 +54,25 @@ function init() {
                 <option value="keepmenu">${Strings['CONF_GENERAL_TITLE_STYLE_KEEPMENU']}</option>
             </select>
             <button id="wmpotify-config-apply" class="wmpotify-aero">${Strings['CONF_GENERAL_APPLY']}</button><br>
+            <label for="wmpotify-config-control-style">${Strings['CONF_GENERAL_CONTROL_STYLE']}</label>
+            <select id="wmpotify-config-control-style" class="wmpotify-aero">
+                <option value="classic">Windows Classic</option>
+                <option value="standard">Windows Standard</option>
+                <option value="xp">Windows XP</option>
+                <option value="aero" selected>Windows Aero</option>
+                <option value="10">Windows 10</option>
+            </select>
+            <label for="wmpotify-config-dark-mode">${Strings['CONF_GENERAL_DARK_MODE']}</label>
+            <select id="wmpotify-config-dark-mode" class="wmpotify-aero">
+                <option value="follow_scheme" selected>${Strings['CONF_GENERAL_DARK_MODE_FOLLOW_SCHEME']}</option>
+                <option value="system">${Strings['CONF_GENERAL_DARK_MODE_SYSTEM']}</option>
+                <option value="always">${Strings['CONF_GENERAL_DARK_MODE_ALWAYS']}</option>
+                <option value="never">${Strings['CONF_GENERAL_DARK_MODE_NEVER']}</option>
+            </select><br>
             <label for="wmpotify-config-font">${Strings['CONF_GENERAL_FONT']}</label>
             <select id="wmpotify-config-font" class="wmpotify-aero">
                 <option value="custom">${Strings['UI_CUSTOM']}</option>
-            </select>
-            <input type="checkbox" id="wmpotify-config-hide-pbleftbtn" class="wmpotify-aero">
-            <label for="wmpotify-config-hide-pbleftbtn">${Strings['CONF_GENERAL_HIDE_PBLEFTBTN']}</label><br>
+            </select><br>
             <label for="wmpotify-config-topmost">${Strings['CONF_GENERAL_TOPMOST']}</label>
             <select id="wmpotify-config-topmost" class="wmpotify-aero" disabled>
                 <option value="always">${Strings['CONF_GENERAL_TOPMOST_ALWAYS']}</option>
@@ -82,14 +86,26 @@ function init() {
                 <option value="acrylic">${Strings['CONF_GENERAL_BACKDROP_ACRYLIC']}</option>
                 <option value="tabbed">${Strings['CONF_GENERAL_BACKDROP_TABBED']}</option>
             </select><br>
+            <input type="checkbox" id="wmpotify-config-hide-pbleftbtn" class="wmpotify-aero">
+            <label for="wmpotify-config-hide-pbleftbtn">${Strings['CONF_GENERAL_HIDE_PBLEFTBTN']}</label><br>
             <input type="checkbox" id="wmpotify-config-show-libx" class="wmpotify-aero">
-            <label for="wmpotify-config-show-libx">${Strings['CONF_GENERAL_SHOW_LIBX']}</label>
+            <label for="wmpotify-config-show-libx">${Strings['CONF_GENERAL_SHOW_LIBX']}</label><br>
             <input type="checkbox" id="wmpotify-config-lock-title" class="wmpotify-aero" disabled>
-            <label for="wmpotify-config-lock-title">${Strings['CONF_GENERAL_LOCK_TITLE']}</label><br>
-            <span id="wmpotify-config-wh-message">${Strings['CONF_GENERAL_WH_MESSAGE']}</span>
+            <label for="wmpotify-config-lock-title">${Strings['CONF_GENERAL_LOCK_TITLE']}</label>
+        </section>
+        <section id="wmpotify-config-tab-color" class="wmpotify-config-tab-content" data-tab-title="${Strings['CONF_COLOR_TITLE']}">
+            <section class="field-row">
+                <a href="#" id="wmpotify-config-color-reset">${Strings['UI_RESET']}</a>
+                <input type="checkbox" id="wmpotify-config-tint-playerbar" class="wmpotify-aero">
+                <label for="wmpotify-config-tint-playerbar">${Strings['CONF_COLOR_TINTPB']}</label>
+            </section>
+            <label>${Strings['CONF_COLOR_HUE']}</label><br>
+            <input type="range" id="wmpotify-config-hue" class="wmpotify-aero no-track" min="0" max="360" step="1" value="180"><br>
+            <label>${Strings['CONF_COLOR_SAT']}</label><br>
+            <input type="range" id="wmpotify-config-sat" class="wmpotify-aero no-track" min="0" max="354" step="1" value="121"><br>
         </section>
         ${whStatus?.speedModSupported ? `
-        <section class="wmpotify-config-tab-content" data-tab-title="${Strings['CONF_SPEED_TITLE']}" data-wh-speedmod-required="true">
+        <section id="wmpotify-config-tab-speed" class="wmpotify-config-tab-content" data-tab-title="${Strings['CONF_SPEED_TITLE']}" data-wh-speedmod-required="true">
             <a href="#" id="wmpotify-config-speed-slow">${Strings['CONF_SPEED_SLOW']}</a>
             <a href="#" id="wmpotify-config-speed-normal">${Strings['CONF_SPEED_NORMAL']}</a>
             <a href="#" id="wmpotify-config-speed-fast">${Strings['CONF_SPEED_FAST']}</a><br>
@@ -97,7 +113,7 @@ function init() {
             ${Strings['CONF_SPEED_CURRENT_LABEL']}: <span id="wmpotify-config-speed-value">1.0</span>
         </section>
         ` : ''}
-        <section class="wmpotify-config-tab-content" data-tab-title="${Strings['CONF_ABOUT_TITLE']}">
+        <section id="wmpotify-config-tab-about" class="wmpotify-config-tab-content" data-tab-title="${Strings['CONF_ABOUT_TITLE']}">
             <div id="wmpotify-about-logo"></div>
             <p id="wmpotify-about-title">WMPotify</p>
             <button id="wmpotify-about-github" onclick="window.open('https://github.com/Ingan121/WMPotify', '_blank')">
@@ -124,7 +140,7 @@ function init() {
                 </svg>
             </button>
             <p>${Strings['CONF_ABOUT_DESC']}</p>
-            <p>${Strings['CONF_ABOUT_VERSION']}: 1.0 Beta 3<span id="wmpotify-about-ctewh-ver"></span></p>
+            <p>${Strings['CONF_ABOUT_VERSION']}: 1.0 Beta 4<span id="wmpotify-about-ctewh-ver"></span></p>
             <p>${Strings['CONF_ABOUT_AUTHOR']} - <a href="https://www.ingan121.com/" target="_blank">www.ingan121.com</a></p>
             <input type="checkbox" id="wmpotify-config-auto-updates" class="wmpotify-aero" checked>
             <label for="wmpotify-config-auto-updates">${Strings['CONF_ABOUT_AUTO_UPDATES']}</label>
@@ -139,6 +155,8 @@ function init() {
     elements.tintPb = configWindow.querySelector('#wmpotify-config-tint-playerbar');
     elements.style = configWindow.querySelector('#wmpotify-config-style');
     elements.titleStyle = configWindow.querySelector('#wmpotify-config-title-style');
+    elements.controlStyle = configWindow.querySelector('#wmpotify-config-control-style');
+    elements.darkMode = configWindow.querySelector('#wmpotify-config-dark-mode');
     elements.fontSelector = configWindow.querySelector('#wmpotify-config-font');
     elements.fontCustom = configWindow.querySelector('#wmpotify-config-font option');
     elements.hidePbLeftBtn = configWindow.querySelector('#wmpotify-config-hide-pbleftbtn');
@@ -172,6 +190,42 @@ function init() {
             activeBasicColor = activeColor;
             inactiveBasicColor = inactiveColor;
             textBasicColor = textColor;
+        }
+    });
+    elements.controlStyle.addEventListener('change', () => {
+        localStorage.wmpotifyControlStyle = elements.controlStyle.value;
+        document.documentElement.dataset.wmpotifyControlStyle = elements.controlStyle.value;
+    });
+    elements.darkMode.addEventListener('change', async () => {
+        const darkMode = elements.darkMode.value;
+        const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        if (darkMode === 'system' && !WindhawkComm.getModule()?.initialOptions.noforceddarkmode && darkQuery.matches) {
+            const locId = 'CONF_GENERAL_DARK_MODE_SYSTEM_MSG_' + (navigator.userAgent.includes('Windows') ? 'WIN' : 'UNIX');
+            if (!await confirmModal(Strings['CONF_GENERAL_DARK_MODE_SYSTEM'], Strings[locId])) {
+                elements.darkMode.value = localStorage.wmpotifyDarkMode || 'follow_scheme';
+                return;
+            }
+        }
+
+        localStorage.wmpotifyDarkMode = darkMode;
+        if (darkMode === 'always' ||
+            (darkMode === 'follow_scheme' && window.Spicetify?.Config?.color_scheme === 'dark') ||
+            (darkMode === 'system' && darkQuery.matches)
+        ) {
+            document.documentElement.dataset.wmpotifyDarkMode = true;
+        } else {
+            delete document.documentElement.dataset.wmpotifyDarkMode;
+        }
+
+        if (darkMode === 'system') {
+            ThemeManager.addSystemDarkModeListener();
+        } else {
+            ThemeManager.removeSystemDarkModeListener();
+        }
+        if (darkMode === 'follow_scheme') {
+            ThemeManager.addMarketplaceSchemeObserver();
+        } else {
+            ThemeManager.removeMarketplaceSchemeObserver();
         }
     });
     elements.fontSelector.addEventListener('change', async () => {
@@ -330,6 +384,14 @@ function init() {
     }
     if (localStorage.wmpotifyTitleStyle) {
         elements.titleStyle.value = localStorage.wmpotifyTitleStyle;
+    }
+    if (localStorage.wmpotifyControlStyle) {
+        elements.controlStyle.value = localStorage.wmpotifyControlStyle;
+    }
+    if (['follow_scheme', 'system', 'always', 'never'].includes(localStorage.wmpotifyDarkMode)) {
+        elements.darkMode.value = localStorage.wmpotifyDarkMode;
+    } else if (WindhawkComm.getModule()?.initialOptions.noforceddarkmode) {
+        elements.darkMode.value = 'system';
     }
     if (localStorage.wmpotifyHidePbLeftBtn) {
         elements.hidePbLeftBtn.checked = true;

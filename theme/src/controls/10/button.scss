@@ -1,0 +1,149 @@
+:root[data-wmpotify-control-style="10"] {
+  --button-face: #e1e1e1;
+  --button-face-hover: #e5f1fb;
+  --button-face-active: #cce4f7;
+  --button-face-disabled: #cccccc;
+  --button-border-color: #adadad;
+  --button-border-color-hovered: #0078d7;
+  --button-border-color-active: #005499;
+  --button-border-color-disabled: #bfbfbf;
+  --button-border-color-inner: transparent;
+  --button-border-color-inner-focus: #0078d7;
+  --button-focus-outline-color: #111111;
+
+  &[data-wmpotify-dark-mode] {
+    --button-face: #333333;
+    --button-face-hover: #454545;
+    --button-face-active: #666666;
+    --button-face-disabled: #333333;
+    --button-border-color: #f0f0f0;
+    --button-border-color-hovered: #f0f0f0;
+    --button-border-color-active: #f0f0f0;
+    --button-border-color-disabled: #f0f0f0;
+    --button-border-color-inner: #9b9b9b;
+    --button-border-color-inner-focus: #ffffff;
+    --button-focus-outline-color: #c3c3c3;
+  }
+
+  button.wmpotify-aero,
+  button.Button-sc-y0gtbx-0,
+  .ReactModalPortal button.Button-sc-qlcn5g-0,
+  .ReactModalPortal button.Button-sc-1dqy6lx-0,
+  #context-menu button.Button-sc-1dqy6lx-0,
+  #context-menu button.Button-sc-qlcn5g-0,
+  .spicetify-exp-features button.reset:not(#Prio1):not(#Prio2) {
+    box-sizing: border-box;
+    box-shadow: inset 1px 1px 0 0 var(--button-border-color), inset -1px -1px 0 0 var(--button-border-color);
+    border: none;
+    border-radius: 0;
+    border-image: none !important;
+    color: var(--button-text-color);
+    min-width: 75px;
+    min-height: 23px;
+    padding: 0 12px;
+    text-align: center;
+    background: var(--button-face);
+    position: relative;
+    z-index: 0;
+
+    /* Button style on hovered */
+    &::before {
+      content: "";
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      padding: 0;
+      margin: 0;
+      top: 0;
+      left: 0;
+      box-shadow: inset 1px 1px 0 0 var(--button-border-color-hovered), inset -1px -1px 0 0 var(--button-border-color-hovered),
+        inset 2px 2px 0 0 var(--button-border-color-inner), inset -2px -2px 0 0 var(--button-border-color-inner);
+      border-radius: 0;
+      background: var(--button-face-hover);
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: -1;
+      border: none !important;
+      right: unset;
+      bottom: unset;
+    }
+
+    /* Button style on clicked */
+    &::after {
+      content: "";
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      padding: 0;
+      margin: 0;
+      top: 0;
+      left: 0;
+      box-shadow: inset 1px 1px 0 0 var(--button-border-color-active), inset -1px -1px 0 0 var(--button-border-color-active),
+        inset 2px 2px 0 0 var(--button-border-color-inner), inset -2px -2px 0 0 var(--button-border-color-inner);
+      border-radius: 0;
+      background: var(--button-face-active);
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: -1;
+      box-sizing: border-box;
+    }
+
+    &:disabled {
+      background: var(--button-face-disabled);
+      border-color: var(--button-border-color-disabled);
+      color: var(--button-text-color-disabled);
+    }
+
+    &:not(:disabled) {
+      /* Animation when hovered */
+      &:hover {
+        border-color: var(--button-border-color-hovered);
+        transition: border-color 0.3s;
+
+        &::before {
+          opacity: 1;
+          transition: opacity 0.3s;
+        }
+      }
+
+      /* Animation when unhovered */
+      &:not(:hover) {
+        border-color: var(--button-border-color);
+        transition: border-color 1s linear;
+
+        &::before {
+          opacity: 0;
+          transition: opacity 1s linear;
+        }
+      }
+
+      &:active,
+      &[data-active],
+      &.active {
+        border-color: var(--button-border-color-active);
+        transition: border-color 0.3s;
+
+        &::after {
+          opacity: 1;
+          transition: opacity 0.3s;
+        }
+      }
+    }
+
+    &:focus-visible,
+    &.focused,
+    &:has(.ButtonInner-medium) {
+      outline: 1px dotted var(--button-focus-outline-color);
+      outline-offset: -4px;
+    }
+
+    &.default,
+    &:focus,
+    &.focused,
+    &:has(.ButtonInner-medium),
+    &:has(.ButtonInner-small) {
+      box-shadow: inset 1px 1px 0 0 var(--button-border-color-hovered), inset -1px -1px 0 0 var(--button-border-color-hovered),
+        inset 2px 2px 0 0 var(--button-border-color-inner-focus), inset -2px -2px 0 0 var(--button-border-color-inner-focus);
+    }
+  }
+}

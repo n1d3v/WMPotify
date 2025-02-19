@@ -47,6 +47,22 @@ class App extends React.Component {
     if (resizeTarget3) {
       resizeTarget3.style.height = '100%';
     }
+    // This interferes with the right-click menu on non-WMPotify themes
+    // Since this bar is empty when global nav is enabled, just hide it
+    // (And this bar is always re-rendered on page navigation, so no need to restore it on unmount)
+    const hideTarget = document.querySelector('.main-topBar-container');
+    const isGlobalNav = !!document.querySelector('.Root__globalNav');
+    if (hideTarget) {
+      if (isGlobalNav) {
+        hideTarget.style.display = 'none';
+      } else {
+        // Make the top bar is overlayed on the main view if it's not global nav
+        const hideTarget2 = document.querySelector('.main-view-container__scroll-node-child-spacer');
+        if (hideTarget2) {
+          hideTarget2.style.display = 'none';
+        }
+      }
+    }
 
     init(this.elemRefs);
     const observer = new IntersectionObserver((entries) => {
@@ -332,11 +348,6 @@ class App extends React.Component {
             font-size: 3rem !important;
             margin: 64px 144px 0 144px !important;
           }
-        }
-
-        /* This interferes with the right-click menu on non-WMPotify themes */
-        .main-topBar-container {
-          display: none;
         }
         `}
       </style>

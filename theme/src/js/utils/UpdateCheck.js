@@ -4,7 +4,7 @@ import Strings from '../strings'
 import WindhawkComm from "../WindhawkComm";
 import { openUpdateDialog } from '../ui/dialogs';
 
-export const ver = '1.0b3';
+export const ver = '1.0b4';
 
 export async function checkUpdates() {
     try {
@@ -64,4 +64,22 @@ export function compareVersions(a, b) {
     }
 
     return aParsed.extra - bParsed.extra;
+}
+
+export function compareSpotifyVersion(target) {
+    let current = window?.Spicetify?.Platform?.version?.split('.').map(Number);
+    if (!current) {
+        current = navigator.userAgent.match(/Spotify\/(\d+\.\d+\.\d+\.\d+)/)?.[1].split('.').map(Number);
+    }
+    if (!current || !target) {
+        return 0;
+    }
+    const targetParsed = target.split('.').map(Number);
+
+    for (let i = 0; i < targetParsed.length; i++) {
+        if (current[i] !== targetParsed[i]) {
+            return current[i] - targetParsed[i];
+        }
+    }
+    return 0;
 }

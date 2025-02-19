@@ -30,6 +30,7 @@ let scrolling = false;
 
 const intersectionObserver = new IntersectionObserver((entries) => {
     if (entries[0].isIntersecting) {
+        processProperties();
         processTimeline(true);
     }
 });
@@ -687,6 +688,9 @@ async function loadLyrics(idOrLrc, addOverride) {
 }
 
 async function processProperties() {
+    if (!localStorage.wmpotifyVisShowLyrics) {
+        return;
+    }
     lyricsView.innerHTML = Strings['LRC_STATUS_LOADING'];
     const spotifyNowPlayingLocal = await getSpotifyNowPlaying();
     if (spotifyNowPlayingLocal && spotifyNowPlayingLocal.item) {
@@ -770,6 +774,7 @@ function processTimeline(init) {
     }
 }
 
+// #region Utils
 function getNearestLyricIndex(time) {
     if (lastSyncedLyricsParsed) {
         if (time < lastSyncedLyricsParsed[0].time) {
@@ -981,6 +986,7 @@ function getFilename (str) {
     return str.split('/').pop().split('.').slice(0, -1).join('.');
 }
 // #endregion
+// #endregion
 
 // #region Initialization
 async function init(lv) {
@@ -990,7 +996,6 @@ async function init(lv) {
 
     overrides = await madIdb.getItem('lyricsOverrides') || {};
     lyricsView = lv;
-    processProperties();
     Spicetify.Player.addEventListener('songchange', processProperties);
     Spicetify.Player.addEventListener('onprogress', processTimeline);
     window.addEventListener('focus', forceProcessTimeline);

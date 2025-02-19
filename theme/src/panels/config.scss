@@ -86,6 +86,12 @@
         font-weight: bold;
     }
 
+    &-wh-message {
+        position: absolute;
+        top: 4px;
+        right: 28px;
+    }
+
     &-close {
         position: absolute;
         top: 8px;
@@ -127,17 +133,17 @@
         margin-left: 10px;
     }
 
-    &-font,
-    &-topmost {
-        margin-top: 3px;
-    }
+    &-tab-general {
+        select {
+            margin-top: 3px;
+        }
 
-    label[for="wmpotify-config-show-libx"],
-    label[for="wmpotify-config-lock-title"],
-    label[for="wmpotify-config-auto-updates"],
-    label[for="wmpotify-config-hide-pbleftbtn"] {
-        &::after {
-            top: -2px;
+        #wmpotify-config-backdrop {
+            margin-bottom: 3px;
+        }
+
+        input[type="checkbox"] + label {
+            margin-top: 3px;
         }
     }
 

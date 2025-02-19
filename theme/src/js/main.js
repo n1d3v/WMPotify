@@ -12,8 +12,9 @@ import { initQueuePanel } from './pages/queue';
 import WindhawkComm from './WindhawkComm';
 import PageManager from './managers/PageManager';
 import WindowManager from './managers/WindowManager';
-import { ver, checkUpdates, compareVersions } from './utils/UpdateCheck';
+import { ver, checkUpdates, compareVersions, compareSpotifyVersion } from './utils/UpdateCheck';
 import { openUpdateDialog } from './ui/dialogs';
+import ThemeManager from './managers/ThemeManager';
 
 const elementsRequired = [
     '.Root__globalNav',
@@ -90,7 +91,7 @@ function earlyInit() {
     }
 
     if (whStatus && !localStorage.wmpotifyStyle && titleStyle === 'native' && whStatus.isThemingEnabled) {
-        if (whStatus.options.transparentrendering && whStatus.isDwmEnabled) {
+        if (WindhawkComm.getModule()?.initialOptions.transparentrendering && whStatus.isDwmEnabled) {
             style = 'aero';
         } else if (!whStatus.isDwmEnabled) {
             style = 'basic';
@@ -127,6 +128,8 @@ function earlyInit() {
     }
     document.documentElement.dataset.wmpotifyStyle = style;
 
+    document.documentElement.dataset.wmpotifyControlStyle = localStorage.wmpotifyControlStyle || 'aero';
+
     window.addEventListener('resize', () => {
         if (style === 'aero') {
             if (window.innerHeight < 62) {
@@ -148,6 +151,25 @@ function earlyInit() {
 
     if (whStatus && localStorage.wmpotifyLockTitle) {
         WindhawkComm.lockTitle(true);
+    }
+
+    let darkMode = 'follow_scheme';
+    if (['follow_scheme', 'system', 'always', 'never'].includes(localStorage.wmpotifyDarkMode)) {
+        darkMode = localStorage.wmpotifyDarkMode;
+    } else if (WindhawkComm.getModule()?.initialOptions.noforceddarkmode) {
+        darkMode = 'system';
+    }
+    const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    if (darkMode === 'always' ||
+        (darkMode === 'follow_scheme' && window.Spicetify?.Config?.color_scheme === 'dark') ||
+        (darkMode === 'system' && darkQuery.matches)
+    ) {
+        document.documentElement.dataset.wmpotifyDarkMode = true;
+    }
+    if (darkMode === 'system') {
+        ThemeManager.addSystemDarkModeListener();
+    } else if (darkMode === 'follow_scheme') {
+        ThemeManager.addMarketplaceSchemeObserver();
     }
 }
 
@@ -202,15 +224,23 @@ async function init() {
 }
 
 function isReady() {
-    return window.Spicetify?.Platform?.PlayerAPI &&
+    if (window.Spicetify?.Platform?.PlayerAPI &&
         window.Spicetify.AppTitle &&
         window.Spicetify.Player?.origin?._state &&
         window.Spicetify.Menu &&
         window.Spicetify.Platform.History?.listen &&
         window.Spicetify.Platform.LocalStorageAPI &&
         window.Spicetify.Platform.Translations &&
-        window.Spicetify.Platform.PlatformData &&
-        elementsRequired.every(selector => document.querySelector(selector));
+        window.Spicetify.Platform.PlatformData
+    ) {
+        if (elementsRequired.every(selector => document.querySelector(selector))) {
+            return true;
+        } else {
+            return false;
+        }
+    } else {
+        return null;
+    }
 }
 
 if (document.readyState === 'complete') {
@@ -224,25 +254,49 @@ window.addEventListener('load', () => {
 function waitForReady() {
     let cnt = 0;
     const interval = setInterval(async () => {
-        if (isReady()) {
+        const ready = isReady();
+        if (ready) {
             clearInterval(interval);
             try {
                 await init();
+                console.log('WMPotify: Theme loaded');
+                document.documentElement.dataset.wmpotifyInitComplete = true;
             } catch (e) {
                 (window.Spicetify?.showNotification || window.alert)('[WMPotify] ' + Strings['MAIN_MSG_ERROR_INIT']);
                 console.error('WMPotify: Error during init:', e);
+                document.documentElement.dataset.wmpotifyJsFail = true;
             }
-            console.log('WMPotify: Theme loaded');
         } else if (cnt++ > 80) {
-            (window.Spicetify?.showNotification || window.alert)('[WMPotify] ' + Strings['MAIN_MSG_ERROR_LOAD_FAIL']);
-            clearInterval(interval);
-            const missing = [];
-            for (const selector of elementsRequired) {
-                if (!document.querySelector(selector)) {
-                    missing.push(selector);
+            if (compareSpotifyVersion('1.2.45') < 0) {
+                (window.Spicetify?.showNotification || window.alert)('[WMPotify] ' + Strings['MAIN_MSG_ERROR_OLD_SPOTIFY']);
+            } else {
+                const locId = compareSpotifyVersion('1.2.45') === 0 ? 'MAIN_MSG_ERROR_LOAD_FAIL_GLOBALNAV' : 'MAIN_MSG_ERROR_LOAD_FAIL';
+                if (window.confirm('[WMPotify] ' + Strings[locId])) {
+                    window.location.reload();
                 }
             }
-            console.log('WMPotify: Missing elements:', missing);
+            if (ready === false) {
+                console.error('WMPotify: Missing elements:', elementsRequired.filter(selector => !document.querySelector(selector)));
+                if (!document.querySelector('.Root__globalNav')) {
+                    // Show headers and sidebar when global nav is missing
+                    // To allow users to access experimental features, marketplace, etc.
+                    document.documentElement.dataset.wmpotifyNoGlobalNav = true;
+                    delete document.body.dataset.hideLibx;
+                    console.error('WMPotify: Global nav not found');
+                }
+            } else {
+                console.error('WMPotify: Missing API objects:', Object.entries({
+                    'Spicetify.Platform.PlayerAPI': window.Spicetify?.Platform?.PlayerAPI,
+                    'Spicetify.AppTitle': window.Spicetify.AppTitle,
+                    'Spicetify.Player.origin._state': window.Spicetify.Player?.origin?._state,
+                    'Spicetify.Menu': window.Spicetify.Menu,
+                    'Spicetify.Platform.History.listen': window.Spicetify.Platform.History?.listen,
+                    'Spicetify.Platform.LocalStorageAPI': window.Spicetify.Platform.LocalStorageAPI,
+                    'Spicetify.Platform.Translations': window.Spicetify.Platform.Translations,
+                    'Spicetify.Platform.PlatformData': window.Spicetify.Platform.PlatformData,
+                }).filter(([_, obj]) => !obj));
+            }
+            clearInterval(interval);
         }
     }, 100);
 }

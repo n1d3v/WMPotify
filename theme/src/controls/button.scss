@@ -1,3 +1,8 @@
+@import "aero/button.scss";
+@import "xp/button.scss";
+@import "classic/button.scss";
+@import "10/button.scss";
+
 .wmpotify-toolbar-button,
 .artist-artistDiscography-button,
 [role="combobox"],
@@ -9,7 +14,7 @@ header nav li,
   height: 21px;
   position: relative;
   font-size: 12px;
-  color: black !important;
+  color: var(--spice-text) !important;
   border: 3px solid transparent;
   border-image: 3 fill stretch;
   border-image-width: 3px;
@@ -20,12 +25,22 @@ header nav li,
 
   &:hover {
     border-image-source: url("resources/ui/toolbarbutton_hover.png");
+    color: black !important;
+
+    a, > span {
+      color: black !important;
+    }
   }
 
   &:active,
   &:has([class*="ctive"]),
   &[class*="-selected-"] {
     border-image-source: url("resources/ui/toolbarbutton_pressed.png");
+    color: black !important;
+
+    a, > span {
+      color: black !important;
+    }
   }
 
   a, > span {
@@ -33,7 +48,7 @@ header nav li,
     margin: 0 !important;
     padding: 0 5px !important;
     min-block-size: unset !important;
-    color: black !important;
+    color: var(--spice-text) !important;
     height: 100%;
     cursor: default !important;
   }
@@ -44,7 +59,7 @@ header nav li,
 }
 
 button.x-sortBox-sortDropdown {
-  color: black;
+  color: var(--spice-text);
   padding: 0;
   gap: 0;
   order: -1;
@@ -72,12 +87,16 @@ button.x-sortBox-sortDropdown {
   &::after {
       content: '⏷';
       font-size: 12px;
-      color: black;
+      color: var(--spice-text);
       margin-top: -2px;
       margin-left: 4px;
       margin-right: -2px;
       order: 2;
       inline-size: unset;
+  }
+
+  &:hover::after {
+    color: black;
   }
 }
 
@@ -88,24 +107,10 @@ button.Button-sc-y0gtbx-0,
 #context-menu button.Button-sc-1dqy6lx-0,
 #context-menu button.Button-sc-qlcn5g-0,
 .spicetify-exp-features button.reset:not(#Prio1):not(#Prio2) {
-  font: var(--font);
-  box-sizing: border-box;
-  border: var(--button-border);
-  border-color: var(--button-border-color);
-  border-radius: var(--border-radius);
-  border-image: none !important;
-  box-shadow: var(--button-shadow) !important;
-  color: #222;
-  min-width: 75px;
-  min-height: 23px;
-  padding: 0 12px;
-  text-align: center;
-  background: var(--button-gradient);
-  position: relative;
-  z-index: 0;
   cursor: default !important;
   transform: none !important;
   opacity: 1 !important;
+  font: var(--font);
 
   svg {
     display: none;
@@ -114,119 +119,11 @@ button.Button-sc-y0gtbx-0,
   .ButtonInner-small,
   .ButtonInner-medium {
     display: block;
-    background: none;
-    color: black;
+    background: none !important;
+    color: var(--spice-text);
     padding-block: 0;
     padding-inline: 0;
     min-block-size: 0;
     transform: none !important;
-  }
-
-  /* Button style on hovered */
-  &::before {
-    content: "";
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    padding: 0;
-    margin: 0;
-    top: 0;
-    left: 0;
-    border-radius: var(--border-radius);
-    box-shadow: var(--button-shadow);
-    background: var(--button-gradient-hovered);
-    opacity: 0;
-    transition: opacity 0.3s;
-    z-index: -1;
-    border: none !important;
-    right: unset;
-    bottom: unset;
-  }
-
-  /* Button style on clicked */
-  &::after {
-    content: "";
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    padding: 0;
-    margin: 0;
-    top: 0;
-    left: 0;
-    box-shadow: var(--button-shadow-active);
-    border-radius: 2px;
-    background: var(--button-gradient-active);
-    opacity: 0;
-    transition: opacity 0.3s;
-    z-index: -1;
-  }
-
-  &:disabled {
-    background: var(--button-face-disabled);
-    border-color: var(--button-border-color-disabled);
-    color: var(--button-text-color-disabled);
-  }
-
-  &:not(:disabled) {
-    /* Animation when hovered */
-    &:hover {
-      border-color: var(--button-border-color-hovered);
-      transition: border-color 0.3s;
-
-      &::before {
-        opacity: 1;
-        transition: opacity 0.3s;
-      }
-    }
-
-    /* Animation when unhovered */
-    &:not(:hover) {
-      border-color: var(--button-border-color);
-      transition: border-color 1s linear;
-
-      &::before {
-        opacity: 0;
-        transition: opacity 1s linear;
-      }
-    }
-
-    &:active,
-    &[data-active],
-    &.active {
-      border-color: var(--button-border-color-active);
-      transition: border-color 0.3s;
-
-      &::after {
-        opacity: 1;
-        transition: opacity 0.3s;
-      }
-    }
-  }
-
-  &:focus-visible,
-  &.focused,
-  &:has(.ButtonInner-medium) {
-    box-shadow: inset 0 0 0 2px var(--button-shade-light-active);
-    outline: 1px dotted #000;
-    outline-offset: -4px;
-  }
-
-  &.default,
-  &:focus,
-  &.focused,
-  &:has(.ButtonInner-medium),
-  &:has(.ButtonInner-small) {
-    border-color: var(--button-border-color-default);
-    background-image: var(--button-gradient-hovered);
-    animation: 1s ease infinite alternate pulse-anim;
-  }
-}
-
-@keyframes pulse-anim {
-  from {
-    box-shadow: inset 0 0 3px 1px #34deffdd;
-  }
-  to {
-    box-shadow: inset 0 0 1px 1px #34deffdd;
   }
 }

@@ -133,7 +133,7 @@
 
                 p {
                     font-size: 12px;
-                    color: black;
+                    color: var(--spice-text);
                 }
             }
 
@@ -188,7 +188,7 @@
             height: var(--queue-item-height);
 
             &:hover {
-                background-color: #d7dbe1;
+                background-color: var(--wmp11-queue-hover);
             }
 
             &:focus-within {
@@ -231,7 +231,7 @@
                 }
 
                 p[data-encore-id="listRowSubtitle"] {
-                    color: #77797d !important;
+                    color: var(--wmp11-subtext) !important;
                     position: relative;
 
                     span:has(> a)::before {

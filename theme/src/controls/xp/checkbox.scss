@@ -1,0 +1,133 @@
+:root[data-wmpotify-control-style="xp"] {
+  --checkbox-width: 13px;
+  --checkmark-width: 11px;
+  --radio-inner-shadow-hover: inset -2px -2px #f8b636, inset 2px 2px #fedf9c;
+  --radio-bg-active: linear-gradient(135deg, rgba(176, 176, 167, 1) 0%, rgba(227, 225, 210, 1) 100%);
+  --radio-bg: linear-gradient(135deg, rgba(220, 220, 215, 1) 0%, rgba(255, 255, 255, 1) 100%);
+  --radio-border: 1px solid #1d5281;
+  --radio-border-disabled: 1px solid #cac8bb;
+  --radio-label-spacing: 6px;
+
+  --checkbox-total-width-precalc: var(--checkbox-width) +
+    var(--radio-label-spacing);
+  --checkbox-total-width: calc(var(--checkbox-total-width-precalc));
+  --checkmark-top: 3px;
+  --checkmark-left: 3px;
+  --border-field: inset -1px -1px #fff,
+    inset 1px 1px #808080, inset -2px -2px #dfdfdf,
+    inset 2px 2px #0a0a0a;
+
+  --checkmark: url("resources/icon/xp/checkmark.svg");
+
+  input.wmpotify-aero[type="checkbox"],
+  input.x-toggle-input[type="checkbox"] {
+    appearance: none;
+    font: var(--font);
+    margin: 0;
+    background: none;
+    position: fixed;
+    opacity: 0;
+    border: none;
+    + label,
+    + .x-toggle-indicatorWrapper {
+      line-height: 13px;
+      position: relative;
+      margin-left: var(--checkbox-total-width);
+      width: auto;
+      background: none !important;
+
+      &::before {
+        content: "";
+        position: absolute;
+        left: calc(-1 * (var(--checkbox-total-width-precalc)));
+        display: inline-block;
+        width: var(--checkbox-width);
+        height: var(--checkbox-width);
+        border: var(--radio-border);
+        background: var(--radio-bg);
+        margin-right: var(--radio-label-spacing);
+      }
+
+      .x-toggle-indicator {
+        display: none;
+      }
+    }
+    &:focus {
+      + {
+        label,
+        .x-toggle-indicatorWrapper {
+          outline: 1px dotted #000000;
+        }
+      }
+    }
+    &:not(:disabled):not(:active) {
+      + label,
+      + .x-toggle-indicatorWrapper {
+        &:hover:before {
+            box-shadow: var(--radio-inner-shadow-hover);
+        }
+      }
+    }
+    &:active {
+      + {
+        label,
+        .x-toggle-indicatorWrapper {
+          &::before {
+            background: var(--radio-bg-active);
+          }
+        }
+      }
+    }
+    &:checked {
+      + {
+        label,
+        .x-toggle-indicatorWrapper {
+          &::after {
+            content: "";
+            display: block;
+            width: var(--checkmark-width);
+            height: var(--checkmark-width);
+            position: absolute;
+            background: var(--checkmark);
+            top: 1px;
+            left: -17px;
+          }
+        }
+        .x-toggle-indicatorWrapper::after {
+          top: 2px;
+        }
+      }
+    }
+    &:disabled {
+      + {
+        label,
+        .x-toggle-indicatorWrapper {
+          &::before {
+            background: white;
+            border: var(--radio-border-disabled);
+          }
+        }
+      }
+      &:checked {
+        + {
+          label,
+          .x-toggle-indicatorWrapper {
+            &::after {
+              background: url("resources/icon/xp/checkmark-disabled.svg");
+            }
+          }
+        }
+      }
+    }
+  }
+
+  label[for="wmpotify-config-tint-playerbar"] {
+    margin-left: 25px !important;
+  }
+
+  #wmpotify-config-tab-general {
+    input[type="checkbox"] + label {
+      padding-bottom: 5px;
+    }
+  }
+}
