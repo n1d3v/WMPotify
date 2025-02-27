@@ -89,23 +89,6 @@ process {
         Uninstall-WMPotify @Parameters
         }
         'Install' {
-        if (-not (Test-Spotify)) {
-            Write-Host -Object 'Spotify not found.' -ForegroundColor Yellow
-
-            $Host.UI.RawUI.Flushinputbuffer()
-            do {
-                $choice = $Host.UI.PromptForChoice('', 'Install Spotify?', ('&Yes', '&No'), 0)
-                if ($choice -notin 0, 1) {
-                    Write-Host "Invalid choice. Please select Yes or No." -ForegroundColor Yellow
-                }
-            } until ($choice -in 0, 1)
-
-            if ($choice -eq 1) {
-                exit
-            }
-
-            Install-Spotify
-        }
 
         if (-not $isSpicetifyInstalled) {
             Write-Host -Object 'Spicetify not found.' -ForegroundColor Yellow
